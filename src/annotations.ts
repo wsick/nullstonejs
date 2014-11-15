@@ -3,7 +3,7 @@ module nullstone {
         $$annotations: any[][];
     }
 
-    export function Annotation(type: Function, name: string, value: any, forbidMultiple?: boolean) {
+    export function Annotation (type: Function, name: string, value: any, forbidMultiple?: boolean) {
         var at = <AnnotatedType>type;
         var anns: any[][] = at.$$annotations;
         if (!anns)
@@ -16,7 +16,7 @@ module nullstone {
         ann.push(value);
     }
 
-    export function GetAnnotations(type: Function, name: string): any[] {
+    export function GetAnnotations (type: Function, name: string): any[] {
         var at = <AnnotatedType>type;
         var anns: any[][] = at.$$annotations;
         if (!anns)
@@ -29,7 +29,7 @@ module nullstone {
         Get(type: Function): T[];
     }
     export function CreateTypedAnnotation<T>(name: string): ITypedAnnotation<T> {
-        function ta(type: Function, ...values: T[]) {
+        function ta (type: Function, ...values: T[]) {
             for (var i = 0, len = values.length; i < len; i++) {
                 Annotation(type, name, values[i]);
             }

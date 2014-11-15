@@ -1,6 +1,6 @@
 module nullstone {
     export class Enum {
-        constructor(public Object: any) {
+        constructor (public Object: any) {
         }
     }
 }
