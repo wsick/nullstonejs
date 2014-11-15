@@ -1,0 +1,16 @@
+{
+  "name": "nullstone",
+  "version": "0.1.0",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "build",
+    "src",
+    "test",
+    "typings",
+    "Gruntfile.js"
+  ],
+  "devDependencies": {
+    "qunit": "~1.15.0"
+  }
+}
