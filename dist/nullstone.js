@@ -4,6 +4,18 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
+    var DirTypeResolver = (function () {
+        function DirTypeResolver() {
+        }
+        DirTypeResolver.prototype.resolve = function (moduleName, name, oresolve) {
+            return require(moduleName + '/' + name);
+        };
+        return DirTypeResolver;
+    })();
+    nullstone.DirTypeResolver = DirTypeResolver;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
     var Enum = (function () {
         function Enum(Object) {
             this.Object = Object;
@@ -57,6 +69,7 @@ var nullstone;
             this.$$systypes = {};
             this.$$ns = {};
             this.libResolver = new nullstone.LibraryResolver();
+            this.dirTypeResolver = new nullstone.DirTypeResolver();
             this.addPrimitive("String", String).addPrimitive("Number", Number).addPrimitive("Double", Number).addPrimitive("Date", Date).addPrimitive("RegExp", RegExp).addPrimitive("Boolean", Boolean).addSystem("Array", Array);
         }
         TypeResolver.prototype.addPrimitive = function (name, type) {
@@ -78,6 +91,15 @@ var nullstone;
         };
 
         TypeResolver.prototype.resolve = function (uri, name, oresolve) {
+            oresolve.type = undefined;
+            if (uri.indexOf("http://") === 0)
+                return this.$$resolveUrlType(uri, name, oresolve);
+            if (uri.indexOf("lib://") === 0)
+                return this.$$resolveLibType(uri, name, oresolve);
+            return this.$$resolveDirType(uri, name, oresolve);
+        };
+
+        TypeResolver.prototype.$$resolveUrlType = function (uri, name, oresolve) {
             if (uri === this.primitiveUri) {
                 oresolve.isPrimitive = true;
                 if ((oresolve.type = this.$$primtypes[name]) !== undefined)
@@ -95,27 +117,27 @@ var nullstone;
                 if ((oresolve.type = ns[name]) !== undefined)
                     return true;
             }
-
-            if (uri.indexOf("lib://") !== 0) {
-                var libResolver = this.libResolver;
-                if (libResolver) {
-                    var libName = uri.substr(6);
-                    var moduleName = "";
-                    var ind = libName.indexOf('/');
-                    if (ind > -1) {
-                        moduleName = libName.substr(ind + 1);
-                        libName = libName.substr(0, ind);
-                    }
-                    var lib = libResolver.resolve(libName);
-                    if (lib) {
-                        if (lib.resolve(moduleName, name, oresolve))
-                            return true;
-                    }
-                }
-            }
-
-            oresolve.type = undefined;
             return false;
+        };
+
+        TypeResolver.prototype.$$resolveLibType = function (uri, name, oresolve) {
+            var libResolver = this.libResolver;
+            if (!libResolver)
+                return false;
+            var libName = uri.substr(6);
+            var moduleName = "";
+            var ind = libName.indexOf('/');
+            if (ind > -1) {
+                moduleName = libName.substr(ind + 1);
+                libName = libName.substr(0, ind);
+            }
+            var lib = libResolver.resolve(libName);
+            return !!lib && lib.resolve(moduleName, name, oresolve);
+        };
+
+        TypeResolver.prototype.$$resolveDirType = function (uri, name, oresolve) {
+            var resolver = this.dirTypeResolver;
+            return !!resolver && resolver.resolve(uri, name, oresolve);
         };
         return TypeResolver;
     })();

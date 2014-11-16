@@ -11,6 +11,7 @@ module nullstone {
     //  Library Uri syntax
     //      http://...
     //      lib://<library>[/<namespace>]
+    //      <dir>
 
     export interface ITypeResolver {
         resolve(uri: string, name: string, /* out */oresolve: IOutType): boolean;
@@ -21,6 +22,7 @@ module nullstone {
         private $$ns: any = {};
 
         libResolver: ILibraryResolver = new LibraryResolver();
+        dirTypeResolver: IDirTypeResolver = new DirTypeResolver();
 
         constructor (public defaultUri: string, public primitiveUri: string) {
             this.addPrimitive("String", String)
@@ -51,6 +53,15 @@ module nullstone {
         }
 
         resolve (uri: string, name: string, /* out */oresolve: IOutType): boolean {
+            oresolve.type = undefined;
+            if (uri.indexOf("http://") === 0)
+                return this.$$resolveUrlType(uri, name, oresolve);
+            if (uri.indexOf("lib://") === 0)
+                return this.$$resolveLibType(uri, name, oresolve);
+            return this.$$resolveDirType(uri, name, oresolve);
+        }
+
+        private $$resolveUrlType (uri: string, name: string, /* out */oresolve: IOutType): boolean {
             if (uri === this.primitiveUri) {
                 oresolve.isPrimitive = true;
                 if ((oresolve.type = this.$$primtypes[name]) !== undefined)
@@ -68,27 +79,27 @@ module nullstone {
                 if ((oresolve.type = ns[name]) !== undefined)
                     return true;
             }
-
-            if (uri.indexOf("lib://") !== 0) {
-                var libResolver = this.libResolver;
-                if (libResolver) {
-                    var libName = uri.substr(6);
-                    var moduleName = "";
-                    var ind = libName.indexOf('/');
-                    if (ind > -1) {
-                        moduleName = libName.substr(ind + 1);
-                        libName = libName.substr(0, ind);
-                    }
-                    var lib = libResolver.resolve(libName);
-                    if (lib) {
-                        if (lib.resolve(moduleName, name, oresolve))
-                            return true;
-                    }
-                }
-            }
-
-            oresolve.type = undefined;
             return false;
+        }
+
+        private $$resolveLibType (uri: string, name: string, /* out */oresolve: IOutType): boolean {
+            var libResolver = this.libResolver;
+            if (!libResolver)
+                return false;
+            var libName = uri.substr(6);
+            var moduleName = "";
+            var ind = libName.indexOf('/');
+            if (ind > -1) {
+                moduleName = libName.substr(ind + 1);
+                libName = libName.substr(0, ind);
+            }
+            var lib = libResolver.resolve(libName);
+            return !!lib && lib.resolve(moduleName, name, oresolve);
+        }
+
+        private $$resolveDirType (uri: string, name: string, /* out */oresolve: IOutType): boolean {
+            var resolver = this.dirTypeResolver;
+            return !!resolver && resolver.resolve(uri, name, oresolve);
         }
     }
 }
