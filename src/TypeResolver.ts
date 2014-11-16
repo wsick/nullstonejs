@@ -20,7 +20,7 @@ module nullstone {
         private $$systypes: any = {};
         private $$ns: any = {};
 
-        loader: ILibraryLoader = new LibraryLoader();
+        libResolver: ILibraryResolver = new LibraryResolver();
 
         constructor (public defaultUri: string, public primitiveUri: string) {
             this.addPrimitive("String", String)
@@ -70,8 +70,8 @@ module nullstone {
             }
 
             if (uri.indexOf("lib://") !== 0) {
-                var loader = this.loader;
-                if (loader) {
+                var libResolver = this.libResolver;
+                if (libResolver) {
                     var libName = uri.substr(6);
                     var moduleName = "";
                     var ind = libName.indexOf('/');
@@ -79,7 +79,7 @@ module nullstone {
                         moduleName = libName.substr(ind + 1);
                         libName = libName.substr(0, ind);
                     }
-                    var lib = loader.resolve(libName);
+                    var lib = libResolver.resolve(libName);
                     if (lib) {
                         if (lib.resolve(moduleName, name, oresolve))
                             return true;

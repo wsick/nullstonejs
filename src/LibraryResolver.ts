@@ -1,8 +1,8 @@
 module nullstone {
-    export interface ILibraryLoader {
+    export interface ILibraryResolver {
         resolve(uri: string): ILibrary;
     }
-    export class LibraryLoader implements ILibraryLoader {
+    export class LibraryResolver implements ILibraryResolver {
         resolve (uri: string): ILibrary {
             //TODO: Implement
             return null;
