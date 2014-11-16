@@ -4,8 +4,8 @@ module nullstone {
     }
     export class LibraryResolver implements ILibraryResolver {
         resolve (uri: string): ILibrary {
-            //TODO: Implement
-            return null;
+            return Library.get(uri)
+                || Library.register(uri, 'lib/' + uri + '/' + uri);
         }
     }
 }

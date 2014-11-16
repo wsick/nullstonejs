@@ -26,14 +26,31 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
+    var libraries = [];
     var Library = (function () {
         function Library() {
+            this.$$libpath = null;
             this.$$module = null;
         }
+        Object.defineProperty(Library.prototype, "rootModule", {
+            get: function () {
+                return this.$$module = this.$$module || require(this.$$libpath);
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        Library.prototype.loadAsync = function (onLoaded) {
+            var _this = this;
+            require([this.$$libpath], function (rootModule) {
+                onLoaded(_this.$$module = rootModule);
+            });
+        };
+
         Library.prototype.resolve = function (moduleName, name, oresolve) {
             oresolve.isPrimitive = false;
             oresolve.type = undefined;
-            var curModule = this.$$module;
+            var curModule = this.rootModule;
             for (var i = 0, tokens = moduleName.split('.'); i < tokens.length && !!curModule; i++) {
                 curModule = curModule[tokens[i]];
             }
@@ -41,6 +58,18 @@ var nullstone;
                 return false;
             oresolve.type = curModule[name];
             return oresolve.type !== undefined;
+        };
+
+        Library.register = function (uri, modulePath) {
+            var lib = libraries[uri];
+            if (!lib)
+                lib = libraries[uri] = new Library();
+            lib.$$libpath = modulePath;
+            return lib;
+        };
+
+        Library.get = function (uri) {
+            return libraries[uri];
         };
         return Library;
     })();
@@ -52,7 +81,7 @@ var nullstone;
         function LibraryResolver() {
         }
         LibraryResolver.prototype.resolve = function (uri) {
-            return null;
+            return nullstone.Library.get(uri) || nullstone.Library.register(uri, 'lib/' + uri + '/' + uri);
         };
         return LibraryResolver;
     })();
