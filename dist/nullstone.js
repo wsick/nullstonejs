@@ -16,9 +16,19 @@ var nullstone;
 (function (nullstone) {
     var Library = (function () {
         function Library() {
+            this.$$module = null;
         }
-        Library.prototype.resolve = function (uri, name, oresolve) {
-            return false;
+        Library.prototype.resolve = function (moduleName, name, oresolve) {
+            oresolve.isPrimitive = false;
+            oresolve.type = undefined;
+            var curModule = this.$$module;
+            for (var i = 0, tokens = moduleName.split('.'); i < tokens.length && !!curModule; i++) {
+                curModule = curModule[tokens[i]];
+            }
+            if (!curModule)
+                return false;
+            oresolve.type = curModule[name];
+            return oresolve.type !== undefined;
         };
         return Library;
     })();

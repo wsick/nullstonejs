@@ -9,10 +9,11 @@ declare module nullstone {
 }
 declare module nullstone {
     interface ILibrary {
-        resolve(uri: string, name: string, oresolve: IOutType): boolean;
+        resolve(moduleName: string, name: string, oresolve: IOutType): boolean;
     }
     class Library implements ILibrary {
-        public resolve(uri: string, name: string, oresolve: IOutType): boolean;
+        private $$module;
+        public resolve(moduleName: string, name: string, oresolve: IOutType): boolean;
     }
 }
 declare module nullstone {
