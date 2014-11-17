@@ -1,4 +1,6 @@
 module nullstone.tests.event {
+    QUnit.module("Event");
+
     var mock = {
         listener: function () {
             var o = {

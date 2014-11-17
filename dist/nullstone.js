@@ -115,6 +115,69 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
+    nullstone.IEnumerable_ = new nullstone.Interface("IEnumerable");
+    nullstone.IEnumerable_.is = function (o) {
+        return o && o.getEnumerator && typeof o.getEnumerator === "function";
+    };
+
+    nullstone.IEnumerable_.empty = {
+        getEnumerator: function (isReverse) {
+            return nullstone.IEnumerator_.empty;
+        }
+    };
+
+    nullstone.IEnumerable_.fromArray = function (arr) {
+        return {
+            $$arr: arr,
+            getEnumerator: function (isReverse) {
+                return nullstone.IEnumerator_.fromArray(this.$$arr, isReverse);
+            }
+        };
+    };
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    nullstone.IEnumerator_ = new nullstone.Interface("IEnumerator");
+
+    nullstone.IEnumerator_.empty = {
+        current: undefined,
+        moveNext: function () {
+            return false;
+        }
+    };
+
+    nullstone.IEnumerator_.fromArray = function (arr, isReverse) {
+        var len = arr.length;
+        var e = { moveNext: undefined, current: undefined };
+        var index;
+        if (isReverse) {
+            index = len;
+            e.moveNext = function () {
+                index--;
+                if (index < 0) {
+                    e.current = undefined;
+                    return false;
+                }
+                e.current = arr[index];
+                return true;
+            };
+        } else {
+            index = -1;
+            e.moveNext = function () {
+                index++;
+                if (index >= len) {
+                    e.current = undefined;
+                    return false;
+                }
+                e.current = arr[index];
+                return true;
+            };
+        }
+        return e;
+    };
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
     var IndexedPropertyInfo = (function () {
         function IndexedPropertyInfo() {
         }

@@ -49,6 +49,27 @@ declare module nullstone {
     var ICollection_: Interface<{}>;
 }
 declare module nullstone {
+    interface IEnumerable<T> {
+        getEnumerator(isReverse?: boolean): IEnumerator<T>;
+    }
+    interface IEnumerableDeclaration<T> extends IInterfaceDeclaration<T> {
+        empty: IEnumerable<T>;
+        fromArray(arr: T[]): IEnumerable<T>;
+    }
+    var IEnumerable_: IEnumerableDeclaration<any>;
+}
+declare module nullstone {
+    interface IEnumerator<T> {
+        current: T;
+        moveNext(): boolean;
+    }
+    interface IEnumeratorDeclaration<T> extends IInterfaceDeclaration<T> {
+        empty: IEnumerator<T>;
+        fromArray(arr: T[], isReverse?: boolean): IEnumerator<T>;
+    }
+    var IEnumerator_: IEnumeratorDeclaration<any>;
+}
+declare module nullstone {
     interface ITypeResolver {
         resolveType(moduleName: string, name: string, oresolve: IOutType): boolean;
     }
