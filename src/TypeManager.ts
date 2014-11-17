@@ -1,3 +1,5 @@
+/// <reference path="Uri" />
+
 module nullstone {
     export interface IOutType {
         type: any;
@@ -23,7 +25,8 @@ module nullstone {
                 .addPrimitive("Double", Number)
                 .addPrimitive("Date", Date)
                 .addPrimitive("RegExp", RegExp)
-                .addPrimitive("Boolean", Boolean);
+                .addPrimitive("Boolean", Boolean)
+                .addPrimitive("Uri", Uri);
         }
 
         resolveType (uri: string, name: string, /* out */oresolve: IOutType): boolean {

@@ -1,9 +1,18 @@
+/// <reference path="conversion" />
+
 module nullstone {
+    export enum UriKind {
+        RelativeOrAbsolute = 0,
+        Absolute = 1,
+        Relative = 2
+    }
     export class Uri {
         private $$originalString: string;
+        private $$kind: UriKind;
 
-        constructor (uri?: string) {
+        constructor (uri?: string, kind?: UriKind) {
             this.$$originalString = uri;
+            this.$$kind = kind || UriKind.RelativeOrAbsolute;
         }
 
         get host (): string {
@@ -34,8 +43,25 @@ module nullstone {
             return s.substr(0, ind);
         }
 
+        get fragment (): string {
+            var s = this.$$originalString;
+            var ind = s.indexOf("#");
+            if (ind < 0)
+                return "";
+            return s.substr(ind);
+        }
+
+        get originalString (): string {
+            return this.$$originalString.toString();
+        }
+
         toString (): string {
             return this.$$originalString.toString();
         }
     }
+    registerTypeConverter(Uri, (val: any): any => {
+        if (val == null)
+            val = "";
+        return new Uri(val.toString());
+    });
 }

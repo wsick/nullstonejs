@@ -89,6 +89,29 @@ declare module nullstone {
     function addTypeInterfaces(type: Function, ...interfaces: IInterfaceDeclaration<any>[]): void;
 }
 declare module nullstone {
+    function convertAnyToType(val: any, type: Function): any;
+    function registerTypeConverter(type: Function, converter: (val: any) => any): void;
+    function registerEnumConverter(e: any, converter: (val: any) => any): void;
+}
+declare module nullstone {
+    enum UriKind {
+        RelativeOrAbsolute = 0,
+        Absolute = 1,
+        Relative = 2,
+    }
+    class Uri {
+        private $$originalString;
+        private $$kind;
+        constructor(uri?: string, kind?: UriKind);
+        public host : string;
+        public absolutePath : string;
+        public scheme : string;
+        public fragment : string;
+        public originalString : string;
+        public toString(): string;
+    }
+}
+declare module nullstone {
     interface IOutType {
         type: any;
         isPrimitive: boolean;
@@ -105,16 +128,6 @@ declare module nullstone {
     }
 }
 declare module nullstone {
-    class Uri {
-        private $$originalString;
-        constructor(uri?: string);
-        public host : string;
-        public absolutePath : string;
-        public scheme : string;
-        public toString(): string;
-    }
-}
-declare module nullstone {
     function Annotation(type: Function, name: string, value: any, forbidMultiple?: boolean): void;
     function GetAnnotations(type: Function, name: string): any[];
     interface ITypedAnnotation<T> {
@@ -124,7 +137,5 @@ declare module nullstone {
     function CreateTypedAnnotation<T>(name: string): ITypedAnnotation<T>;
 }
 declare module nullstone {
-    function convertAnyToType(val: any, type: Function): any;
-    function registerTypeConverter(type: Function, converter: (val: any) => any): void;
-    function registerEnumConverter(e: any, converter: (val: any) => any): void;
+    function equals(val1: any, val2: any): boolean;
 }

@@ -94,21 +94,26 @@ var nullstone;
         };
 
         Library.prototype.add = function (name, type) {
+            if (!type)
+                throw new Error("A type must be specified when registering '" + name + "'`.");
             Object.defineProperty(type, "$$uri", { value: this.uri, writable: false });
             this.$$types[name] = type;
             return this;
         };
 
         Library.prototype.addPrimitive = function (name, type) {
+            if (!type)
+                throw new Error("A type must be specified when registering '" + name + "'`.");
             Object.defineProperty(type, "$$uri", { value: this.uri, writable: false });
             this.$$primtypes[name] = type;
             return this;
         };
 
         Library.prototype.addEnum = function (name, enu) {
+            this.add(name, enu);
             Object.defineProperty(enu, "$$enum", { value: true, writable: false });
             enu.name = name;
-            return this.add(name, enu);
+            return this;
         };
         return Library;
     })();
@@ -271,123 +276,6 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
-    
-    var TypeManager = (function () {
-        function TypeManager(defaultUri, xUri) {
-            this.defaultUri = defaultUri;
-            this.xUri = xUri;
-            this.libResolver = new nullstone.LibraryResolver();
-            this.libResolver.resolve(defaultUri).add("Array", Array);
-
-            this.libResolver.resolve(xUri).addPrimitive("String", String).addPrimitive("Number", Number).addPrimitive("Double", Number).addPrimitive("Date", Date).addPrimitive("RegExp", RegExp).addPrimitive("Boolean", Boolean);
-        }
-        TypeManager.prototype.resolveType = function (uri, name, oresolve) {
-            oresolve.isPrimitive = false;
-            oresolve.type = undefined;
-            return this.libResolver.resolveType(uri, name, oresolve);
-        };
-        return TypeManager;
-    })();
-    nullstone.TypeManager = TypeManager;
-})(nullstone || (nullstone = {}));
-var nullstone;
-(function (nullstone) {
-    var Uri = (function () {
-        function Uri(uri) {
-            this.$$originalString = uri;
-        }
-        Object.defineProperty(Uri.prototype, "host", {
-            get: function () {
-                var s = this.$$originalString;
-                var ind = Math.max(3, s.indexOf("://") + 3);
-                var end = s.indexOf("/", ind);
-
-                return (end < 0) ? s.substr(ind) : s.substr(ind, end - ind);
-            },
-            enumerable: true,
-            configurable: true
-        });
-
-        Object.defineProperty(Uri.prototype, "absolutePath", {
-            get: function () {
-                var s = this.$$originalString;
-                var ind = Math.max(3, s.indexOf("://") + 3);
-                var start = s.indexOf("/", ind);
-                if (start < 0 || start < ind)
-                    return "/";
-                var qstart = s.indexOf("?", start);
-                if (qstart < 0 || qstart < start)
-                    return s.substr(start);
-                return s.substr(start, qstart - start);
-            },
-            enumerable: true,
-            configurable: true
-        });
-
-        Object.defineProperty(Uri.prototype, "scheme", {
-            get: function () {
-                var s = this.$$originalString;
-                var ind = s.indexOf("://");
-                if (ind < 0)
-                    return null;
-                return s.substr(0, ind);
-            },
-            enumerable: true,
-            configurable: true
-        });
-
-        Uri.prototype.toString = function () {
-            return this.$$originalString.toString();
-        };
-        return Uri;
-    })();
-    nullstone.Uri = Uri;
-})(nullstone || (nullstone = {}));
-var nullstone;
-(function (nullstone) {
-    function Annotation(type, name, value, forbidMultiple) {
-        var at = type;
-        var anns = at.$$annotations;
-        if (!anns)
-            Object.defineProperty(at, "$$annotations", { value: (anns = []), writable: false });
-        var ann = anns[name];
-        if (!ann)
-            anns[name] = ann = [];
-        if (forbidMultiple && ann.length > 0)
-            throw new Error("Only 1 content annotation allowed per type [" + type.constructor.name + "].");
-        ann.push(value);
-    }
-    nullstone.Annotation = Annotation;
-
-    function GetAnnotations(type, name) {
-        var at = type;
-        var anns = at.$$annotations;
-        if (!anns)
-            return undefined;
-        return (anns[name] || []).slice(0);
-    }
-    nullstone.GetAnnotations = GetAnnotations;
-
-    function CreateTypedAnnotation(name) {
-        function ta(type) {
-            var values = [];
-            for (var _i = 0; _i < (arguments.length - 1); _i++) {
-                values[_i] = arguments[_i + 1];
-            }
-            for (var i = 0, len = values.length; i < len; i++) {
-                Annotation(type, name, values[i]);
-            }
-        }
-
-        ta.Get = function (type) {
-            return GetAnnotations(type, name);
-        };
-        return ta;
-    }
-    nullstone.CreateTypedAnnotation = CreateTypedAnnotation;
-})(nullstone || (nullstone = {}));
-var nullstone;
-(function (nullstone) {
     var converters = [];
     converters[Boolean] = function (val) {
         if (val == null)
@@ -449,5 +337,169 @@ var nullstone;
         e.Converter = converter;
     }
     nullstone.registerEnumConverter = registerEnumConverter;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    (function (UriKind) {
+        UriKind[UriKind["RelativeOrAbsolute"] = 0] = "RelativeOrAbsolute";
+        UriKind[UriKind["Absolute"] = 1] = "Absolute";
+        UriKind[UriKind["Relative"] = 2] = "Relative";
+    })(nullstone.UriKind || (nullstone.UriKind = {}));
+    var UriKind = nullstone.UriKind;
+    var Uri = (function () {
+        function Uri(uri, kind) {
+            this.$$originalString = uri;
+            this.$$kind = kind || 0 /* RelativeOrAbsolute */;
+        }
+        Object.defineProperty(Uri.prototype, "host", {
+            get: function () {
+                var s = this.$$originalString;
+                var ind = Math.max(3, s.indexOf("://") + 3);
+                var end = s.indexOf("/", ind);
+
+                return (end < 0) ? s.substr(ind) : s.substr(ind, end - ind);
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        Object.defineProperty(Uri.prototype, "absolutePath", {
+            get: function () {
+                var s = this.$$originalString;
+                var ind = Math.max(3, s.indexOf("://") + 3);
+                var start = s.indexOf("/", ind);
+                if (start < 0 || start < ind)
+                    return "/";
+                var qstart = s.indexOf("?", start);
+                if (qstart < 0 || qstart < start)
+                    return s.substr(start);
+                return s.substr(start, qstart - start);
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        Object.defineProperty(Uri.prototype, "scheme", {
+            get: function () {
+                var s = this.$$originalString;
+                var ind = s.indexOf("://");
+                if (ind < 0)
+                    return null;
+                return s.substr(0, ind);
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        Object.defineProperty(Uri.prototype, "fragment", {
+            get: function () {
+                var s = this.$$originalString;
+                var ind = s.indexOf("#");
+                if (ind < 0)
+                    return "";
+                return s.substr(ind);
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        Object.defineProperty(Uri.prototype, "originalString", {
+            get: function () {
+                return this.$$originalString.toString();
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        Uri.prototype.toString = function () {
+            return this.$$originalString.toString();
+        };
+        return Uri;
+    })();
+    nullstone.Uri = Uri;
+    nullstone.registerTypeConverter(Uri, function (val) {
+        if (val == null)
+            val = "";
+        return new Uri(val.toString());
+    });
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    
+    var TypeManager = (function () {
+        function TypeManager(defaultUri, xUri) {
+            this.defaultUri = defaultUri;
+            this.xUri = xUri;
+            this.libResolver = new nullstone.LibraryResolver();
+            this.libResolver.resolve(defaultUri).add("Array", Array);
+
+            this.libResolver.resolve(xUri).addPrimitive("String", String).addPrimitive("Number", Number).addPrimitive("Double", Number).addPrimitive("Date", Date).addPrimitive("RegExp", RegExp).addPrimitive("Boolean", Boolean).addPrimitive("Uri", nullstone.Uri);
+        }
+        TypeManager.prototype.resolveType = function (uri, name, oresolve) {
+            oresolve.isPrimitive = false;
+            oresolve.type = undefined;
+            return this.libResolver.resolveType(uri, name, oresolve);
+        };
+        return TypeManager;
+    })();
+    nullstone.TypeManager = TypeManager;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    function Annotation(type, name, value, forbidMultiple) {
+        var at = type;
+        var anns = at.$$annotations;
+        if (!anns)
+            Object.defineProperty(at, "$$annotations", { value: (anns = []), writable: false });
+        var ann = anns[name];
+        if (!ann)
+            anns[name] = ann = [];
+        if (forbidMultiple && ann.length > 0)
+            throw new Error("Only 1 content annotation allowed per type [" + type.constructor.name + "].");
+        ann.push(value);
+    }
+    nullstone.Annotation = Annotation;
+
+    function GetAnnotations(type, name) {
+        var at = type;
+        var anns = at.$$annotations;
+        if (!anns)
+            return undefined;
+        return (anns[name] || []).slice(0);
+    }
+    nullstone.GetAnnotations = GetAnnotations;
+
+    function CreateTypedAnnotation(name) {
+        function ta(type) {
+            var values = [];
+            for (var _i = 0; _i < (arguments.length - 1); _i++) {
+                values[_i] = arguments[_i + 1];
+            }
+            for (var i = 0, len = values.length; i < len; i++) {
+                Annotation(type, name, values[i]);
+            }
+        }
+
+        ta.Get = function (type) {
+            return GetAnnotations(type, name);
+        };
+        return ta;
+    }
+    nullstone.CreateTypedAnnotation = CreateTypedAnnotation;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    function equals(val1, val2) {
+        if (val1 == null && val2 == null)
+            return true;
+        if (val1 == null || val2 == null)
+            return false;
+        if (val1 === val2)
+            return true;
+        if (val1.Equals)
+            return val1.Equals(val2);
+        return false;
+    }
+    nullstone.equals = equals;
 })(nullstone || (nullstone = {}));
 //# sourceMappingURL=nullstone.js.map

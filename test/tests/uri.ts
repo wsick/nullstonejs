@@ -31,4 +31,15 @@ module nullstone.tests.uri {
         var uri = new Uri("https://some.com");
         assert.strictEqual(uri.absolutePath, "/");
     });
+
+    QUnit.test("Fragment", (assert) => {
+        var uri = new Uri("http://some.com/path/to");
+        assert.strictEqual(uri.fragment, "");
+
+        var uri = new Uri("http://some.com/path/to#");
+        assert.strictEqual(uri.fragment, "#");
+
+        var uri = new Uri("http://some.com/path/to#frag");
+        assert.strictEqual(uri.fragment, "#frag");
+    });
 }

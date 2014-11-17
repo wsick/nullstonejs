@@ -47,21 +47,26 @@ module nullstone {
         }
 
         add (name: string, type: any): ILibrary {
+            if (!type)
+                throw new Error("A type must be specified when registering '" + name + "'`.");
             Object.defineProperty(type, "$$uri", {value: this.uri, writable: false});
             this.$$types[name] = type;
             return this;
         }
 
         addPrimitive (name: string, type: any): ILibrary {
+            if (!type)
+                throw new Error("A type must be specified when registering '" + name + "'`.");
             Object.defineProperty(type, "$$uri", {value: this.uri, writable: false});
             this.$$primtypes[name] = type;
             return this;
         }
 
         addEnum (name: string, enu: any): ILibrary {
+            this.add(name, enu);
             Object.defineProperty(enu, "$$enum", {value: true, writable: false});
             enu.name = name;
-            return this.add(name, enu);
+            return this;
         }
     }
 }
