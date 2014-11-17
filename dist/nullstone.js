@@ -527,6 +527,27 @@ var nullstone;
             oresolve.type = undefined;
             return this.libResolver.resolveType(uri, name, oresolve);
         };
+
+        TypeManager.prototype.add = function (uri, name, type) {
+            var lib = this.libResolver.resolve(uri);
+            if (lib)
+                lib.add(name, type);
+            return this;
+        };
+
+        TypeManager.prototype.addPrimitive = function (uri, name, type) {
+            var lib = this.libResolver.resolve(uri);
+            if (lib)
+                lib.addPrimitive(name, type);
+            return this;
+        };
+
+        TypeManager.prototype.addEnum = function (uri, name, enu) {
+            var lib = this.libResolver.resolve(uri);
+            if (lib)
+                lib.addEnum(name, enu);
+            return this;
+        };
         return TypeManager;
     })();
     nullstone.TypeManager = TypeManager;

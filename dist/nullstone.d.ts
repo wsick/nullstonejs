@@ -143,6 +143,9 @@ declare module nullstone {
     }
     interface ITypeManager {
         resolveType(uri: string, name: string, oresolve: IOutType): boolean;
+        add(uri: string, name: string, type: any): ITypeManager;
+        addPrimitive(uri: string, name: string, type: any): ITypeManager;
+        addEnum(uri: string, name: string, enu: any): ITypeManager;
     }
     class TypeManager implements ITypeManager {
         public defaultUri: string;
@@ -150,6 +153,9 @@ declare module nullstone {
         public libResolver: ILibraryResolver;
         constructor(defaultUri: string, xUri: string);
         public resolveType(uri: string, name: string, oresolve: IOutType): boolean;
+        public add(uri: string, name: string, type: any): ITypeManager;
+        public addPrimitive(uri: string, name: string, type: any): ITypeManager;
+        public addEnum(uri: string, name: string, enu: any): ITypeManager;
     }
 }
 declare module nullstone {

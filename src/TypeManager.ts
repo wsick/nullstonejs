@@ -11,6 +11,9 @@ module nullstone {
 
     export interface ITypeManager {
         resolveType(uri: string, name: string, /* out */oresolve: IOutType): boolean;
+        add (uri: string, name: string, type: any): ITypeManager;
+        addPrimitive (uri: string, name: string, type: any): ITypeManager;
+        addEnum (uri: string, name: string, enu: any): ITypeManager;
     }
     export class TypeManager implements ITypeManager {
         libResolver: ILibraryResolver = new LibraryResolver();
@@ -33,6 +36,27 @@ module nullstone {
             oresolve.isPrimitive = false;
             oresolve.type = undefined;
             return this.libResolver.resolveType(uri, name, oresolve);
+        }
+
+        add (uri: string, name: string, type: any): ITypeManager {
+            var lib = this.libResolver.resolve(uri);
+            if (lib)
+                lib.add(name, type);
+            return this;
+        }
+
+        addPrimitive (uri: string, name: string, type: any): ITypeManager {
+            var lib = this.libResolver.resolve(uri);
+            if (lib)
+                lib.addPrimitive(name, type);
+            return this;
+        }
+
+        addEnum (uri: string, name: string, enu: any): ITypeManager {
+            var lib = this.libResolver.resolve(uri);
+            if (lib)
+                lib.addEnum(name, enu);
+            return this;
         }
     }
 }
