@@ -2,6 +2,7 @@ module nullstone {
     export interface ILibrary {
         uri: string;
         sourcePath: string;
+        exports: string;
         rootModule: any;
         loadAsync (): async.IAsyncRequest<Library>;
         resolveType (moduleName: string, name: string, /* out */oresolve: IOutType): boolean;
@@ -18,6 +19,7 @@ module nullstone {
         private $$types: any = {};
 
         uri: string;
+        exports: string;
 
         get sourcePath (): string {
             return this.$$sourcePath || 'lib/' + this.uri + '/' + this.uri;
@@ -36,12 +38,23 @@ module nullstone {
         }
 
         loadAsync (): async.IAsyncRequest<Library> {
+            this.$configModule();
             return async.create((resolve, reject) => {
                 require([this.sourcePath], (rootModule) => {
                     this.$$module = rootModule;
                     resolve(this);
                 });
             });
+        }
+
+        private $configModule () {
+            var rc = <RequireConfig>{
+                shim: {}
+            };
+            rc.shim[this.sourcePath] = {
+                exports: this.exports
+            };
+            require.config(rc);
         }
 
         resolveType (moduleName: string, name: string, /* out */oresolve: IOutType): boolean {

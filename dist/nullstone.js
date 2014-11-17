@@ -263,12 +263,23 @@ var nullstone;
 
         Library.prototype.loadAsync = function () {
             var _this = this;
+            this.$configModule();
             return nullstone.async.create(function (resolve, reject) {
                 require([_this.sourcePath], function (rootModule) {
                     _this.$$module = rootModule;
                     resolve(_this);
                 });
             });
+        };
+
+        Library.prototype.$configModule = function () {
+            var rc = {
+                shim: {}
+            };
+            rc.shim[this.sourcePath] = {
+                exports: this.exports
+            };
+            require.config(rc);
         };
 
         Library.prototype.resolveType = function (moduleName, name, oresolve) {

@@ -58,6 +58,7 @@ module nullstone.tests.typemanager {
     QUnit.asyncTest("Configure custom library", () => {
         var lib = typemgr.resolveLibrary("lib://External.Library");
         lib.sourcePath = "mock/external.js";
+        lib.exports = "External.Library";
         lib.loadAsync()
             .then(lib => {
                 QUnit.start();

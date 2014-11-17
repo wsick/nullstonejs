@@ -92,6 +92,7 @@ declare module nullstone {
     interface ILibrary {
         uri: string;
         sourcePath: string;
+        exports: string;
         rootModule: any;
         loadAsync(): async.IAsyncRequest<Library>;
         resolveType(moduleName: string, name: string, oresolve: IOutType): boolean;
@@ -105,10 +106,12 @@ declare module nullstone {
         private $$primtypes;
         private $$types;
         public uri: string;
+        public exports: string;
         public sourcePath : string;
         constructor(uri: string);
         public rootModule : any;
         public loadAsync(): async.IAsyncRequest<Library>;
+        private $configModule();
         public resolveType(moduleName: string, name: string, oresolve: IOutType): boolean;
         public add(name: string, type: any): ILibrary;
         public addPrimitive(name: string, type: any): ILibrary;
