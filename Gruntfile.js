@@ -83,14 +83,14 @@ module.exports = function (grunt) {
                 dest: '<%= dirs.test.build %>',
                 options: {
                     target: 'es5',
-                    basePath: '<%= dirs.test.root %>/tests',
+                    basePath: '<%= dirs.test.root %>',
                     module: 'amd',
                     sourceMap: true
                 }
             }
         },
         qunit: {
-            all: ['<%= dirs.test.root %>/**/*.html']
+            all: ['<%= dirs.test.root %>/*.html']
         },
         watch: {
             src: {
