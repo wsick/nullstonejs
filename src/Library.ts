@@ -1,8 +1,9 @@
 module nullstone {
     export interface ILibrary {
         uri: string;
+        sourcePath: string;
         rootModule: any;
-        loadAsync (): IAsyncRequest<Library>;
+        loadAsync (): async.IAsyncRequest<Library>;
         resolveType (moduleName: string, name: string, /* out */oresolve: IOutType): boolean;
 
         add (name: string, type: any): ILibrary;
@@ -10,30 +11,33 @@ module nullstone {
         addEnum (name: string, enu: any): ILibrary;
     }
     export class Library implements ILibrary {
-        private $$libpath: string = null;
         private $$module: any = null;
+        private $$sourcePath: string = null;
 
         private $$primtypes: any = {};
         private $$types: any = {};
+
+        uri: string;
+
+        get sourcePath (): string {
+            return this.$$sourcePath || 'lib/' + this.uri + '/' + this.uri;
+        }
+
+        set sourcePath (value: string) {
+            this.$$sourcePath = value;
+        }
 
         constructor (uri: string) {
             Object.defineProperty(this, "uri", {value: uri, writable: false});
         }
 
-        uri: string;
-
         get rootModule (): any {
-            return this.$$module = this.$$module || require(this.$$libpath);
+            return this.$$module = this.$$module || require(this.sourcePath);
         }
 
-        setLibPath (path: string) {
-            this.$$libpath = path;
-        }
-
-        loadAsync (): IAsyncRequest<Library> {
-            return createAsync(function (resolve, reject) {
-                this.$$libpath = this.$$libpath || 'lib/' + this.uri + '/' + this.uri;
-                require([this.$$libpath], (rootModule) => {
+        loadAsync (): async.IAsyncRequest<Library> {
+            return async.create((resolve, reject) => {
+                require([this.sourcePath], (rootModule) => {
                     this.$$module = rootModule;
                     resolve(this);
                 });
@@ -49,11 +53,13 @@ module nullstone {
                 return (oresolve.type = this.$$types[name]) !== undefined;
             }
 
+            var curModule = this.rootModule;
             oresolve.isPrimitive = false;
             oresolve.type = undefined;
-            var curModule = this.rootModule;
-            for (var i = 0, tokens = moduleName.split('.'); i < tokens.length && !!curModule; i++) {
-                curModule = curModule[tokens[i]];
+            if (moduleName !== "/") {
+                for (var i = 0, tokens = moduleName.substr(1).split('.'); i < tokens.length && !!curModule; i++) {
+                    curModule = curModule[tokens[i]];
+                }
             }
             if (!curModule)
                 return false;

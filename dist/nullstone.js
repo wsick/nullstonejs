@@ -78,43 +78,6 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
-    function createAsync(resolution) {
-        var onSuccess;
-        var onError;
-
-        var resolvedResult;
-
-        function resolve(result) {
-            resolvedResult = result;
-            onSuccess && onSuccess(result);
-        }
-
-        var resolvedError;
-
-        function reject(error) {
-            resolvedError = error;
-            onError && onError(error);
-        }
-
-        resolution(resolve, reject);
-
-        var req = {
-            then: function (success, errored) {
-                onSuccess = success;
-                onError = errored;
-                if (resolvedResult !== undefined)
-                    onSuccess && onSuccess(resolvedResult);
-                else if (resolvedError !== undefined)
-                    onError && onError(resolvedError);
-                return req;
-            }
-        };
-        return req;
-    }
-    nullstone.createAsync = createAsync;
-})(nullstone || (nullstone = {}));
-var nullstone;
-(function (nullstone) {
     var Interface = (function () {
         function Interface(name) {
             Object.defineProperty(this, "name", { value: name, writable: false });
@@ -272,29 +235,36 @@ var nullstone;
 (function (nullstone) {
     var Library = (function () {
         function Library(uri) {
-            this.$$libpath = null;
             this.$$module = null;
+            this.$$sourcePath = null;
             this.$$primtypes = {};
             this.$$types = {};
             Object.defineProperty(this, "uri", { value: uri, writable: false });
         }
-        Object.defineProperty(Library.prototype, "rootModule", {
+        Object.defineProperty(Library.prototype, "sourcePath", {
             get: function () {
-                return this.$$module = this.$$module || require(this.$$libpath);
+                return this.$$sourcePath || 'lib/' + this.uri + '/' + this.uri;
+            },
+            set: function (value) {
+                this.$$sourcePath = value;
             },
             enumerable: true,
             configurable: true
         });
 
-        Library.prototype.setLibPath = function (path) {
-            this.$$libpath = path;
-        };
+
+        Object.defineProperty(Library.prototype, "rootModule", {
+            get: function () {
+                return this.$$module = this.$$module || require(this.sourcePath);
+            },
+            enumerable: true,
+            configurable: true
+        });
 
         Library.prototype.loadAsync = function () {
-            return nullstone.createAsync(function (resolve, reject) {
-                var _this = this;
-                this.$$libpath = this.$$libpath || 'lib/' + this.uri + '/' + this.uri;
-                require([this.$$libpath], function (rootModule) {
+            var _this = this;
+            return nullstone.async.create(function (resolve, reject) {
+                require([_this.sourcePath], function (rootModule) {
                     _this.$$module = rootModule;
                     resolve(_this);
                 });
@@ -310,11 +280,13 @@ var nullstone;
                 return (oresolve.type = this.$$types[name]) !== undefined;
             }
 
+            var curModule = this.rootModule;
             oresolve.isPrimitive = false;
             oresolve.type = undefined;
-            var curModule = this.rootModule;
-            for (var i = 0, tokens = moduleName.split('.'); i < tokens.length && !!curModule; i++) {
-                curModule = curModule[tokens[i]];
+            if (moduleName !== "/") {
+                for (var i = 0, tokens = moduleName.substr(1).split('.'); i < tokens.length && !!curModule; i++) {
+                    curModule = curModule[tokens[i]];
+                }
             }
             if (!curModule)
                 return false;
@@ -689,6 +661,10 @@ var nullstone;
 
             this.libResolver.resolve(xUri).addPrimitive("String", String).addPrimitive("Number", Number).addPrimitive("Double", Number).addPrimitive("Date", Date).addPrimitive("RegExp", RegExp).addPrimitive("Boolean", Boolean).addPrimitive("Uri", nullstone.Uri);
         }
+        TypeManager.prototype.resolveLibrary = function (uri) {
+            return this.libResolver.resolve(uri);
+        };
+
         TypeManager.prototype.resolveType = function (uri, name, oresolve) {
             oresolve.isPrimitive = false;
             oresolve.type = undefined;
@@ -761,6 +737,46 @@ var nullstone;
         return ta;
     }
     nullstone.CreateTypedAnnotation = CreateTypedAnnotation;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    (function (async) {
+        function create(resolution) {
+            var onSuccess;
+            var onError;
+
+            var resolvedResult;
+
+            function resolve(result) {
+                resolvedResult = result;
+                onSuccess && onSuccess(result);
+            }
+
+            var resolvedError;
+
+            function reject(error) {
+                resolvedError = error;
+                onError && onError(error);
+            }
+
+            resolution(resolve, reject);
+
+            var req = {
+                then: function (success, errored) {
+                    onSuccess = success;
+                    onError = errored;
+                    if (resolvedResult !== undefined)
+                        onSuccess && onSuccess(resolvedResult);
+                    else if (resolvedError !== undefined)
+                        onError && onError(resolvedError);
+                    return req;
+                }
+            };
+            return req;
+        }
+        async.create = create;
+    })(nullstone.async || (nullstone.async = {}));
+    var async = nullstone.async;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {

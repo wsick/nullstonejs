@@ -2,7 +2,7 @@ module nullstone.tests.async {
     QUnit.module("Async");
 
     QUnit.test("Resolve", (assert) => {
-        createAsync((resolve, reject) => {
+        nullstone.async.create((resolve, reject) => {
             resolve({});
         }).then(result => {
             assert.ok(true);
@@ -12,7 +12,7 @@ module nullstone.tests.async {
     });
 
     QUnit.test("Reject", (assert) => {
-        createAsync((resolve, reject) => {
+        nullstone.async.create((resolve, reject) => {
             reject("Errored");
         }).then(result => {
             assert.ok(false, "Should not resolve");
@@ -22,7 +22,7 @@ module nullstone.tests.async {
     });
 
     QUnit.asyncTest("Asynchronous Resolve", () => {
-        createAsync((resolve, reject) => {
+        nullstone.async.create((resolve, reject) => {
             setTimeout(() => resolve({}), 1);
         }).then(result => {
             QUnit.start();
@@ -34,7 +34,7 @@ module nullstone.tests.async {
     });
 
     QUnit.asyncTest("Asynchronous Reject", () => {
-        createAsync((resolve, reject) => {
+        nullstone.async.create((resolve, reject) => {
             setTimeout(() => reject("Errored"), 1);
         }).then(result => {
             QUnit.start();

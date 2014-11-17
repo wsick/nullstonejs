@@ -1,12 +1,12 @@
-module nullstone {
+module nullstone.async {
     export interface IAsyncRequest<T> {
-        then(success: (result: T) => any, errored: (error: any) => any): IAsyncRequest<T>;
+        then(success: (result: T) => any, errored?: (error: any) => any): IAsyncRequest<T>;
     }
     export interface IAsyncResolution<T> {
         (resolve: (result: T) => any, reject: (error: any) => any);
     }
 
-    export function createAsync <T>(resolution: IAsyncResolution<T>): IAsyncRequest<T> {
+    export function create <T>(resolution: IAsyncResolution<T>): IAsyncRequest<T> {
         var onSuccess: (result: T)=>any;
         var onError: (error: any)=>any;
 
@@ -27,7 +27,7 @@ module nullstone {
         resolution(resolve, reject);
 
         var req = <IAsyncRequest<T>>{
-            then: function (success: (result: T) => any, errored: (error: any) => any): IAsyncRequest<T> {
+            then: function (success: (result: T) => any, errored?: (error: any) => any): IAsyncRequest<T> {
                 onSuccess = success;
                 onError = errored;
                 if (resolvedResult !== undefined)

@@ -1,5 +1,5 @@
 module nullstone.tests.typemanager {
-    QUnit.module("Type Resolver");
+    QUnit.module("Type Manager");
 
     var DEFAULT_XMLNS = "http://schemas.wsick.com/nullstone";
     var X_XMLNS = "http://schemas.wsick.com/nullstone/x";
@@ -53,5 +53,24 @@ module nullstone.tests.typemanager {
         assert.ok(typemgr.resolveType(SOME_NS, "MockClass", oresolve));
         assert.strictEqual(oresolve.isPrimitive, false);
         assert.strictEqual(oresolve.type, MockClass);
+    });
+
+    QUnit.asyncTest("Configure custom library", () => {
+        var lib = typemgr.resolveLibrary("lib://External.Library");
+        lib.sourcePath = "mock/external.js";
+        lib.loadAsync()
+            .then(lib => {
+                QUnit.start();
+                var oresolve: IOutType = {
+                    isPrimitive: false,
+                    type: undefined
+                };
+                ok(typemgr.resolveType("lib://External.Library", "MockExternalClass", oresolve));
+                strictEqual(oresolve.isPrimitive, false);
+                strictEqual(oresolve.type, lib.rootModule.MockExternalClass);
+            }, err => {
+                QUnit.start();
+                ok(false, err);
+            });
     });
 }

@@ -32,6 +32,10 @@ module nullstone {
                 .addPrimitive("Uri", Uri);
         }
 
+        resolveLibrary (uri: string): ILibrary {
+            return this.libResolver.resolve(uri);
+        }
+
         resolveType (uri: string, name: string, /* out */oresolve: IOutType): boolean {
             oresolve.isPrimitive = false;
             oresolve.type = undefined;

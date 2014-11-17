@@ -10,6 +10,15 @@
 <div id="qunit-fixture"></div>
 <script src="lib/qunit/qunit/qunit.js"></script>
 <script src="lib/nullstone/dist/nullstone.js"></script>
+<script type="text/javascript">
+    var require = {
+        shim: {
+            "mock/external.js": {
+                exports: "External.Library"
+            }
+        }
+    };
+</script>
 <script src="lib/requirejs/require.js"></script>
 
 <script src=".build/tests/uri.js"></script>

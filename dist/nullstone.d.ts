@@ -29,15 +29,6 @@ declare module nullstone {
     }
 }
 declare module nullstone {
-    interface IAsyncRequest<T> {
-        then(success: (result: T) => any, errored: (error: any) => any): IAsyncRequest<T>;
-    }
-    interface IAsyncResolution<T> {
-        (resolve: (result: T) => any, reject: (error: any) => any): any;
-    }
-    function createAsync<T>(resolution: IAsyncResolution<T>): IAsyncRequest<T>;
-}
-declare module nullstone {
     interface IInterfaceDeclaration<T> {
         name: string;
         is(o: any): boolean;
@@ -100,23 +91,24 @@ declare module nullstone {
 declare module nullstone {
     interface ILibrary {
         uri: string;
+        sourcePath: string;
         rootModule: any;
-        loadAsync(): IAsyncRequest<Library>;
+        loadAsync(): async.IAsyncRequest<Library>;
         resolveType(moduleName: string, name: string, oresolve: IOutType): boolean;
         add(name: string, type: any): ILibrary;
         addPrimitive(name: string, type: any): ILibrary;
         addEnum(name: string, enu: any): ILibrary;
     }
     class Library implements ILibrary {
-        private $$libpath;
         private $$module;
+        private $$sourcePath;
         private $$primtypes;
         private $$types;
-        constructor(uri: string);
         public uri: string;
+        public sourcePath : string;
+        constructor(uri: string);
         public rootModule : any;
-        public setLibPath(path: string): void;
-        public loadAsync(): IAsyncRequest<Library>;
+        public loadAsync(): async.IAsyncRequest<Library>;
         public resolveType(moduleName: string, name: string, oresolve: IOutType): boolean;
         public add(name: string, type: any): ILibrary;
         public addPrimitive(name: string, type: any): ILibrary;
@@ -199,6 +191,7 @@ declare module nullstone {
         public xUri: string;
         public libResolver: ILibraryResolver;
         constructor(defaultUri: string, xUri: string);
+        public resolveLibrary(uri: string): ILibrary;
         public resolveType(uri: string, name: string, oresolve: IOutType): boolean;
         public add(uri: string, name: string, type: any): ITypeManager;
         public addPrimitive(uri: string, name: string, type: any): ITypeManager;
@@ -213,6 +206,15 @@ declare module nullstone {
         Get(type: Function): T[];
     }
     function CreateTypedAnnotation<T>(name: string): ITypedAnnotation<T>;
+}
+declare module nullstone.async {
+    interface IAsyncRequest<T> {
+        then(success: (result: T) => any, errored?: (error: any) => any): IAsyncRequest<T>;
+    }
+    interface IAsyncResolution<T> {
+        (resolve: (result: T) => any, reject: (error: any) => any): any;
+    }
+    function create<T>(resolution: IAsyncResolution<T>): IAsyncRequest<T>;
 }
 declare module nullstone {
     function equals(val1: any, val2: any): boolean;
