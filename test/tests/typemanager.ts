@@ -38,4 +38,20 @@ module nullstone.tests.typemanager {
         assert.strictEqual(oresolve.isPrimitive, true);
         assert.strictEqual(oresolve.type, Uri);
     });
+
+    class MockClass {
+    }
+
+    QUnit.test("Resolve Custom library type", (assert) => {
+        var SOME_NS = "http://some.namespace/";
+        typemgr.add(SOME_NS, "MockClass", MockClass);
+
+        var oresolve: IOutType = {
+            isPrimitive: false,
+            type: undefined
+        };
+        assert.ok(typemgr.resolveType(SOME_NS, "MockClass", oresolve));
+        assert.strictEqual(oresolve.isPrimitive, false);
+        assert.strictEqual(oresolve.type, MockClass);
+    });
 }
