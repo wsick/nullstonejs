@@ -246,6 +246,8 @@ var nullstone;
                 return this.$$sourcePath || 'lib/' + this.uri + '/' + this.uri;
             },
             set: function (value) {
+                if (value.substr(value.length - 3) === '.js')
+                    value = value.substr(0, value.length - 3);
                 this.$$sourcePath = value;
             },
             enumerable: true,
@@ -265,7 +267,7 @@ var nullstone;
             var _this = this;
             this.$configModule();
             return nullstone.async.create(function (resolve, reject) {
-                require([_this.sourcePath], function (rootModule) {
+                require([_this.uri], function (rootModule) {
                     _this.$$module = rootModule;
                     resolve(_this);
                 });
@@ -273,13 +275,20 @@ var nullstone;
         };
 
         Library.prototype.$configModule = function () {
-            var rc = {
-                shim: {}
+            var co = {
+                paths: {},
+                shim: {},
+                map: {
+                    "*": {}
+                }
             };
-            rc.shim[this.sourcePath] = {
+            var srcPath = this.sourcePath;
+            co.paths[this.uri] = srcPath;
+            co.shim[this.uri] = {
                 exports: this.exports
             };
-            require.config(rc);
+            co.map['*'][srcPath] = this.uri;
+            require.config(co);
         };
 
         Library.prototype.resolveType = function (moduleName, name, oresolve) {

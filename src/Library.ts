@@ -26,6 +26,8 @@ module nullstone {
         }
 
         set sourcePath (value: string) {
+            if (value.substr(value.length - 3) === '.js')
+                value = value.substr(0, value.length - 3);
             this.$$sourcePath = value;
         }
 
@@ -40,7 +42,7 @@ module nullstone {
         loadAsync (): async.IAsyncRequest<Library> {
             this.$configModule();
             return async.create((resolve, reject) => {
-                require([this.sourcePath], (rootModule) => {
+                require([this.uri], (rootModule) => {
                     this.$$module = rootModule;
                     resolve(this);
                 });
@@ -48,13 +50,20 @@ module nullstone {
         }
 
         private $configModule () {
-            var rc = <RequireConfig>{
-                shim: {}
+            var co = <RequireConfig>{
+                paths: {},
+                shim: {},
+                map: {
+                    "*": {}
+                }
             };
-            rc.shim[this.sourcePath] = {
+            var srcPath = this.sourcePath;
+            co.paths[this.uri] = srcPath;
+            co.shim[this.uri] = {
                 exports: this.exports
             };
-            require.config(rc);
+            co.map['*'][srcPath] = this.uri;
+            require.config(co);
         }
 
         resolveType (moduleName: string, name: string, /* out */oresolve: IOutType): boolean {
