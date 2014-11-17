@@ -28,6 +28,56 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
+    var Event = (function () {
+        function Event() {
+            this.$$callbacks = [];
+            this.$$scopes = [];
+        }
+        Object.defineProperty(Event.prototype, "has", {
+            get: function () {
+                return this.$$callbacks.length > 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        Event.prototype.on = function (callback, scope) {
+            this.$$callbacks.push(callback);
+            this.$$scopes.push(scope);
+        };
+
+        Event.prototype.off = function (callback, scope) {
+            var cbs = this.$$callbacks;
+            var scopes = this.$$scopes;
+            var search = cbs.length - 1;
+            while (search > 0) {
+                search = cbs.lastIndexOf(callback, search);
+                if (scopes[search] === scope) {
+                    cbs.splice(search, 1);
+                    scopes.splice(search, 1);
+                }
+                search--;
+            }
+        };
+
+        Event.prototype.raise = function (sender, args) {
+            for (var i = 0, cbs = this.$$callbacks.slice(0), scopes = this.$$scopes.slice(0), len = cbs.length; i < len; i++) {
+                cbs[i].call(scopes[i], sender, args);
+            }
+        };
+
+        Event.prototype.raiseAsync = function (sender, args) {
+            var _this = this;
+            window.setTimeout(function () {
+                return _this.raise(sender, args);
+            }, 1);
+        };
+        return Event;
+    })();
+    nullstone.Event = Event;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
     var Interface = (function () {
         function Interface(name) {
             Object.defineProperty(this, "name", { value: name, writable: false });
@@ -563,7 +613,7 @@ var nullstone;
         if (!ann)
             anns[name] = ann = [];
         if (forbidMultiple && ann.length > 0)
-            throw new Error("Only 1 content annotation allowed per type [" + type.constructor.name + "].");
+            throw new Error("Only 1 '" + name + "' annotation allowed per type [" + type.constructor.name + "].");
         ann.push(value);
     }
     nullstone.Annotation = Annotation;

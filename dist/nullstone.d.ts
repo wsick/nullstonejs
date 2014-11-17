@@ -13,6 +13,22 @@ declare module nullstone {
     }
 }
 declare module nullstone {
+    interface IEventArgs {
+    }
+    interface IEventCallback<T extends IEventArgs> {
+        (sender: any, args: T): any;
+    }
+    class Event<T extends IEventArgs> {
+        private $$callbacks;
+        private $$scopes;
+        public has : boolean;
+        public on(callback: IEventCallback<T>, scope: any): void;
+        public off(callback: IEventCallback<T>, scope: any): void;
+        public raise(sender: any, args: T): void;
+        public raiseAsync(sender: any, args: T): void;
+    }
+}
+declare module nullstone {
     interface IInterfaceDeclaration<T> {
         name: string;
         is(o: any): boolean;
