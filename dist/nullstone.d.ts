@@ -75,7 +75,7 @@ declare module nullstone {
     function CreateTypedAnnotation<T>(name: string): ITypedAnnotation<T>;
 }
 declare module nullstone {
-    function ConvertAnyToType(val: any, type: Function): any;
-    function RegisterTypeConverter(type: Function, converter: (val: any) => any): void;
-    function RegisterEnumConverter(e: any, converter: (val: any) => any): void;
+    function convertAnyToType(val: any, type: Function): any;
+    function registerTypeConverter(type: Function, converter: (val: any) => any): void;
+    function registerEnumConverter(e: any, converter: (val: any) => any): void;
 }

@@ -252,7 +252,7 @@ var nullstone;
         return new RegExp(val);
     };
 
-    function ConvertAnyToType(val, type) {
+    function convertAnyToType(val, type) {
         var converter = converters[type];
         if (converter)
             return converter(val);
@@ -267,16 +267,16 @@ var nullstone;
         }
         return val;
     }
-    nullstone.ConvertAnyToType = ConvertAnyToType;
+    nullstone.convertAnyToType = convertAnyToType;
 
-    function RegisterTypeConverter(type, converter) {
+    function registerTypeConverter(type, converter) {
         converters[type] = converter;
     }
-    nullstone.RegisterTypeConverter = RegisterTypeConverter;
+    nullstone.registerTypeConverter = registerTypeConverter;
 
-    function RegisterEnumConverter(e, converter) {
+    function registerEnumConverter(e, converter) {
         e.Converter = converter;
     }
-    nullstone.RegisterEnumConverter = RegisterEnumConverter;
+    nullstone.registerEnumConverter = registerEnumConverter;
 })(nullstone || (nullstone = {}));
 //# sourceMappingURL=nullstone.js.map

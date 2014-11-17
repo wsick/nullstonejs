@@ -32,7 +32,7 @@ module nullstone {
         return new RegExp(val);
     };
 
-    export function ConvertAnyToType (val: any, type: Function): any {
+    export function convertAnyToType (val: any, type: Function): any {
         var converter: (val: any) => any = (<any>converters)[type];
         if (converter)
             return converter(val);
@@ -48,11 +48,11 @@ module nullstone {
         return val;
     }
 
-    export function RegisterTypeConverter (type: Function, converter: (val: any) => any) {
+    export function registerTypeConverter (type: Function, converter: (val: any) => any) {
         converters[type] = converter;
     }
 
-    export function RegisterEnumConverter (e: any, converter: (val: any) => any) {
+    export function registerEnumConverter (e: any, converter: (val: any) => any) {
         e.Converter = converter;
     }
 }
