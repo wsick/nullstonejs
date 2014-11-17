@@ -19,14 +19,14 @@ declare module nullstone {
     interface ILibrary {
         rootModule: any;
         loadAsync(onLoaded: (rootModule: any) => any): any;
-        resolve(moduleName: string, name: string, oresolve: IOutType): boolean;
+        resolveType(moduleName: string, name: string, oresolve: IOutType): boolean;
     }
     class Library implements ILibrary {
         private $$libpath;
         private $$module;
         public rootModule : any;
-        public loadAsync(onLoaded: (rootModule: any) => any): void;
-        public resolve(moduleName: string, name: string, oresolve: IOutType): boolean;
+        public loadAsync(onLoaded?: (rootModule: any) => any): void;
+        public resolveType(moduleName: string, name: string, oresolve: IOutType): boolean;
         static register(uri: string, modulePath: string): ILibrary;
         static get(uri: string): ILibrary;
     }

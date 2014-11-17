@@ -94,7 +94,7 @@ module nullstone {
                 libName = libName.substr(0, ind);
             }
             var lib = libResolver.resolve(libName);
-            return !!lib && lib.resolve(moduleName, name, oresolve);
+            return !!lib && lib.resolveType(moduleName, name, oresolve);
         }
 
         private $$resolveDirType (uri: string, name: string, /* out */oresolve: IOutType): boolean {

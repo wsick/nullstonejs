@@ -43,11 +43,11 @@ var nullstone;
         Library.prototype.loadAsync = function (onLoaded) {
             var _this = this;
             require([this.$$libpath], function (rootModule) {
-                onLoaded(_this.$$module = rootModule);
+                onLoaded && onLoaded(_this.$$module = rootModule);
             });
         };
 
-        Library.prototype.resolve = function (moduleName, name, oresolve) {
+        Library.prototype.resolveType = function (moduleName, name, oresolve) {
             oresolve.isPrimitive = false;
             oresolve.type = undefined;
             var curModule = this.rootModule;
@@ -161,7 +161,7 @@ var nullstone;
                 libName = libName.substr(0, ind);
             }
             var lib = libResolver.resolve(libName);
-            return !!lib && lib.resolve(moduleName, name, oresolve);
+            return !!lib && lib.resolveType(moduleName, name, oresolve);
         };
 
         TypeResolver.prototype.$$resolveDirType = function (uri, name, oresolve) {

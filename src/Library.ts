@@ -2,7 +2,7 @@ module nullstone {
     export interface ILibrary {
         rootModule: any;
         loadAsync (onLoaded: (rootModule: any) => any);
-        resolve (moduleName: string, name: string, /* out */oresolve: IOutType): boolean;
+        resolveType (moduleName: string, name: string, /* out */oresolve: IOutType): boolean;
     }
     interface ILibraryHash {
         [id:string]: Library;
@@ -16,13 +16,13 @@ module nullstone {
             return this.$$module = this.$$module || require(this.$$libpath);
         }
 
-        loadAsync (onLoaded: (rootModule: any) => any) {
+        loadAsync (onLoaded?: (rootModule: any) => any) {
             require([this.$$libpath], (rootModule) => {
-                onLoaded(this.$$module = rootModule);
+                onLoaded && onLoaded(this.$$module = rootModule);
             });
         }
 
-        resolve (moduleName: string, name: string, /* out */oresolve: IOutType): boolean {
+        resolveType (moduleName: string, name: string, /* out */oresolve: IOutType): boolean {
             oresolve.isPrimitive = false;
             oresolve.type = undefined;
             var curModule = this.rootModule;
