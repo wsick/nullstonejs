@@ -1,19 +1,19 @@
 module nullstone {
     export interface IPropertyInfo {
-        GetValue(obj: any): any;
-        SetValue(obj: any, value: any);
+        getValue(obj: any): any;
+        setValue(obj: any, value: any);
     }
 
     export class PropertyInfo implements IPropertyInfo {
         private $$getFunc: () => any;
         private $$setFunc: (value: any) => any;
 
-        GetValue (obj: any): any {
+        getValue (obj: any): any {
             if (this.$$getFunc)
                 return this.$$getFunc.call(obj);
         }
 
-        SetValue (obj: any, value: any) {
+        setValue (obj: any, value: any) {
             if (this.$$setFunc)
                 return this.$$setFunc.call(obj, value);
         }

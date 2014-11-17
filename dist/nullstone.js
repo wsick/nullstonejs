@@ -56,6 +56,70 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
+    nullstone.ICollection_ = new nullstone.Interface("ICollection");
+    nullstone.ICollection_.is = function (o) {
+        if (!o)
+            return false;
+        return typeof o.GetValueAt === "function" && typeof o.SetValueAt === "function";
+    };
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    var IndexedPropertyInfo = (function () {
+        function IndexedPropertyInfo() {
+        }
+        Object.defineProperty(IndexedPropertyInfo.prototype, "propertyType", {
+            get: function () {
+                return undefined;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        IndexedPropertyInfo.prototype.getValue = function (ro, index) {
+            if (this.GetFunc)
+                return this.GetFunc.call(ro, index);
+        };
+
+        IndexedPropertyInfo.prototype.setValue = function (ro, index, value) {
+            if (this.SetFunc)
+                this.SetFunc.call(ro, index, value);
+        };
+
+        IndexedPropertyInfo.find = function (typeOrObj) {
+            var o = typeOrObj;
+            var isType = typeOrObj instanceof Function;
+            if (isType)
+                o = new typeOrObj();
+
+            if (o instanceof Array) {
+                var pi = new IndexedPropertyInfo();
+                pi.GetFunc = function (index) {
+                    return this[index];
+                };
+                pi.SetFunc = function (index, value) {
+                    this[index] = value;
+                };
+                return pi;
+            }
+            var coll = nullstone.ICollection_.as(o);
+            if (coll) {
+                var pi = new IndexedPropertyInfo();
+                pi.GetFunc = function (index) {
+                    return this.GetValueAt(index);
+                };
+                pi.SetFunc = function (index, value) {
+                    return this.SetValueAt(index, value);
+                };
+                return pi;
+            }
+        };
+        return IndexedPropertyInfo;
+    })();
+    nullstone.IndexedPropertyInfo = IndexedPropertyInfo;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
     var Library = (function () {
         function Library(uri) {
             this.$$libpath = null;
@@ -182,12 +246,12 @@ var nullstone;
     var PropertyInfo = (function () {
         function PropertyInfo() {
         }
-        PropertyInfo.prototype.GetValue = function (obj) {
+        PropertyInfo.prototype.getValue = function (obj) {
             if (this.$$getFunc)
                 return this.$$getFunc.call(obj);
         };
 
-        PropertyInfo.prototype.SetValue = function (obj, value) {
+        PropertyInfo.prototype.setValue = function (obj, value) {
             if (this.$$setFunc)
                 return this.$$setFunc.call(obj, value);
         };

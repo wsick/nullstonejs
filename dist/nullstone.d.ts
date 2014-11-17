@@ -13,11 +13,6 @@ declare module nullstone {
     }
 }
 declare module nullstone {
-    interface ITypeResolver {
-        resolveType(moduleName: string, name: string, oresolve: IOutType): boolean;
-    }
-}
-declare module nullstone {
     interface IInterfaceDeclaration<T> {
         name: string;
         is(o: any): boolean;
@@ -28,6 +23,32 @@ declare module nullstone {
         constructor(name: string);
         public is(o: any): boolean;
         public as(o: any): T;
+    }
+}
+declare module nullstone {
+    interface ICollection<T> {
+        GetValueAt(index: number): T;
+        SetValueAt(index: number, value: T): any;
+    }
+    var ICollection_: Interface<{}>;
+}
+declare module nullstone {
+    interface ITypeResolver {
+        resolveType(moduleName: string, name: string, oresolve: IOutType): boolean;
+    }
+}
+declare module nullstone {
+    interface IIndexedPropertyInfo {
+        getValue(obj: any, index: number): any;
+        setValue(obj: any, index: number, value: any): any;
+    }
+    class IndexedPropertyInfo implements IIndexedPropertyInfo {
+        public GetFunc: (index: number) => any;
+        public SetFunc: (index: number, value: any) => any;
+        public propertyType : Function;
+        public getValue(ro: any, index: number): any;
+        public setValue(ro: any, index: number, value: any): void;
+        static find(typeOrObj: any): IndexedPropertyInfo;
     }
 }
 declare module nullstone {
@@ -72,14 +93,14 @@ declare module nullstone {
 }
 declare module nullstone {
     interface IPropertyInfo {
-        GetValue(obj: any): any;
-        SetValue(obj: any, value: any): any;
+        getValue(obj: any): any;
+        setValue(obj: any, value: any): any;
     }
     class PropertyInfo implements IPropertyInfo {
         private $$getFunc;
         private $$setFunc;
-        public GetValue(obj: any): any;
-        public SetValue(obj: any, value: any): any;
+        public getValue(obj: any): any;
+        public setValue(obj: any, value: any): any;
         static find(typeOrObj: any, name: string): IPropertyInfo;
     }
 }
