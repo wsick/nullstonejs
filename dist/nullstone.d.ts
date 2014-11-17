@@ -111,6 +111,7 @@ declare module nullstone {
         public host : string;
         public absolutePath : string;
         public scheme : string;
+        public toString(): string;
     }
 }
 declare module nullstone {

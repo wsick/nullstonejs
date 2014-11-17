@@ -317,8 +317,8 @@ var nullstone;
                     return "/";
                 var qstart = s.indexOf("?", start);
                 if (qstart < 0 || qstart < start)
-                    qstart = undefined;
-                return s.substr(start, qstart);
+                    return s.substr(start);
+                return s.substr(start, qstart - start);
             },
             enumerable: true,
             configurable: true
@@ -335,6 +335,10 @@ var nullstone;
             enumerable: true,
             configurable: true
         });
+
+        Uri.prototype.toString = function () {
+            return this.$$originalString.toString();
+        };
         return Uri;
     })();
     nullstone.Uri = Uri;

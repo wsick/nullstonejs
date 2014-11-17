@@ -22,8 +22,8 @@ module nullstone {
                 return "/";
             var qstart = s.indexOf("?", start);
             if (qstart < 0 || qstart < start)
-                qstart = undefined;
-            return s.substr(start, qstart);
+                return s.substr(start);
+            return s.substr(start, qstart - start);
         }
 
         get scheme (): string {
@@ -32,6 +32,10 @@ module nullstone {
             if (ind < 0)
                 return null;
             return s.substr(0, ind);
+        }
+
+        toString (): string {
+            return this.$$originalString.toString();
         }
     }
 }

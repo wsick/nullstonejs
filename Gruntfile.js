@@ -78,7 +78,8 @@ module.exports = function (grunt) {
                 src: [
                     'typings/*.d.ts',
                     '<%= dirs.test.root %>/**/*.ts',
-                    '!<%= dirs.test.lib %>/**/*.ts'
+                    '!<%= dirs.test.lib %>/**/*.ts',
+                    'dist/nullstone.d.ts'
                 ],
                 dest: '<%= dirs.test.build %>',
                 options: {
