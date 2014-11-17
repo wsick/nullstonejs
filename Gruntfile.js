@@ -54,6 +54,7 @@ module.exports = function (grunt) {
             test: {
                 files: [
                     { src: './lib/qunit', dest: '<%= dirs.test.lib %>/qunit' },
+                    { src: './lib/requirejs', dest: '<%= dirs.test.lib %>/requirejs' },
                     { src: './dist', dest: '<%= dirs.test.lib %>/<%= meta.name %>/dist' },
                     { src: './src', dest: '<%= dirs.test.lib %>/<%= meta.name %>/src' }
                 ]

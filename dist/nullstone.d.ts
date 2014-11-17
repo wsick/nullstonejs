@@ -115,6 +115,7 @@ declare module nullstone {
         constructor(uri: string);
         public uri: string;
         public rootModule : any;
+        public setLibPath(path: string): void;
         public loadAsync(): IAsyncRequest<Library>;
         public resolveType(moduleName: string, name: string, oresolve: IOutType): boolean;
         public add(name: string, type: any): ILibrary;

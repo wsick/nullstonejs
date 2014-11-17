@@ -12,7 +12,7 @@ module nullstone {
     //      lib://<library>[/<namespace>]
     //      <dir>
     export class LibraryResolver implements ILibraryResolver {
-        private $$libs: ILibraryHash;
+        private $$libs: ILibraryHash = {};
 
         dirResolver = new DirResolver();
 
@@ -36,10 +36,11 @@ module nullstone {
                 return this.dirResolver.resolveType(uri, name, oresolve);
 
             var libName = (scheme === "lib") ? libUri.host : uri;
+            var modName = (scheme === "lib") ? libUri.absolutePath : "";
             var lib = this.$$libs[libName];
             if (!lib)
                 lib = this.$$libs[libName] = new Library(libName);
-            return lib.resolveType(libUri.absolutePath, name, oresolve);
+            return lib.resolveType(modName, name, oresolve);
         }
     }
 }

@@ -286,6 +286,10 @@ var nullstone;
             configurable: true
         });
 
+        Library.prototype.setLibPath = function (path) {
+            this.$$libpath = path;
+        };
+
         Library.prototype.loadAsync = function () {
             return nullstone.createAsync(function (resolve, reject) {
                 var _this = this;
@@ -298,6 +302,14 @@ var nullstone;
         };
 
         Library.prototype.resolveType = function (moduleName, name, oresolve) {
+            if (!moduleName) {
+                oresolve.isPrimitive = true;
+                if ((oresolve.type = this.$$primtypes[name]) !== undefined)
+                    return true;
+                oresolve.isPrimitive = false;
+                return (oresolve.type = this.$$types[name]) !== undefined;
+            }
+
             oresolve.isPrimitive = false;
             oresolve.type = undefined;
             var curModule = this.rootModule;
@@ -340,6 +352,7 @@ var nullstone;
 (function (nullstone) {
     var LibraryResolver = (function () {
         function LibraryResolver() {
+            this.$$libs = {};
             this.dirResolver = new nullstone.DirResolver();
         }
         LibraryResolver.prototype.resolve = function (uri) {
@@ -362,10 +375,11 @@ var nullstone;
                 return this.dirResolver.resolveType(uri, name, oresolve);
 
             var libName = (scheme === "lib") ? libUri.host : uri;
+            var modName = (scheme === "lib") ? libUri.absolutePath : "";
             var lib = this.$$libs[libName];
             if (!lib)
                 lib = this.$$libs[libName] = new nullstone.Library(libName);
-            return lib.resolveType(libUri.absolutePath, name, oresolve);
+            return lib.resolveType(modName, name, oresolve);
         };
         return LibraryResolver;
     })();

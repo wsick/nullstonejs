@@ -26,6 +26,10 @@ module nullstone {
             return this.$$module = this.$$module || require(this.$$libpath);
         }
 
+        setLibPath (path: string) {
+            this.$$libpath = path;
+        }
+
         loadAsync (): IAsyncRequest<Library> {
             return createAsync(function (resolve, reject) {
                 this.$$libpath = this.$$libpath || 'lib/' + this.uri + '/' + this.uri;
@@ -37,6 +41,14 @@ module nullstone {
         }
 
         resolveType (moduleName: string, name: string, /* out */oresolve: IOutType): boolean {
+            if (!moduleName) {
+                oresolve.isPrimitive = true;
+                if ((oresolve.type = this.$$primtypes[name]) !== undefined)
+                    return true;
+                oresolve.isPrimitive = false;
+                return (oresolve.type = this.$$types[name]) !== undefined;
+            }
+
             oresolve.isPrimitive = false;
             oresolve.type = undefined;
             var curModule = this.rootModule;
