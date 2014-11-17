@@ -29,6 +29,15 @@ declare module nullstone {
     }
 }
 declare module nullstone {
+    interface IAsyncRequest<T> {
+        then(success: (result: T) => any, errored: (error: any) => any): IAsyncRequest<T>;
+    }
+    interface IAsyncResolution<T> {
+        (resolve: (result: T) => any, reject: (error: any) => any): any;
+    }
+    function createAsync<T>(resolution: IAsyncResolution<T>): IAsyncRequest<T>;
+}
+declare module nullstone {
     interface IInterfaceDeclaration<T> {
         name: string;
         is(o: any): boolean;
@@ -92,7 +101,7 @@ declare module nullstone {
     interface ILibrary {
         uri: string;
         rootModule: any;
-        loadAsync(onLoaded: (rootModule: any) => any): any;
+        loadAsync(): IAsyncRequest<Library>;
         resolveType(moduleName: string, name: string, oresolve: IOutType): boolean;
         add(name: string, type: any): ILibrary;
         addPrimitive(name: string, type: any): ILibrary;
@@ -106,7 +115,7 @@ declare module nullstone {
         constructor(uri: string);
         public uri: string;
         public rootModule : any;
-        public loadAsync(onLoaded?: (rootModule: any) => any): void;
+        public loadAsync(): IAsyncRequest<Library>;
         public resolveType(moduleName: string, name: string, oresolve: IOutType): boolean;
         public add(name: string, type: any): ILibrary;
         public addPrimitive(name: string, type: any): ILibrary;

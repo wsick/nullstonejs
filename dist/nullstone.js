@@ -78,6 +78,43 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
+    function createAsync(resolution) {
+        var onSuccess;
+        var onError;
+
+        var resolvedResult;
+
+        function resolve(result) {
+            resolvedResult = result;
+            onSuccess && onSuccess(result);
+        }
+
+        var resolvedError;
+
+        function reject(error) {
+            resolvedError = error;
+            onError && onError(error);
+        }
+
+        resolution(resolve, reject);
+
+        var req = {
+            then: function (success, errored) {
+                onSuccess = success;
+                onError = errored;
+                if (resolvedResult !== undefined)
+                    onSuccess && onSuccess(resolvedResult);
+                else if (resolvedError !== undefined)
+                    onError && onError(resolvedError);
+                return req;
+            }
+        };
+        return req;
+    }
+    nullstone.createAsync = createAsync;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
     var Interface = (function () {
         function Interface(name) {
             Object.defineProperty(this, "name", { value: name, writable: false });
@@ -249,11 +286,14 @@ var nullstone;
             configurable: true
         });
 
-        Library.prototype.loadAsync = function (onLoaded) {
-            var _this = this;
-            this.$$libpath = this.$$libpath || 'lib/' + this.uri + '/' + this.uri;
-            require([this.$$libpath], function (rootModule) {
-                onLoaded && onLoaded(_this.$$module = rootModule);
+        Library.prototype.loadAsync = function () {
+            return nullstone.createAsync(function (resolve, reject) {
+                var _this = this;
+                this.$$libpath = this.$$libpath || 'lib/' + this.uri + '/' + this.uri;
+                require([this.$$libpath], function (rootModule) {
+                    _this.$$module = rootModule;
+                    resolve(_this);
+                });
             });
         };
 
