@@ -102,13 +102,17 @@ declare module nullstone {
     class Uri {
         private $$originalString;
         private $$kind;
-        constructor(uri?: string, kind?: UriKind);
+        constructor(uri: Uri);
+        constructor(uri: string, kind?: UriKind);
+        public kind : UriKind;
         public host : string;
         public absolutePath : string;
         public scheme : string;
         public fragment : string;
         public originalString : string;
         public toString(): string;
+        public equals(other: Uri): boolean;
+        static isNullOrEmpty(uri: Uri): boolean;
     }
 }
 declare module nullstone {

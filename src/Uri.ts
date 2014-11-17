@@ -10,9 +10,20 @@ module nullstone {
         private $$originalString: string;
         private $$kind: UriKind;
 
-        constructor (uri?: string, kind?: UriKind) {
-            this.$$originalString = uri;
-            this.$$kind = kind || UriKind.RelativeOrAbsolute;
+        constructor (uri: Uri);
+        constructor (uri: string, kind?: UriKind);
+        constructor (uri?: any, kind?: UriKind) {
+            if (typeof uri === "string") {
+                this.$$originalString = uri;
+                this.$$kind = kind || UriKind.RelativeOrAbsolute;
+            } else if (uri instanceof Uri) {
+                this.$$originalString = (<Uri>uri).$$originalString;
+                this.$$kind = (<Uri>uri).$$kind;
+            }
+        }
+
+        get kind (): UriKind {
+            return this.$$kind;
         }
 
         get host (): string {
@@ -57,6 +68,16 @@ module nullstone {
 
         toString (): string {
             return this.$$originalString.toString();
+        }
+
+        equals (other: Uri): boolean {
+            return this.$$originalString === other.$$originalString;
+        }
+
+        static isNullOrEmpty (uri: Uri): boolean {
+            if (uri == null)
+                return true;
+            return !uri.$$originalString;
         }
     }
     registerTypeConverter(Uri, (val: any): any => {

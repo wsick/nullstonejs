@@ -348,9 +348,22 @@ var nullstone;
     var UriKind = nullstone.UriKind;
     var Uri = (function () {
         function Uri(uri, kind) {
-            this.$$originalString = uri;
-            this.$$kind = kind || 0 /* RelativeOrAbsolute */;
+            if (typeof uri === "string") {
+                this.$$originalString = uri;
+                this.$$kind = kind || 0 /* RelativeOrAbsolute */;
+            } else if (uri instanceof Uri) {
+                this.$$originalString = uri.$$originalString;
+                this.$$kind = uri.$$kind;
+            }
         }
+        Object.defineProperty(Uri.prototype, "kind", {
+            get: function () {
+                return this.$$kind;
+            },
+            enumerable: true,
+            configurable: true
+        });
+
         Object.defineProperty(Uri.prototype, "host", {
             get: function () {
                 var s = this.$$originalString;
@@ -413,6 +426,16 @@ var nullstone;
 
         Uri.prototype.toString = function () {
             return this.$$originalString.toString();
+        };
+
+        Uri.prototype.equals = function (other) {
+            return this.$$originalString === other.$$originalString;
+        };
+
+        Uri.isNullOrEmpty = function (uri) {
+            if (uri == null)
+                return true;
+            return !uri.$$originalString;
         };
         return Uri;
     })();
@@ -496,9 +519,7 @@ var nullstone;
             return false;
         if (val1 === val2)
             return true;
-        if (val1.Equals)
-            return val1.Equals(val2);
-        return false;
+        return !!val1.equals && val1.equals(val2);
     }
     nullstone.equals = equals;
 })(nullstone || (nullstone = {}));
