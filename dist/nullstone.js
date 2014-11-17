@@ -4,15 +4,17 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
-    var DirTypeResolver = (function () {
-        function DirTypeResolver() {
+    var DirResolver = (function () {
+        function DirResolver() {
         }
-        DirTypeResolver.prototype.resolve = function (moduleName, name, oresolve) {
-            return require(moduleName + '/' + name);
+        DirResolver.prototype.resolveType = function (moduleName, name, oresolve) {
+            oresolve.isPrimitive = false;
+            oresolve.type = require(moduleName + '/' + name);
+            return oresolve.type !== undefined;
         };
-        return DirTypeResolver;
+        return DirResolver;
     })();
-    nullstone.DirTypeResolver = DirTypeResolver;
+    nullstone.DirResolver = DirResolver;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -26,11 +28,41 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
-    var libraries = [];
+    var Interface = (function () {
+        function Interface(name) {
+            Object.defineProperty(this, "name", { value: name, writable: false });
+        }
+        Interface.prototype.is = function (o) {
+            if (!o)
+                return false;
+            var type = o.constructor;
+            while (type) {
+                var is = type.$$interfaces;
+                if (is && is.indexOf(this) > -1)
+                    return true;
+                type = nullstone.getTypeParent(type);
+            }
+            return false;
+        };
+
+        Interface.prototype.as = function (o) {
+            if (!this.is(o))
+                return undefined;
+            return o;
+        };
+        return Interface;
+    })();
+    nullstone.Interface = Interface;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
     var Library = (function () {
-        function Library() {
+        function Library(uri) {
             this.$$libpath = null;
             this.$$module = null;
+            this.$$primtypes = {};
+            this.$$types = {};
+            Object.defineProperty(this, "uri", { value: uri, writable: false });
         }
         Object.defineProperty(Library.prototype, "rootModule", {
             get: function () {
@@ -42,6 +74,7 @@ var nullstone;
 
         Library.prototype.loadAsync = function (onLoaded) {
             var _this = this;
+            this.$$libpath = this.$$libpath || 'lib/' + this.uri + '/' + this.uri;
             require([this.$$libpath], function (rootModule) {
                 onLoaded && onLoaded(_this.$$module = rootModule);
             });
@@ -60,16 +93,22 @@ var nullstone;
             return oresolve.type !== undefined;
         };
 
-        Library.register = function (uri, modulePath) {
-            var lib = libraries[uri];
-            if (!lib)
-                lib = libraries[uri] = new Library();
-            lib.$$libpath = modulePath;
-            return lib;
+        Library.prototype.add = function (name, type) {
+            Object.defineProperty(type, "$$uri", { value: this.uri, writable: false });
+            this.$$types[name] = type;
+            return this;
         };
 
-        Library.get = function (uri) {
-            return libraries[uri];
+        Library.prototype.addPrimitive = function (name, type) {
+            Object.defineProperty(type, "$$uri", { value: this.uri, writable: false });
+            this.$$primtypes[name] = type;
+            return this;
+        };
+
+        Library.prototype.addEnum = function (name, enu) {
+            Object.defineProperty(enu, "$$enum", { value: true, writable: false });
+            enu.name = name;
+            return this.add(name, enu);
         };
         return Library;
     })();
@@ -79,9 +118,32 @@ var nullstone;
 (function (nullstone) {
     var LibraryResolver = (function () {
         function LibraryResolver() {
+            this.dirResolver = new nullstone.DirResolver();
         }
         LibraryResolver.prototype.resolve = function (uri) {
-            return nullstone.Library.get(uri) || nullstone.Library.register(uri, 'lib/' + uri + '/' + uri);
+            var libUri = new nullstone.Uri(uri);
+            var scheme = libUri.scheme;
+            if (!scheme)
+                return null;
+
+            var libName = (scheme === "lib") ? libUri.host : uri;
+            var lib = this.$$libs[libName];
+            if (!lib)
+                lib = this.$$libs[libName] = new nullstone.Library(libName);
+            return lib;
+        };
+
+        LibraryResolver.prototype.resolveType = function (uri, name, oresolve) {
+            var libUri = new nullstone.Uri(uri);
+            var scheme = libUri.scheme;
+            if (!scheme)
+                return this.dirResolver.resolveType(uri, name, oresolve);
+
+            var libName = (scheme === "lib") ? libUri.host : uri;
+            var lib = this.$$libs[libName];
+            if (!lib)
+                lib = this.$$libs[libName] = new nullstone.Library(libName);
+            return lib.resolveType(libUri.absolutePath, name, oresolve);
         };
         return LibraryResolver;
     })();
@@ -89,88 +151,193 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
-    
-    var TypeResolver = (function () {
-        function TypeResolver(defaultUri, primitiveUri) {
-            this.defaultUri = defaultUri;
-            this.primitiveUri = primitiveUri;
-            this.$$primtypes = {};
-            this.$$systypes = {};
-            this.$$ns = {};
-            this.libResolver = new nullstone.LibraryResolver();
-            this.dirTypeResolver = new nullstone.DirTypeResolver();
-            this.addPrimitive("String", String).addPrimitive("Number", Number).addPrimitive("Double", Number).addPrimitive("Date", Date).addPrimitive("RegExp", RegExp).addPrimitive("Boolean", Boolean).addSystem("Array", Array);
-        }
-        TypeResolver.prototype.addPrimitive = function (name, type) {
-            this.$$primtypes[name] = type;
-            return this;
-        };
+    function getPropertyDescriptor(obj, name) {
+        if (!obj)
+            return undefined;
+        var type = obj.constructor;
+        var propDesc = Object.getOwnPropertyDescriptor(type.prototype, name);
+        if (propDesc)
+            return propDesc;
+        return Object.getOwnPropertyDescriptor(obj, name);
+    }
+    nullstone.getPropertyDescriptor = getPropertyDescriptor;
 
-        TypeResolver.prototype.addSystem = function (name, type) {
-            this.$$systypes[name] = type;
-            return this;
-        };
-
-        TypeResolver.prototype.add = function (uri, name, type) {
-            var ns = this.$$ns[uri];
-            if (!ns)
-                ns = this.$$ns[ns] || {};
-            ns[name] = type;
-            return this;
-        };
-
-        TypeResolver.prototype.resolve = function (uri, name, oresolve) {
-            oresolve.type = undefined;
-            if (uri.indexOf("http://") === 0)
-                return this.$$resolveUrlType(uri, name, oresolve);
-            if (uri.indexOf("lib://") === 0)
-                return this.$$resolveLibType(uri, name, oresolve);
-            return this.$$resolveDirType(uri, name, oresolve);
-        };
-
-        TypeResolver.prototype.$$resolveUrlType = function (uri, name, oresolve) {
-            if (uri === this.primitiveUri) {
-                oresolve.isPrimitive = true;
-                if ((oresolve.type = this.$$primtypes[name]) !== undefined)
-                    return true;
-            }
-
-            oresolve.isPrimitive = false;
-            if (uri === this.defaultUri) {
-                if ((oresolve.type = this.$$systypes[name]) !== undefined)
-                    return true;
-            }
-
-            var ns = this.$$ns[uri];
-            if (ns) {
-                if ((oresolve.type = ns[name]) !== undefined)
-                    return true;
-            }
+    function hasProperty(obj, name) {
+        if (!obj)
             return false;
+        if (obj.hasOwnProperty(name))
+            return true;
+        var type = obj.constructor;
+        return type.prototype.hasOwnProperty(name);
+    }
+    nullstone.hasProperty = hasProperty;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    var PropertyInfo = (function () {
+        function PropertyInfo() {
+        }
+        PropertyInfo.prototype.GetValue = function (obj) {
+            if (this.$$getFunc)
+                return this.$$getFunc.call(obj);
         };
 
-        TypeResolver.prototype.$$resolveLibType = function (uri, name, oresolve) {
-            var libResolver = this.libResolver;
-            if (!libResolver)
-                return false;
-            var libName = uri.substr(6);
-            var moduleName = "";
-            var ind = libName.indexOf('/');
-            if (ind > -1) {
-                moduleName = libName.substr(ind + 1);
-                libName = libName.substr(0, ind);
+        PropertyInfo.prototype.SetValue = function (obj, value) {
+            if (this.$$setFunc)
+                return this.$$setFunc.call(obj, value);
+        };
+
+        PropertyInfo.find = function (typeOrObj, name) {
+            var o = typeOrObj;
+            var isType = typeOrObj instanceof Function;
+            if (isType)
+                o = new typeOrObj();
+
+            if (!(o instanceof Object))
+                return null;
+
+            var nameClosure = name;
+            var propDesc = nullstone.getPropertyDescriptor(o, name);
+            if (propDesc) {
+                var pi = new PropertyInfo();
+                pi.$$getFunc = propDesc.get;
+                if (!pi.$$getFunc)
+                    pi.$$getFunc = function () {
+                        return this[nameClosure];
+                    };
+                pi.$$setFunc = propDesc.set;
+                if (!pi.$$setFunc && propDesc.writable)
+                    pi.$$setFunc = function (value) {
+                        this[nameClosure] = value;
+                    };
+                return pi;
             }
-            var lib = libResolver.resolve(libName);
-            return !!lib && lib.resolveType(moduleName, name, oresolve);
-        };
 
-        TypeResolver.prototype.$$resolveDirType = function (uri, name, oresolve) {
-            var resolver = this.dirTypeResolver;
-            return !!resolver && resolver.resolve(uri, name, oresolve);
+            var type = isType ? typeOrObj : typeOrObj.constructor;
+            var pi = new PropertyInfo();
+            pi.$$getFunc = type.prototype["Get" + name];
+            pi.$$setFunc = type.prototype["Set" + name];
+            return pi;
         };
-        return TypeResolver;
+        return PropertyInfo;
     })();
-    nullstone.TypeResolver = TypeResolver;
+    nullstone.PropertyInfo = PropertyInfo;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    function getTypeName(type) {
+        var t = type;
+        if (!t)
+            return "";
+        var name = t.name;
+        if (name)
+            return name;
+        var name = t.toString().match(/function ([^\(]+)/)[1];
+        Object.defineProperty(t, "name", { enumerable: false, value: name, writable: false });
+        return name;
+    }
+    nullstone.getTypeName = getTypeName;
+
+    function getTypeParent(type) {
+        if (type === Object)
+            return null;
+        var p = type.$$parent;
+        if (!p) {
+            if (!type.prototype)
+                return undefined;
+            p = Object.getPrototypeOf(type.prototype).constructor;
+            Object.defineProperty(type, "$$parent", { value: p, writable: false });
+        }
+        return p;
+    }
+    nullstone.getTypeParent = getTypeParent;
+
+    function addTypeInterfaces(type) {
+        var interfaces = [];
+        for (var _i = 0; _i < (arguments.length - 1); _i++) {
+            interfaces[_i] = arguments[_i + 1];
+        }
+        if (!interfaces)
+            return;
+        for (var j = 0, len = interfaces.length; j < len; j++) {
+            if (!interfaces[j]) {
+                console.warn("Registering undefined interface on type.", type);
+                break;
+            }
+        }
+        Object.defineProperty(type, "$$interfaces", { value: interfaces, writable: false });
+    }
+    nullstone.addTypeInterfaces = addTypeInterfaces;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    
+    var TypeManager = (function () {
+        function TypeManager(defaultUri, xUri) {
+            this.defaultUri = defaultUri;
+            this.xUri = xUri;
+            this.libResolver = new nullstone.LibraryResolver();
+            this.libResolver.resolve(defaultUri).add("Array", Array);
+
+            this.libResolver.resolve(xUri).addPrimitive("String", String).addPrimitive("Number", Number).addPrimitive("Double", Number).addPrimitive("Date", Date).addPrimitive("RegExp", RegExp).addPrimitive("Boolean", Boolean);
+        }
+        TypeManager.prototype.resolveType = function (uri, name, oresolve) {
+            oresolve.isPrimitive = false;
+            oresolve.type = undefined;
+            return this.libResolver.resolveType(uri, name, oresolve);
+        };
+        return TypeManager;
+    })();
+    nullstone.TypeManager = TypeManager;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    var Uri = (function () {
+        function Uri(uri) {
+            this.$$originalString = uri;
+        }
+        Object.defineProperty(Uri.prototype, "host", {
+            get: function () {
+                var s = this.$$originalString;
+                var ind = Math.max(3, s.indexOf("://") + 3);
+                var end = s.indexOf("/", ind);
+
+                return (end < 0) ? s.substr(ind) : s.substr(ind, end - ind);
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        Object.defineProperty(Uri.prototype, "absolutePath", {
+            get: function () {
+                var s = this.$$originalString;
+                var ind = Math.max(3, s.indexOf("://") + 3);
+                var start = s.indexOf("/", ind);
+                if (start < 0 || start < ind)
+                    return "/";
+                var qstart = s.indexOf("?", start);
+                if (qstart < 0 || qstart < start)
+                    qstart = undefined;
+                return s.substr(start, qstart);
+            },
+            enumerable: true,
+            configurable: true
+        });
+
+        Object.defineProperty(Uri.prototype, "scheme", {
+            get: function () {
+                var s = this.$$originalString;
+                var ind = s.indexOf("://");
+                if (ind < 0)
+                    return null;
+                return s.substr(0, ind);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return Uri;
+    })();
+    nullstone.Uri = Uri;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {

@@ -1,10 +1,9 @@
 module nullstone {
-    export interface IDirTypeResolver {
-        resolve(moduleName: string, name: string, /* out */oresolve: IOutType): boolean;
-    }
-    export class DirTypeResolver implements IDirTypeResolver {
-        resolve (moduleName: string, name: string, /* out */oresolve: IOutType): boolean {
-            return require(moduleName + '/' + name);
+    export class DirResolver implements ITypeResolver {
+        resolveType (moduleName: string, name: string, /* out */oresolve: IOutType): boolean {
+            oresolve.isPrimitive = false;
+            oresolve.type = require(moduleName + '/' + name);
+            return oresolve.type !== undefined;
         }
     }
 }
