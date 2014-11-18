@@ -39,4 +39,43 @@ module nullstone.async {
         };
         return req;
     }
+
+    export function resolve<T>(obj: T): IAsyncRequest<T> {
+        return async.create<T>((resolve, reject) => {
+            resolve(obj);
+        });
+    }
+
+    export function reject<T>(err: any): IAsyncRequest<T> {
+        return async.create<T>((resolve, reject) => {
+            reject(err);
+        });
+    }
+
+    export function many<T>(arr: IAsyncRequest<T>[]): IAsyncRequest<T[]> {
+        if (!arr || arr.length < 1)
+            return resolve<T[]>([]);
+
+        return create((resolve, reject) => {
+            var resolves: T[] = new Array(arr.length);
+            var errors: any[] = new Array(arr.length);
+            var finished = 0;
+            var count = arr.length;
+            var anyerrors = false;
+
+            function completeSingle (i: number, res: T, err: any) {
+                resolves[i] = res;
+                errors[i] = err;
+                anyerrors = anyerrors || err !== undefined;
+                finished++;
+                if (finished >= count)
+                    anyerrors ? reject(errors) : resolve(resolves);
+            }
+
+            for (var i = 0; i < count; i++) {
+                arr[i].then(resi => completeSingle(i, resi, undefined),
+                        erri => completeSingle(i, undefined, erri));
+            }
+        });
+    }
 }

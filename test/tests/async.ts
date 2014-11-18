@@ -44,4 +44,38 @@ module nullstone.tests.async {
             strictEqual(err, "Errored");
         });
     });
+
+    QUnit.asyncTest("Many Resolve", () => {
+        var as: nullstone.async.IAsyncRequest<any>[] = [];
+
+        as.push(nullstone.async.resolve({}));
+        as.push(nullstone.async.resolve({}));
+        as.push(nullstone.async.resolve({}));
+
+        nullstone.async.many(as)
+            .then(res => {
+                QUnit.start();
+                ok(true);
+            }, err => {
+                QUnit.start();
+                ok(false);
+            });
+    });
+
+    QUnit.asyncTest("Many Resolve", () => {
+        var as: nullstone.async.IAsyncRequest<any>[] = [];
+
+        as.push(nullstone.async.reject({}));
+        as.push(nullstone.async.resolve({}));
+        as.push(nullstone.async.reject({}));
+
+        nullstone.async.many(as)
+            .then(res => {
+                QUnit.start();
+                ok(false);
+            }, err => {
+                QUnit.start();
+                ok(true);
+            });
+    });
 }
