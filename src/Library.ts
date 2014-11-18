@@ -42,10 +42,10 @@ module nullstone {
         loadAsync (): async.IAsyncRequest<Library> {
             this.$configModule();
             return async.create((resolve, reject) => {
-                require([this.uri], (rootModule) => {
+                (<Function>require)([this.uri], (rootModule) => {
                     this.$$module = rootModule;
                     resolve(this);
-                });
+                }, reject);
             });
         }
 

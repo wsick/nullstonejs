@@ -10,6 +10,10 @@ module nullstone {
     // SIMPLES["FontFamily"] = true;
 
     export interface ITypeManager {
+        defaultUri: string;
+        xUri: string;
+        resolveLibrary (uri: string): ILibrary;
+        loadTypeAsync (uri: string, name: string): async.IAsyncRequest<any>;
         resolveType(uri: string, name: string, /* out */oresolve: IOutType): boolean;
         add (uri: string, name: string, type: any): ITypeManager;
         addPrimitive (uri: string, name: string, type: any): ITypeManager;
@@ -34,6 +38,10 @@ module nullstone {
 
         resolveLibrary (uri: string): ILibrary {
             return this.libResolver.resolve(uri);
+        }
+
+        loadTypeAsync (uri: string, name: string): async.IAsyncRequest<any> {
+            return this.libResolver.loadTypeAsync(uri, name);
         }
 
         resolveType (uri: string, name: string, /* out */oresolve: IOutType): boolean {

@@ -74,4 +74,17 @@ module nullstone.tests.typemanager {
                 ok(false, err);
             });
     });
+
+    QUnit.asyncTest("Load amd class", () => {
+        typemgr.loadTypeAsync("mock", "amdclass")
+            .then(cls => {
+                QUnit.start();
+                strictEqual((<any>cls).name, "AmdClass");
+                var o: any = new (<any>cls)();
+                strictEqual(o.x, 1);
+            }, err => {
+                QUnit.start();
+                ok(false, err);
+            });
+    });
 }

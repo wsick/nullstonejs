@@ -3,6 +3,7 @@ module nullstone {
         [id:string]: ILibrary;
     }
     export interface ILibraryResolver extends ITypeResolver {
+        loadTypeAsync(uri: string, name: string): async.IAsyncRequest<any>;
         resolve(uri: string): ILibrary;
     }
 
@@ -18,6 +19,13 @@ module nullstone {
 
         createLibrary (uri: string): ILibrary {
             return new Library(uri);
+        }
+
+        loadTypeAsync (uri: string, name: string): async.IAsyncRequest<any> {
+            var lib = this.resolve(uri);
+            if (lib)
+                return lib.loadAsync();
+            return this.dirResolver.loadAsync(uri, name);
         }
 
         resolve (uri: string): ILibrary {
