@@ -125,6 +125,7 @@ declare module nullstone {
     class LibraryResolver implements ILibraryResolver {
         private $$libs;
         public dirResolver: DirResolver;
+        public createLibrary(uri: string): ILibrary;
         public resolve(uri: string): ILibrary;
         public resolveType(uri: string, name: string, oresolve: IOutType): boolean;
     }

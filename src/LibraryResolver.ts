@@ -1,6 +1,6 @@
 module nullstone {
     interface ILibraryHash {
-        [id:string]: Library;
+        [id:string]: ILibrary;
     }
     export interface ILibraryResolver extends ITypeResolver {
         resolve(uri: string): ILibrary;
@@ -16,6 +16,10 @@ module nullstone {
 
         dirResolver = new DirResolver();
 
+        createLibrary (uri: string): ILibrary {
+            return new Library(uri);
+        }
+
         resolve (uri: string): ILibrary {
             var libUri = new Uri(uri);
             var scheme = libUri.scheme;
@@ -25,7 +29,7 @@ module nullstone {
             var libName = (scheme === "lib") ? libUri.host : uri;
             var lib = this.$$libs[libName];
             if (!lib)
-                lib = this.$$libs[libName] = new Library(libName);
+                lib = this.$$libs[libName] = this.createLibrary(libName);
             return lib;
         }
 

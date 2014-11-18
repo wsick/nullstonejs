@@ -347,6 +347,10 @@ var nullstone;
             this.$$libs = {};
             this.dirResolver = new nullstone.DirResolver();
         }
+        LibraryResolver.prototype.createLibrary = function (uri) {
+            return new nullstone.Library(uri);
+        };
+
         LibraryResolver.prototype.resolve = function (uri) {
             var libUri = new nullstone.Uri(uri);
             var scheme = libUri.scheme;
@@ -356,7 +360,7 @@ var nullstone;
             var libName = (scheme === "lib") ? libUri.host : uri;
             var lib = this.$$libs[libName];
             if (!lib)
-                lib = this.$$libs[libName] = new nullstone.Library(libName);
+                lib = this.$$libs[libName] = this.createLibrary(libName);
             return lib;
         };
 
