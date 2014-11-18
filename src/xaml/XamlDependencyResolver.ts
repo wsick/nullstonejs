@@ -9,7 +9,12 @@ module nullstone.xaml {
         }
 
         collect (el: Element) {
-            //TODO: Implement
+            var parser = new sax.xaml.Parser()
+                .onResolveType((uri, name) => {
+                    this.add(uri, name);
+                    return Object;
+                })
+                .parse(el);
         }
     }
 }

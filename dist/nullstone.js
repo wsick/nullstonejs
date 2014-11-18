@@ -936,6 +936,11 @@ var nullstone;
                 _super.call(this, typeManager);
             }
             XamlDependencyResolver.prototype.collect = function (el) {
+                var _this = this;
+                var parser = new sax.xaml.Parser().onResolveType(function (uri, name) {
+                    _this.add(uri, name);
+                    return Object;
+                }).parse(el);
             };
             return XamlDependencyResolver;
         })(nullstone.resolve.DependencyResolver);

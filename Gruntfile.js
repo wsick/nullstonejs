@@ -56,6 +56,7 @@ module.exports = function (grunt) {
                     { src: './lib/qunit', dest: '<%= dirs.test.lib %>/qunit' },
                     { src: './lib/requirejs', dest: '<%= dirs.test.lib %>/requirejs' },
                     { src: './lib/requirejs-text', dest: '<%= dirs.test.lib %>/requirejs-text' },
+                    { src: './lib/sax-xaml', dest: '<%= dirs.test.lib %>/sax-xaml' },
                     { src: './dist', dest: '<%= dirs.test.lib %>/<%= meta.name %>/dist' },
                     { src: './src', dest: '<%= dirs.test.lib %>/<%= meta.name %>/src' }
                 ]
@@ -67,7 +68,8 @@ module.exports = function (grunt) {
                     'typings/*.d.ts',
                     './src/_Version.ts',
                     './src/*.ts',
-                    './src/**/*.ts'
+                    './src/**/*.ts',
+                    './lib/sax-xaml/dist/sax-xaml.d.ts'
                 ],
                 dest: './dist/<%= meta.name %>.js',
                 options: {
@@ -81,6 +83,7 @@ module.exports = function (grunt) {
                     'typings/*.d.ts',
                     '<%= dirs.test.root %>/**/*.ts',
                     '!<%= dirs.test.lib %>/**/*.ts',
+                    './lib/sax-xaml/dist/sax-xaml.d.ts',
                     'dist/nullstone.d.ts'
                 ],
                 dest: '<%= dirs.test.build %>',
