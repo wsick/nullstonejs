@@ -374,7 +374,7 @@ var nullstone;
             var modName = (scheme === "lib") ? libUri.absolutePath : "";
             var lib = this.$$libs[libName];
             if (!lib)
-                lib = this.$$libs[libName] = new nullstone.Library(libName);
+                lib = this.$$libs[libName] = this.createLibrary(libName);
             return lib.resolveType(modName, name, oresolve);
         };
         return LibraryResolver;
