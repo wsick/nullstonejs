@@ -1,0 +1,6 @@
+<Application
+        xmlns="http://schemas.wsick.com/nullstone"
+        xmlns:x="http://schemas.wsick.com/nullstone/x"
+        xmlns:mock="mock">
+    <mock:AmdClass />
+</Application>

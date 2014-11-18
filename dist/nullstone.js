@@ -7,6 +7,15 @@ var nullstone;
     var DirResolver = (function () {
         function DirResolver() {
         }
+        DirResolver.prototype.loadAsync = function (moduleName, name) {
+            var reqUri = moduleName + '/' + name;
+            return nullstone.async.create(function (resolve, reject) {
+                require([reqUri], function (rootModule) {
+                    resolve(rootModule);
+                }, reject);
+            });
+        };
+
         DirResolver.prototype.resolveType = function (moduleName, name, oresolve) {
             oresolve.isPrimitive = false;
             oresolve.type = require(moduleName + '/' + name);
@@ -270,7 +279,7 @@ var nullstone;
                 require([_this.uri], function (rootModule) {
                     _this.$$module = rootModule;
                     resolve(_this);
-                });
+                }, reject);
             });
         };
 
@@ -349,6 +358,13 @@ var nullstone;
         }
         LibraryResolver.prototype.createLibrary = function (uri) {
             return new nullstone.Library(uri);
+        };
+
+        LibraryResolver.prototype.loadTypeAsync = function (uri, name) {
+            var lib = this.resolve(uri);
+            if (lib)
+                return lib.loadAsync();
+            return this.dirResolver.loadAsync(uri, name);
         };
 
         LibraryResolver.prototype.resolve = function (uri) {
@@ -689,6 +705,10 @@ var nullstone;
             return this.libResolver.resolve(uri);
         };
 
+        TypeManager.prototype.loadTypeAsync = function (uri, name) {
+            return this.libResolver.loadTypeAsync(uri, name);
+        };
+
         TypeManager.prototype.resolveType = function (uri, name, oresolve) {
             oresolve.isPrimitive = false;
             oresolve.type = undefined;
@@ -799,6 +819,51 @@ var nullstone;
             return req;
         }
         async.create = create;
+
+        function resolve(obj) {
+            return async.create(function (resolve, reject) {
+                resolve(obj);
+            });
+        }
+        async.resolve = resolve;
+
+        function reject(err) {
+            return async.create(function (resolve, reject) {
+                reject(err);
+            });
+        }
+        async.reject = reject;
+
+        function many(arr) {
+            if (!arr || arr.length < 1)
+                return resolve([]);
+
+            return create(function (resolve, reject) {
+                var resolves = new Array(arr.length);
+                var errors = new Array(arr.length);
+                var finished = 0;
+                var count = arr.length;
+                var anyerrors = false;
+
+                function completeSingle(i, res, err) {
+                    resolves[i] = res;
+                    errors[i] = err;
+                    anyerrors = anyerrors || err !== undefined;
+                    finished++;
+                    if (finished >= count)
+                        anyerrors ? reject(errors) : resolve(resolves);
+                }
+
+                for (var i = 0; i < count; i++) {
+                    arr[i].then(function (resi) {
+                        return completeSingle(i, resi, undefined);
+                    }, function (erri) {
+                        return completeSingle(i, undefined, erri);
+                    });
+                }
+            });
+        }
+        async.many = many;
     })(nullstone.async || (nullstone.async = {}));
     var async = nullstone.async;
 })(nullstone || (nullstone = {}));
@@ -814,5 +879,100 @@ var nullstone;
         return !!val1.equals && val1.equals(val2);
     }
     nullstone.equals = equals;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    (function (resolve) {
+        var DependencyResolver = (function () {
+            function DependencyResolver(typeManager) {
+                this.typeManager = typeManager;
+                this.$$uris = [];
+                this.$$names = [];
+                this.$$resolving = [];
+            }
+            DependencyResolver.prototype.add = function (uri, name) {
+                var uris = this.$$uris;
+                var names = this.$$names;
+                var ind = uris.indexOf(uri);
+                if (ind > -1 && names[ind] === name)
+                    return false;
+                if (this.$$resolving.indexOf(uri + "/" + name) > -1)
+                    return false;
+                uris.push(uri);
+                names.push(name);
+                return true;
+            };
+
+            DependencyResolver.prototype.resolve = function () {
+                var as = [];
+                for (var i = 0, uris = this.$$uris, names = this.$$names, tm = this.typeManager, resolving = this.$$resolving; i < uris.length; i++) {
+                    var uri = uris[i];
+                    var name = names[i];
+                    resolving.push(uri + "/" + name);
+                    as.push(tm.loadTypeAsync(uri, name));
+                }
+                return nullstone.async.many(as);
+            };
+            return DependencyResolver;
+        })();
+        resolve.DependencyResolver = DependencyResolver;
+    })(nullstone.resolve || (nullstone.resolve = {}));
+    var resolve = nullstone.resolve;
+})(nullstone || (nullstone = {}));
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
+var nullstone;
+(function (nullstone) {
+    (function (xaml) {
+        var W3URI = "http://www.w3.org/2000/xmlns/";
+
+        var XamlDependencyResolver = (function (_super) {
+            __extends(XamlDependencyResolver, _super);
+            function XamlDependencyResolver(typeManager) {
+                _super.call(this, typeManager);
+            }
+            XamlDependencyResolver.prototype.collect = function (el) {
+            };
+            return XamlDependencyResolver;
+        })(nullstone.resolve.DependencyResolver);
+        xaml.XamlDependencyResolver = XamlDependencyResolver;
+    })(nullstone.xaml || (nullstone.xaml = {}));
+    var xaml = nullstone.xaml;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    (function (_xaml) {
+        var parser = new DOMParser();
+        var xds = [];
+
+        var XamlDocument = (function () {
+            function XamlDocument(xaml) {
+                this.Document = parser.parseFromString(xaml, "text/xml");
+            }
+            XamlDocument.prototype.resolve = function (resolver) {
+                resolver.collect(this.Document.documentElement);
+                return resolver.resolve();
+            };
+
+            XamlDocument.getAsync = function (url) {
+                var reqUri = "text!" + url.toString();
+                return nullstone.async.create(function (resolve, reject) {
+                    var xd = xds[reqUri];
+                    if (xd)
+                        return resolve(xd);
+                    require([reqUri], function (xaml) {
+                        resolve(xd = new XamlDocument(xaml));
+                    }, reject);
+                });
+            };
+            return XamlDocument;
+        })();
+        _xaml.XamlDocument = XamlDocument;
+    })(nullstone.xaml || (nullstone.xaml = {}));
+    var xaml = nullstone.xaml;
 })(nullstone || (nullstone = {}));
 //# sourceMappingURL=nullstone.js.map

@@ -10,6 +10,13 @@
 <div id="qunit-fixture"></div>
 <script src="lib/qunit/qunit/qunit.js"></script>
 <script src="lib/nullstone/dist/nullstone.js"></script>
+<script type="text/javascript">
+    var require = {
+        paths: {
+            "text": "lib/requirejs-text/text"
+        }
+    };
+</script>
 <script src="lib/requirejs/require.js"></script>
 
 <script src=".build/tests/uri.js"></script>
@@ -18,6 +25,7 @@
 <script src=".build/tests/enumerable.js"></script>
 <script src=".build/tests/async.js"></script>
 <script src=".build/tests/typemanager.js"></script>
+<script src=".build/tests/xaml/xamldocument.js"></script>
 
 </body>
 </html>

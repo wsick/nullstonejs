@@ -3,6 +3,7 @@ declare module nullstone {
 }
 declare module nullstone {
     class DirResolver implements ITypeResolver {
+        public loadAsync(moduleName: string, name: string): async.IAsyncRequest<any>;
         public resolveType(moduleName: string, name: string, oresolve: IOutType): boolean;
     }
 }
@@ -120,12 +121,14 @@ declare module nullstone {
 }
 declare module nullstone {
     interface ILibraryResolver extends ITypeResolver {
+        loadTypeAsync(uri: string, name: string): async.IAsyncRequest<any>;
         resolve(uri: string): ILibrary;
     }
     class LibraryResolver implements ILibraryResolver {
         private $$libs;
         public dirResolver: DirResolver;
         public createLibrary(uri: string): ILibrary;
+        public loadTypeAsync(uri: string, name: string): async.IAsyncRequest<any>;
         public resolve(uri: string): ILibrary;
         public resolveType(uri: string, name: string, oresolve: IOutType): boolean;
     }
@@ -185,6 +188,10 @@ declare module nullstone {
         isPrimitive: boolean;
     }
     interface ITypeManager {
+        defaultUri: string;
+        xUri: string;
+        resolveLibrary(uri: string): ILibrary;
+        loadTypeAsync(uri: string, name: string): async.IAsyncRequest<any>;
         resolveType(uri: string, name: string, oresolve: IOutType): boolean;
         add(uri: string, name: string, type: any): ITypeManager;
         addPrimitive(uri: string, name: string, type: any): ITypeManager;
@@ -196,6 +203,7 @@ declare module nullstone {
         public libResolver: ILibraryResolver;
         constructor(defaultUri: string, xUri: string);
         public resolveLibrary(uri: string): ILibrary;
+        public loadTypeAsync(uri: string, name: string): async.IAsyncRequest<any>;
         public resolveType(uri: string, name: string, oresolve: IOutType): boolean;
         public add(uri: string, name: string, type: any): ITypeManager;
         public addPrimitive(uri: string, name: string, type: any): ITypeManager;
@@ -219,7 +227,43 @@ declare module nullstone.async {
         (resolve: (result: T) => any, reject: (error: any) => any): any;
     }
     function create<T>(resolution: IAsyncResolution<T>): IAsyncRequest<T>;
+    function resolve<T>(obj: T): IAsyncRequest<T>;
+    function reject<T>(err: any): IAsyncRequest<T>;
+    function many<T>(arr: IAsyncRequest<T>[]): IAsyncRequest<T[]>;
 }
 declare module nullstone {
     function equals(val1: any, val2: any): boolean;
+}
+declare module nullstone.resolve {
+    interface IDependencyResolver {
+        add(uri: string, name: string): boolean;
+        resolve(): async.IAsyncRequest<any>;
+    }
+    class DependencyResolver implements IDependencyResolver {
+        public typeManager: ITypeManager;
+        private $$uris;
+        private $$names;
+        private $$resolving;
+        constructor(typeManager: ITypeManager);
+        public add(uri: string, name: string): boolean;
+        public resolve(): async.IAsyncRequest<any>;
+    }
+}
+declare module nullstone.xaml {
+    interface IXamlDependencyResolver extends resolve.IDependencyResolver {
+        collect(el: Element): any;
+    }
+    class XamlDependencyResolver extends resolve.DependencyResolver implements IXamlDependencyResolver {
+        constructor(typeManager: ITypeManager);
+        public collect(el: Element): void;
+    }
+}
+declare module nullstone.xaml {
+    class XamlDocument {
+        public Document: Document;
+        constructor(xaml: string);
+        public resolve(resolver: IXamlDependencyResolver): async.IAsyncRequest<any>;
+        static getAsync(url: string): async.IAsyncRequest<XamlDocument>;
+        static getAsync(url: Uri): async.IAsyncRequest<XamlDocument>;
+    }
 }
