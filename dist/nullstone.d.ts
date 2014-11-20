@@ -234,36 +234,50 @@ declare module nullstone.async {
 declare module nullstone {
     function equals(val1: any, val2: any): boolean;
 }
-declare module nullstone.resolve {
-    interface IDependencyResolver {
+declare module nullstone.markup {
+    interface IMarkupParser<T> {
+        onResolveType(cb?: (uri: string, name: string) => any): IMarkupParser<T>;
+        parse(root: T): any;
+    }
+    var NO_PARSER: IMarkupParser<any>;
+}
+declare module nullstone.markup {
+    function createMarkup<T extends Markup<any>>(markupType: Function, uri: string): T;
+    function createMarkup<T extends Markup<any>>(markupType: Function, uri: Uri): T;
+    class Markup<T> {
+        public uri: Uri;
+        public root: T;
+        constructor();
+        public createParser(): IMarkupParser<T>;
+        public resolve(typemgr: ITypeManager): async.IAsyncRequest<any>;
+        public loadAsync(): async.IAsyncRequest<Markup<T>>;
+        public loadRoot(data: string): T;
+        public setRoot(markup: T): Markup<T>;
+    }
+}
+declare module nullstone.markup {
+    interface IMarkupDependencyResolver<T> {
         add(uri: string, name: string): boolean;
+        collect(root: T): any;
         resolve(): async.IAsyncRequest<any>;
     }
-    class DependencyResolver implements IDependencyResolver {
+    class MarkupDependencyResolver<T> implements IMarkupDependencyResolver<T> {
         public typeManager: ITypeManager;
+        public parser: IMarkupParser<T>;
         private $$uris;
         private $$names;
         private $$resolving;
-        constructor(typeManager: ITypeManager);
+        constructor(typeManager: ITypeManager, parser: IMarkupParser<T>);
+        public collect(root: T): void;
         public add(uri: string, name: string): boolean;
         public resolve(): async.IAsyncRequest<any>;
     }
 }
 declare module nullstone.xaml {
-    interface IXamlDependencyResolver extends resolve.IDependencyResolver {
-        collect(el: Element): any;
-    }
-    class XamlDependencyResolver extends resolve.DependencyResolver implements IXamlDependencyResolver {
-        constructor(typeManager: ITypeManager);
-        public collect(el: Element): void;
-    }
-}
-declare module nullstone.xaml {
-    class XamlDocument {
-        public Document: Document;
-        constructor(xaml: string);
-        public resolve(resolver: IXamlDependencyResolver): async.IAsyncRequest<any>;
-        static getAsync(url: string): async.IAsyncRequest<XamlDocument>;
-        static getAsync(url: Uri): async.IAsyncRequest<XamlDocument>;
+    class Xaml extends markup.Markup<Element> {
+        static create(uri: string): Xaml;
+        static create(uri: Uri): Xaml;
+        public createParser(): sax.xaml.Parser<sax.xaml.IDocumentContext>;
+        public loadRoot(data: string): Element;
     }
 }

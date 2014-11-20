@@ -1,14 +1,24 @@
-module nullstone.resolve {
-    export interface IDependencyResolver {
+module nullstone.markup {
+    export interface IMarkupDependencyResolver<T> {
         add(uri: string, name: string): boolean;
+        collect(root: T);
         resolve(): async.IAsyncRequest<any>;
     }
-    export class DependencyResolver implements IDependencyResolver {
+    export class MarkupDependencyResolver<T> implements IMarkupDependencyResolver<T> {
         private $$uris: string[] = [];
         private $$names: string[] = [];
         private $$resolving: string[] = [];
 
-        constructor (public typeManager: ITypeManager) {
+        constructor (public typeManager: ITypeManager, public parser: IMarkupParser<T>) {
+        }
+
+        collect (root: T) {
+            this.parser
+                .onResolveType((uri, name) => {
+                    this.add(uri, name);
+                    return Object;
+                })
+                .parse(root);
         }
 
         add (uri: string, name: string): boolean {

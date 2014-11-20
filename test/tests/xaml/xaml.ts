@@ -1,15 +1,15 @@
-module nullstone.tests.xaml.xamldocument {
-    QUnit.module("Xaml Document");
+module nullstone.xaml.tests {
+    QUnit.module("Xaml");
 
     var DEFAULT_XMLNS = "http://schemas.wsick.com/nullstone";
     var X_XMLNS = "http://schemas.wsick.com/nullstone/x";
     var typemgr = new TypeManager(DEFAULT_XMLNS, X_XMLNS);
-    var resolver = new nullstone.xaml.XamlDependencyResolver(typemgr);
 
     QUnit.asyncTest("Simple dependency", () => {
-        nullstone.xaml.XamlDocument.getAsync("mock/simple.xaml")
-            .then(xd => {
-                xd.resolve(resolver)
+        Xaml.create("mock/simple.xaml")
+            .loadAsync()
+            .then(md => {
+                md.resolve(typemgr)
                     .then(a => {
                         QUnit.start();
                         ok(true, a);

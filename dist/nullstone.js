@@ -882,15 +882,91 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
-    (function (resolve) {
-        var DependencyResolver = (function () {
-            function DependencyResolver(typeManager) {
+    (function (markup) {
+        markup.NO_PARSER = {
+            onResolveType: function (cb) {
+                return markup.NO_PARSER;
+            },
+            parse: function (root) {
+            }
+        };
+    })(nullstone.markup || (nullstone.markup = {}));
+    var markup = nullstone.markup;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    (function (_markup) {
+        var mds = [];
+
+        function createMarkup(markupType, uri) {
+            var url = uri.toString();
+            var md = mds[url];
+            if (md)
+                return md;
+            md = new markupType();
+            md.uri = new nullstone.Uri(url);
+            return md;
+        }
+        _markup.createMarkup = createMarkup;
+
+        var Markup = (function () {
+            function Markup() {
+            }
+            Markup.prototype.createParser = function () {
+                return _markup.NO_PARSER;
+            };
+
+            Markup.prototype.resolve = function (typemgr) {
+                var resolver = new _markup.MarkupDependencyResolver(typemgr, this.createParser());
+                resolver.collect(this.root);
+                return resolver.resolve();
+            };
+
+            Markup.prototype.loadAsync = function () {
+                var reqUri = "text!" + this.uri.toString();
+                var md = this;
+                return nullstone.async.create(function (resolve, reject) {
+                    require([reqUri], function (data) {
+                        md.setRoot(md.loadRoot(data));
+                        resolve(md);
+                    }, reject);
+                });
+            };
+
+            Markup.prototype.loadRoot = function (data) {
+                return data;
+            };
+
+            Markup.prototype.setRoot = function (markup) {
+                this.root = markup;
+                return this;
+            };
+            return Markup;
+        })();
+        _markup.Markup = Markup;
+    })(nullstone.markup || (nullstone.markup = {}));
+    var markup = nullstone.markup;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    (function (markup) {
+        var MarkupDependencyResolver = (function () {
+            function MarkupDependencyResolver(typeManager, parser) {
                 this.typeManager = typeManager;
+                this.parser = parser;
                 this.$$uris = [];
                 this.$$names = [];
                 this.$$resolving = [];
             }
-            DependencyResolver.prototype.add = function (uri, name) {
+            MarkupDependencyResolver.prototype.collect = function (root) {
+                var _this = this;
+                this.parser.onResolveType(function (uri, name) {
+                    _this.add(uri, name);
+                    return Object;
+                }).parse(root);
+            };
+
+            MarkupDependencyResolver.prototype.add = function (uri, name) {
                 var uris = this.$$uris;
                 var names = this.$$names;
                 var ind = uris.indexOf(uri);
@@ -903,7 +979,7 @@ var nullstone;
                 return true;
             };
 
-            DependencyResolver.prototype.resolve = function () {
+            MarkupDependencyResolver.prototype.resolve = function () {
                 var as = [];
                 for (var i = 0, uris = this.$$uris, names = this.$$names, tm = this.typeManager, resolving = this.$$resolving; i < uris.length; i++) {
                     var uri = uris[i];
@@ -913,11 +989,11 @@ var nullstone;
                 }
                 return nullstone.async.many(as);
             };
-            return DependencyResolver;
+            return MarkupDependencyResolver;
         })();
-        resolve.DependencyResolver = DependencyResolver;
-    })(nullstone.resolve || (nullstone.resolve = {}));
-    var resolve = nullstone.resolve;
+        markup.MarkupDependencyResolver = MarkupDependencyResolver;
+    })(nullstone.markup || (nullstone.markup = {}));
+    var markup = nullstone.markup;
 })(nullstone || (nullstone = {}));
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -928,55 +1004,28 @@ var __extends = this.__extends || function (d, b) {
 var nullstone;
 (function (nullstone) {
     (function (xaml) {
-        var W3URI = "http://www.w3.org/2000/xmlns/";
-
-        var XamlDependencyResolver = (function (_super) {
-            __extends(XamlDependencyResolver, _super);
-            function XamlDependencyResolver(typeManager) {
-                _super.call(this, typeManager);
-            }
-            XamlDependencyResolver.prototype.collect = function (el) {
-                var _this = this;
-                var parser = new sax.xaml.Parser().onResolveType(function (uri, name) {
-                    _this.add(uri, name);
-                    return Object;
-                }).parse(el);
-            };
-            return XamlDependencyResolver;
-        })(nullstone.resolve.DependencyResolver);
-        xaml.XamlDependencyResolver = XamlDependencyResolver;
-    })(nullstone.xaml || (nullstone.xaml = {}));
-    var xaml = nullstone.xaml;
-})(nullstone || (nullstone = {}));
-var nullstone;
-(function (nullstone) {
-    (function (_xaml) {
         var parser = new DOMParser();
-        var xds = [];
 
-        var XamlDocument = (function () {
-            function XamlDocument(xaml) {
-                this.Document = parser.parseFromString(xaml, "text/xml");
+        var Xaml = (function (_super) {
+            __extends(Xaml, _super);
+            function Xaml() {
+                _super.apply(this, arguments);
             }
-            XamlDocument.prototype.resolve = function (resolver) {
-                resolver.collect(this.Document.documentElement);
-                return resolver.resolve();
+            Xaml.create = function (uri) {
+                return nullstone.markup.createMarkup(Xaml, uri);
             };
 
-            XamlDocument.getAsync = function (url) {
-                var reqUri = "text!" + url.toString();
-                return nullstone.async.create(function (resolve, reject) {
-                    var xd = xds[reqUri];
-                    if (xd)
-                        return resolve(xd);
-                    require([reqUri], function (xaml) {
-                        resolve(xd = new XamlDocument(xaml));
-                    }, reject);
-                });
+            Xaml.prototype.createParser = function () {
+                return new sax.xaml.Parser();
             };
-            return XamlDocument;
-        })();
-        _xaml.XamlDocument = XamlDocument;
+
+            Xaml.prototype.loadRoot = function (data) {
+                var doc = parser.parseFromString(data, "text/xml");
+                return doc.documentElement;
+            };
+            return Xaml;
+        })(nullstone.markup.Markup);
+        xaml.Xaml = Xaml;
     })(nullstone.xaml || (nullstone.xaml = {}));
     var xaml = nullstone.xaml;
 })(nullstone || (nullstone = {}));
