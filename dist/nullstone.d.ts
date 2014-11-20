@@ -279,10 +279,10 @@ declare module nullstone.markup {
         public resolve(): async.IAsyncRequest<any>;
     }
 }
-declare module nullstone.xaml {
-    class Xaml extends markup.Markup<Element> {
-        static create(uri: string): Xaml;
-        static create(uri: Uri): Xaml;
+declare module nullstone.markup.xaml {
+    class XamlMarkup extends Markup<Element> {
+        static create(uri: string): XamlMarkup;
+        static create(uri: Uri): XamlMarkup;
         public createParser(): sax.xaml.Parser<sax.xaml.IDocumentContext>;
         public loadRoot(data: string): Element;
     }

@@ -1,11 +1,11 @@
-module nullstone.xaml {
+module nullstone.markup.xaml {
     var parser = new DOMParser();
-    var xcache = new Memoizer<Xaml>((key) => new Xaml(key));
+    var xcache = new Memoizer<XamlMarkup>((key) => new XamlMarkup(key));
 
-    export class Xaml extends markup.Markup<Element> {
-        static create (uri: string): Xaml;
-        static create (uri: Uri): Xaml;
-        static create (uri: any): Xaml {
+    export class XamlMarkup extends markup.Markup<Element> {
+        static create (uri: string): XamlMarkup;
+        static create (uri: Uri): XamlMarkup;
+        static create (uri: any): XamlMarkup {
             return xcache.memoize(uri.toString());
         }
 

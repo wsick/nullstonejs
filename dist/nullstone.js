@@ -1008,33 +1008,36 @@ var __extends = this.__extends || function (d, b) {
 };
 var nullstone;
 (function (nullstone) {
-    (function (xaml) {
-        var parser = new DOMParser();
-        var xcache = new nullstone.Memoizer(function (key) {
-            return new Xaml(key);
-        });
+    (function (markup) {
+        (function (xaml) {
+            var parser = new DOMParser();
+            var xcache = new nullstone.Memoizer(function (key) {
+                return new XamlMarkup(key);
+            });
 
-        var Xaml = (function (_super) {
-            __extends(Xaml, _super);
-            function Xaml() {
-                _super.apply(this, arguments);
-            }
-            Xaml.create = function (uri) {
-                return xcache.memoize(uri.toString());
-            };
+            var XamlMarkup = (function (_super) {
+                __extends(XamlMarkup, _super);
+                function XamlMarkup() {
+                    _super.apply(this, arguments);
+                }
+                XamlMarkup.create = function (uri) {
+                    return xcache.memoize(uri.toString());
+                };
 
-            Xaml.prototype.createParser = function () {
-                return new sax.xaml.Parser();
-            };
+                XamlMarkup.prototype.createParser = function () {
+                    return new sax.xaml.Parser();
+                };
 
-            Xaml.prototype.loadRoot = function (data) {
-                var doc = parser.parseFromString(data, "text/xml");
-                return doc.documentElement;
-            };
-            return Xaml;
-        })(nullstone.markup.Markup);
-        xaml.Xaml = Xaml;
-    })(nullstone.xaml || (nullstone.xaml = {}));
-    var xaml = nullstone.xaml;
+                XamlMarkup.prototype.loadRoot = function (data) {
+                    var doc = parser.parseFromString(data, "text/xml");
+                    return doc.documentElement;
+                };
+                return XamlMarkup;
+            })(markup.Markup);
+            xaml.XamlMarkup = XamlMarkup;
+        })(markup.xaml || (markup.xaml = {}));
+        var xaml = markup.xaml;
+    })(nullstone.markup || (nullstone.markup = {}));
+    var markup = nullstone.markup;
 })(nullstone || (nullstone = {}));
 //# sourceMappingURL=nullstone.js.map

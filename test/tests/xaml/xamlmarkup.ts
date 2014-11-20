@@ -1,4 +1,4 @@
-module nullstone.xaml.tests {
+module nullstone.markup.xaml.tests {
     QUnit.module("Xaml");
 
     var DEFAULT_XMLNS = "http://schemas.wsick.com/nullstone";
@@ -6,7 +6,7 @@ module nullstone.xaml.tests {
     var typemgr = new TypeManager(DEFAULT_XMLNS, X_XMLNS);
 
     QUnit.asyncTest("Simple dependency", () => {
-        Xaml.create("mock/simple.xaml")
+        XamlMarkup.create("mock/simple.xaml")
             .loadAsync()
             .then(md => {
                 md.resolve(typemgr)
