@@ -1,23 +1,10 @@
 module nullstone.markup {
-    var mds: Markup<any>[] = [];
-
-    export function createMarkup<T extends Markup<any>>(markupType: Function, uri: string): T;
-    export function createMarkup<T extends Markup<any>>(markupType: Function, uri: Uri): T;
-    export function createMarkup<T extends Markup<any>>(markupType: Function, uri: any): T {
-        var url = uri.toString();
-        var md: T = <any>mds[url];
-        if (md)
-            return md;
-        md = new (<any>markupType)();
-        md.uri = new Uri(url);
-        return md;
-    }
-
     export class Markup<T> {
         uri: Uri;
         root: T;
 
-        constructor () {
+        constructor (uri: string) {
+            this.uri = new Uri(uri);
         }
 
         createParser (): IMarkupParser<T> {

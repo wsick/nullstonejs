@@ -134,6 +134,14 @@ declare module nullstone {
     }
 }
 declare module nullstone {
+    class Memoizer<T> {
+        private $$creator;
+        private $$cache;
+        constructor(creator: (key: string) => T);
+        public memoize(key: string): T;
+    }
+}
+declare module nullstone {
     function getPropertyDescriptor(obj: any, name: string): PropertyDescriptor;
     function hasProperty(obj: any, name: string): boolean;
 }
@@ -242,12 +250,10 @@ declare module nullstone.markup {
     var NO_PARSER: IMarkupParser<any>;
 }
 declare module nullstone.markup {
-    function createMarkup<T extends Markup<any>>(markupType: Function, uri: string): T;
-    function createMarkup<T extends Markup<any>>(markupType: Function, uri: Uri): T;
     class Markup<T> {
         public uri: Uri;
         public root: T;
-        constructor();
+        constructor(uri: string);
         public createParser(): IMarkupParser<T>;
         public resolve(typemgr: ITypeManager): async.IAsyncRequest<any>;
         public loadAsync(): async.IAsyncRequest<Markup<T>>;

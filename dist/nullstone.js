@@ -399,6 +399,23 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
+    var Memoizer = (function () {
+        function Memoizer(creator) {
+            this.$$cache = [];
+            this.$$creator = creator;
+        }
+        Memoizer.prototype.memoize = function (key) {
+            var obj = this.$$cache[key];
+            if (!obj)
+                obj = this.$$creator(key);
+            return obj;
+        };
+        return Memoizer;
+    })();
+    nullstone.Memoizer = Memoizer;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
     function getPropertyDescriptor(obj, name) {
         if (!obj)
             return undefined;
@@ -896,21 +913,9 @@ var nullstone;
 var nullstone;
 (function (nullstone) {
     (function (_markup) {
-        var mds = [];
-
-        function createMarkup(markupType, uri) {
-            var url = uri.toString();
-            var md = mds[url];
-            if (md)
-                return md;
-            md = new markupType();
-            md.uri = new nullstone.Uri(url);
-            return md;
-        }
-        _markup.createMarkup = createMarkup;
-
         var Markup = (function () {
-            function Markup() {
+            function Markup(uri) {
+                this.uri = new nullstone.Uri(uri);
             }
             Markup.prototype.createParser = function () {
                 return _markup.NO_PARSER;
@@ -1005,6 +1010,9 @@ var nullstone;
 (function (nullstone) {
     (function (xaml) {
         var parser = new DOMParser();
+        var xcache = new nullstone.Memoizer(function (key) {
+            return new Xaml(key);
+        });
 
         var Xaml = (function (_super) {
             __extends(Xaml, _super);
@@ -1012,7 +1020,7 @@ var nullstone;
                 _super.apply(this, arguments);
             }
             Xaml.create = function (uri) {
-                return nullstone.markup.createMarkup(Xaml, uri);
+                return xcache.memoize(uri.toString());
             };
 
             Xaml.prototype.createParser = function () {
