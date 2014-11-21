@@ -30,40 +30,27 @@ module nullstone.markup.xaml.tests.extensions {
                 deepEqual(cmds[i], {
                     cmd: 'rt',
                     xmlns: DEFAULT_XMLNS,
-                    name: 'Application',
+                    name: 'Grid',
                     type: cmds[i].type
-                }, 'rt Application');
+                }, 'rt Grid');
                 i++;
-                deepEqual(cmds[i], {
-                    cmd: 'ps',
-                    ownerType: cmds[i - 1].type,
-                    propName: 'Resources'
-                }, 'ps Resources');
-                i++;
-                deepEqual(cmds[i], {
-                    cmd: 'rt',
-                    xmlns: DEFAULT_XMLNS,
-                    name: 'Style',
-                    type: cmds[i].type
-                }, 'rt Style');
-                i++;
-                var style = cmds[i].obj;
+                var grid = cmds[i].obj;
                 deepEqual(cmds[i], {
                     cmd: 'or',
                     type: cmds[i - 1].type,
-                    obj: style
-                }, 'or Style');
+                    obj: grid
+                }, 'or Grid');
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'o',
-                    obj: style
-                }, 'o Style');
+                    cmd: 'co',
+                    obj: grid
+                }, 'o Grid');
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'ps',
                     ownerType: null,
-                    propName: 'TargetType'
-                }, 'ps TargetType');
+                    propName: 'Tag'
+                }, 'ps Tag');
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'rt',
@@ -85,19 +72,13 @@ module nullstone.markup.xaml.tests.extensions {
                 deepEqual(cmds[i], {
                     cmd: 'pe',
                     ownerType: null,
-                    propName: 'TargetType'
-                }, 'pe TargetType');
+                    propName: 'Tag'
+                }, 'pe Tag');
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
-                    obj: style
-                }, 'oe Style');
-                i++;
-                deepEqual(cmds[i], {
-                    cmd: 'pe',
-                    ownerType: cmds[i - 11].type,
-                    propName: 'Resources'
-                }, 'pe Resources');
+                    obj: grid
+                }, 'oe Grid');
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
