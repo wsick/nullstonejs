@@ -283,7 +283,7 @@ declare module nullstone.markup.xaml {
     class XamlMarkup extends Markup<Element> {
         static create(uri: string): XamlMarkup;
         static create(uri: Uri): XamlMarkup;
-        public createParser(): sax.xaml.Parser<sax.xaml.IDocumentContext>;
+        public createParser(): sax.xaml.Parser;
         public loadRoot(data: string): Element;
     }
 }

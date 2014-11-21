@@ -1,0 +1,9 @@
+{
+  "tests": [
+    {
+      "name": "Collect Dependencies (Metro)",
+      "test": "tests/Metro",
+      "runCount": 10
+    }
+  ]
+}
