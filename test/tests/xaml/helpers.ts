@@ -22,7 +22,7 @@ module nullstone.markup.xaml.tests {
     }
 
     export module mock {
-        export function parse (el: Element, cb: (cmds: any[]) => any) {
+        export function parse (el: Element, cb: (cmds: any[]) => any, skipTagName?: string) {
             var cmds = [];
             var parser = new XamlParser()
                 .on({
@@ -35,6 +35,8 @@ module nullstone.markup.xaml.tests {
                             name: name,
                             type: type
                         });
+                        if (skipTagName && name === skipTagName)
+                            parser.skipNextElement();
                         return type;
                     },
                     resolveObject: (type) => {
@@ -45,6 +47,13 @@ module nullstone.markup.xaml.tests {
                             obj: obj
                         });
                         return obj;
+                    },
+                    elementSkip: (el, obj) => {
+                        cmds.push({
+                            cmd: 'eskip',
+                            el: el,
+                            obj: obj
+                        });
                     },
                     object: (obj) => {
                         cmds.push({
@@ -111,8 +120,8 @@ module nullstone.markup.xaml.tests {
                     end: () => {
                         cb(cmds);
                     }
-                })
-                .parse(el);
+                });
+            parser.parse(el);
         }
     }
 }

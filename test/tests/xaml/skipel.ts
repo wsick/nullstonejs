@@ -1,24 +1,8 @@
 module nullstone.markup.xaml.tests {
     QUnit.module('Markup:XAML');
 
-    QUnit.asyncTest("No callbacks - Graceful", () => {
-        getDoc("docs/basic.xml", (doc) => {
-            var parser = new XamlParser()
-                .on({
-                    end: () => {
-                        QUnit.start();
-                        ok(true);
-                    }
-                })
-                .parse(doc.documentElement);
-        }, (err) => {
-            QUnit.start();
-            ok(false, err.message);
-        });
-    });
-
-    QUnit.asyncTest("Basic", () => {
-        getDoc("docs/basic.xml", (doc) => {
+    QUnit.asyncTest("Skip Next Element", () => {
+        getDoc("docs/skipel.xml", (doc) => {
             mock.parse(doc.documentElement, (cmds) => {
                 QUnit.start();
 
@@ -46,43 +30,30 @@ module nullstone.markup.xaml.tests {
                 deepEqual(cmds[i], {
                     cmd: 'rt',
                     xmlns: DEFAULT_XMLNS,
-                    name: 'Button',
+                    name: 'SkipMe',
                     type: cmds[i].type
-                }, 'rt Button');
+                }, 'rt SkipMe');
                 i++;
-                var btn = cmds[i].obj;
+                var sm = cmds[i].obj;
                 deepEqual(cmds[i], {
                     cmd: 'or',
                     type: cmds[i - 1].type,
-                    obj: btn
-                }, 'or Button');
+                    obj: sm
+                }, 'or SkipMe');
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'co',
-                    obj: btn
-                }, 'co Button');
-                i++;
-                deepEqual(cmds[i], {
-                    cmd: 'name',
-                    name: 'LayoutRoot'
-                }, 'name Button');
-                i++;
-                deepEqual(cmds[i], {
-                    cmd: 'ct',
-                    text: 'Content'
-                }, 'ct Content');
-                i++;
-                deepEqual(cmds[i], {
-                    cmd: 'oe',
-                    obj: btn
-                }, 'oe Button');
+                    cmd: 'eskip',
+                    el: cmds[i].el,
+                    obj: sm
+                }, 'eskip');
+                //Application - End
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: app
-                }, 'oe Application');
+                });
                 strictEqual(cmds.length, i + 1);
-            });
+            }, 'SkipMe');
         }, (err) => {
             QUnit.start();
             ok(false, err.message);

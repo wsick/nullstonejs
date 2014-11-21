@@ -5,6 +5,9 @@ module nullstone.markup.events {
     export interface IResolveObject {
         (type: any): any;
     }
+    export interface IElementSkip<T> {
+        (root: T, obj: any);
+    }
     export interface IObject {
         (obj: any);
     }

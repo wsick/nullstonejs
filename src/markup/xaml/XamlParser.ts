@@ -7,6 +7,7 @@ module nullstone.markup.xaml {
     export class XamlParser implements IMarkupParser<Element> {
         private $$onResolveType: events.IResolveType;
         private $$onResolveObject: events.IResolveObject;
+        private $$onElementSkip: events.IElementSkip<Element>;
         private $$onObject: events.IObject;
         private $$onObjectEnd: events.IObject;
         private $$onContentObject: events.IObject;
@@ -26,6 +27,7 @@ module nullstone.markup.xaml {
         private $$xXmlns: string;
 
         private $$objectStack: any[] = [];
+        private $$skipnext = false;
 
         constructor () {
             this.setExtensionParser(new XamlExtensionParser())
@@ -33,11 +35,12 @@ module nullstone.markup.xaml {
                 .on({});
         }
 
-        on (listener: IMarkupSax): XamlParser {
+        on (listener: IMarkupSax<Element>): XamlParser {
             listener = createMarkupSax(listener);
 
             this.$$onResolveType = listener.resolveType;
             this.$$onResolveObject = listener.resolveObject;
+            this.$$onElementSkip = listener.elementSkip;
             this.$$onObject = listener.object;
             this.$$onObjectEnd = listener.objectEnd;
             this.$$onContentObject = listener.contentObject;
@@ -89,6 +92,10 @@ module nullstone.markup.xaml {
             return this;
         }
 
+        skipNextElement () {
+            this.$$skipnext = true;
+        }
+
         private $$handleElement (el: Element, isContent: boolean) {
             // NOTE: Handle tag open
             //  <[ns:]Type.Name>
@@ -102,6 +109,13 @@ module nullstone.markup.xaml {
 
             var type = this.$$onResolveType(xmlns, name);
             var obj = this.$$onResolveObject(type);
+
+            if (this.$$skipnext) {
+                this.$$skipnext = false;
+                this.$$onElementSkip(el, obj);
+                return;
+            }
+
             this.$$objectStack.push(obj);
 
             if (isContent) {

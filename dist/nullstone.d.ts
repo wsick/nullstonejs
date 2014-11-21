@@ -262,15 +262,17 @@ declare module nullstone.markup {
 }
 declare module nullstone.markup {
     interface IMarkupParser<T> {
-        on(listener: IMarkupSax): IMarkupParser<T>;
+        on(listener: IMarkupSax<T>): IMarkupParser<T>;
         setNamespaces(defaultXmlns: string, xXmlns: string): IMarkupParser<T>;
         setExtensionParser(parser: IMarkupExtensionParser): IMarkupParser<T>;
         parse(root: T): any;
+        skipNextElement(): any;
     }
     var NO_PARSER: IMarkupParser<any>;
-    interface IMarkupSax {
+    interface IMarkupSax<T> {
         resolveType?: events.IResolveType;
         resolveObject?: events.IResolveObject;
+        elementSkip?: events.IElementSkip<T>;
         object?: events.IObject;
         objectEnd?: events.IObject;
         contentObject?: events.IObject;
@@ -284,7 +286,7 @@ declare module nullstone.markup {
         error?: events.IResumableError;
         end?: () => any;
     }
-    function createMarkupSax(listener: IMarkupSax): IMarkupSax;
+    function createMarkupSax<T>(listener: IMarkupSax<T>): IMarkupSax<T>;
 }
 declare module nullstone.markup {
     class Markup<T> {
@@ -322,6 +324,9 @@ declare module nullstone.markup.events {
     }
     interface IResolveObject {
         (type: any): any;
+    }
+    interface IElementSkip<T> {
+        (root: T, obj: any): any;
     }
     interface IObject {
         (obj: any): any;
@@ -389,6 +394,7 @@ declare module nullstone.markup.xaml {
     class XamlParser implements IMarkupParser<Element> {
         private $$onResolveType;
         private $$onResolveObject;
+        private $$onElementSkip;
         private $$onObject;
         private $$onObjectEnd;
         private $$onContentObject;
@@ -405,11 +411,13 @@ declare module nullstone.markup.xaml {
         private $$defaultXmlns;
         private $$xXmlns;
         private $$objectStack;
+        private $$skipnext;
         constructor();
-        public on(listener: IMarkupSax): XamlParser;
+        public on(listener: IMarkupSax<Element>): XamlParser;
         public setNamespaces(defaultXmlns: string, xXmlns: string): XamlParser;
         public setExtensionParser(parser: IMarkupExtensionParser): XamlParser;
         public parse(el: Element): XamlParser;
+        public skipNextElement(): void;
         private $$handleElement(el, isContent);
         private $$handleResources(owner, resEl);
         private $$tryHandleError(el, xmlns, name);

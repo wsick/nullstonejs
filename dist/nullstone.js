@@ -911,6 +911,8 @@ var nullstone;
                 return markup.NO_PARSER;
             },
             parse: function (root) {
+            },
+            skipNextElement: function () {
             }
         };
 
@@ -921,6 +923,8 @@ var nullstone;
                 }),
                 resolveObject: listener.resolveObject || (function (type) {
                     return new (type)();
+                }),
+                elementSkip: listener.elementSkip || (function (el, obj) {
                 }),
                 object: listener.object || (function (obj) {
                 }),
@@ -1290,6 +1294,7 @@ var nullstone;
                 function XamlParser() {
                     this.$$onEnd = null;
                     this.$$objectStack = [];
+                    this.$$skipnext = false;
                     this.setExtensionParser(new xaml.XamlExtensionParser()).setNamespaces(xaml.DEFAULT_XMLNS, xaml.DEFAULT_XMLNS_X).on({});
                 }
                 XamlParser.prototype.on = function (listener) {
@@ -1297,6 +1302,7 @@ var nullstone;
 
                     this.$$onResolveType = listener.resolveType;
                     this.$$onResolveObject = listener.resolveObject;
+                    this.$$onElementSkip = listener.elementSkip;
                     this.$$onObject = listener.object;
                     this.$$onObjectEnd = listener.objectEnd;
                     this.$$onContentObject = listener.contentObject;
@@ -1343,6 +1349,10 @@ var nullstone;
                     return this;
                 };
 
+                XamlParser.prototype.skipNextElement = function () {
+                    this.$$skipnext = true;
+                };
+
                 XamlParser.prototype.$$handleElement = function (el, isContent) {
                     var name = el.localName;
                     var xmlns = el.namespaceURI;
@@ -1353,6 +1363,13 @@ var nullstone;
 
                     var type = this.$$onResolveType(xmlns, name);
                     var obj = this.$$onResolveObject(type);
+
+                    if (this.$$skipnext) {
+                        this.$$skipnext = false;
+                        this.$$onElementSkip(el, obj);
+                        return;
+                    }
+
                     this.$$objectStack.push(obj);
 
                     if (isContent) {

@@ -1,12 +1,13 @@
 module nullstone.markup {
     export interface IMarkupParser<T> {
-        on(listener: IMarkupSax): IMarkupParser<T>
+        on(listener: IMarkupSax<T>): IMarkupParser<T>
         setNamespaces (defaultXmlns: string, xXmlns: string): IMarkupParser<T>;
         setExtensionParser (parser: IMarkupExtensionParser): IMarkupParser<T>;
         parse(root: T);
+        skipNextElement();
     }
     export var NO_PARSER: IMarkupParser<any> = {
-        on (listener: IMarkupSax): IMarkupParser<any> {
+        on (listener: IMarkupSax<any>): IMarkupParser<any> {
             return NO_PARSER;
         },
         setNamespaces (defaultXmlns: string, xXmlns: string): IMarkupParser<any> {
@@ -16,13 +17,16 @@ module nullstone.markup {
             return NO_PARSER;
         },
         parse (root: any) {
+        },
+        skipNextElement (): any {
         }
     };
 
 
-    export interface IMarkupSax {
+    export interface IMarkupSax<T> {
         resolveType?: events.IResolveType;
         resolveObject?: events.IResolveObject;
+        elementSkip?: events.IElementSkip<T>;
         object?: events.IObject;
         objectEnd?: events.IObject;
         contentObject?: events.IObject;
@@ -37,10 +41,12 @@ module nullstone.markup {
         end?: () => any;
     }
 
-    export function createMarkupSax (listener: IMarkupSax): IMarkupSax {
+    export function createMarkupSax<T> (listener: IMarkupSax<T>): IMarkupSax<T> {
         return {
             resolveType: listener.resolveType || ((uri, name) => Object),
             resolveObject: listener.resolveObject || ((type) => new (type)()),
+            elementSkip: listener.elementSkip || ((el, obj) => {
+            }),
             object: listener.object || ((obj) => {
             }),
             objectEnd: listener.objectEnd || ((obj) => {
