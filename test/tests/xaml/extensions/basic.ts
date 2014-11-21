@@ -31,7 +31,7 @@ module nullstone.markup.xaml.extensions.tests {
             return func();
         });
     var mock = {
-        resolver: function (): INamespacePrefixResolver {
+        resolver: function (): INsPrefixResolver {
             return {
                 lookupNamespaceURI: function (prefix: string): string {
                     if (prefix === null)

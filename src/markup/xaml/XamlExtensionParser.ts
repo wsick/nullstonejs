@@ -1,4 +1,4 @@
-module nullstone.markup.xaml.extensions {
+module nullstone.markup.xaml {
     // Syntax:
     //      {<Alias|Name> [<DefaultKey>=]<DefaultValue>|<Key>=<Value>}
     // Examples:
@@ -9,43 +9,28 @@ module nullstone.markup.xaml.extensions {
     //  {Binding }
     //  {StaticResource }
 
-    export module events {
-        export interface IResolveType {
-            (xmlns: string, name: string): any;
-        }
-        export interface IResolveObject {
-            (type: any): any;
-        }
-        export interface IError {
-            (e: Error);
-        }
-    }
-
     interface IParseContext {
         text: string;
         i: number;
         acc: string;
         error: any;
-        resolver: INamespacePrefixResolver;
+        resolver: INsPrefixResolver;
     }
-    export interface INamespacePrefixResolver {
-        lookupNamespaceURI(prefix: string): string;
-    }
-    export class XamlExtensionParser {
+    export class XamlExtensionParser implements IMarkupExtensionParser {
         private $$defaultXmlns = "http://schemas.wsick.com/fayde";
         private $$xXmlns = "http://schemas.wsick.com/fayde/x";
 
         private $$onResolveType: events.IResolveType;
         private $$onResolveObject: events.IResolveObject;
         private $$onError: events.IError;
-        private $$onEnd: () => any = null;
 
-        setNamespaces (defaultXmlns: string, xXmlns: string) {
+        setNamespaces (defaultXmlns: string, xXmlns: string): XamlExtensionParser {
             this.$$defaultXmlns = defaultXmlns;
             this.$$xXmlns = xXmlns;
+            return this;
         }
 
-        parse (value: string, resolver: INamespacePrefixResolver, os: any[]): any {
+        parse (value: string, resolver: INsPrefixResolver, os: any[]): any {
             this.$$ensure();
             var ctx: IParseContext = {
                 text: value,
@@ -57,7 +42,6 @@ module nullstone.markup.xaml.extensions {
             var obj = this.$$doParse(ctx, os);
             if (ctx.error)
                 this.$$onError(ctx.error);
-            this.$$destroy();
             return obj;
         }
 
@@ -193,29 +177,20 @@ module nullstone.markup.xaml.extensions {
                 .onError(this.$$onError);
         }
 
-        onResolveType (cb?: events.IResolveType): XamlExtensionParser {
+        onResolveType (cb?: extevents.IResolveType): XamlExtensionParser {
             this.$$onResolveType = cb || ((xmlns, name) => Object);
             return this;
         }
 
-        onResolveObject (cb?: events.IResolveObject): XamlExtensionParser {
+        onResolveObject (cb?: extevents.IResolveObject): XamlExtensionParser {
             this.$$onResolveObject = cb || ((type) => new type());
             return this;
         }
 
-        onError (cb?: events.IError): XamlExtensionParser {
+        onError (cb?: extevents.IError): XamlExtensionParser {
             this.$$onError = cb || ((e) => {
             });
             return this;
-        }
-
-        onEnd (cb: () => any): XamlExtensionParser {
-            this.$$onEnd = cb;
-            return this;
-        }
-
-        private $$destroy () {
-            this.$$onEnd && this.$$onEnd();
         }
     }
 }

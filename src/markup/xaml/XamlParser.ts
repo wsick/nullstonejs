@@ -4,36 +4,6 @@ module nullstone.markup.xaml {
     var ERROR_XMLNS = "http://www.w3.org/1999/xhtml";
     var ERROR_NAME = "parsererror";
 
-    export module events {
-        export interface IResolveType {
-            (xmlns: string, name: string): any;
-        }
-        export interface IResolveObject {
-            (type: any): any;
-        }
-        export interface IObject {
-            (obj: any);
-        }
-        export interface IText {
-            (text: string);
-        }
-        export interface IName {
-            (name: string);
-        }
-        export interface IKey {
-            (key: string);
-        }
-        export interface IPropertyStart {
-            (ownerType: any, propName: string);
-        }
-        export interface IPropertyEnd {
-            (ownerType: any, propName: string);
-        }
-        export interface IError {
-            (e: Error): boolean;
-        }
-    }
-
     export class XamlParser implements IMarkupParser<Element> {
         private $$onResolveType: events.IResolveType;
         private $$onResolveObject: events.IResolveObject;
@@ -48,7 +18,7 @@ module nullstone.markup.xaml {
         private $$onError: events.IError;
         private $$onEnd: () => any = null;
 
-        extension: extensions.XamlExtensionParser;
+        private $$extension: IMarkupExtensionParser;
 
         private $$defaultXmlns: string;
         private $$xXmlns: string;
@@ -56,23 +26,60 @@ module nullstone.markup.xaml {
         private $$objectStack: any[] = [];
 
         constructor () {
-            this.extension = this.createExtensionParser();
-            this.setNamespaces(DEFAULT_XMLNS, DEFAULT_XMLNS_X);
+            this.setExtensionParser(new XamlExtensionParser())
+                .setNamespaces(DEFAULT_XMLNS, DEFAULT_XMLNS_X)
+                .on({});
+        }
+
+        on (listener: IMarkupSax): XamlParser {
+            listener = createMarkupSax(listener);
+
+            this.$$onResolveType = listener.resolveType;
+            this.$$onResolveObject = listener.resolveObject;
+            this.$$onObject = listener.object;
+            this.$$onObjectEnd = listener.objectEnd;
+            this.$$onContentObject = listener.contentObject;
+            this.$$onContentText = listener.contentText;
+            this.$$onName = listener.name;
+            this.$$onKey = listener.key;
+            this.$$onPropertyStart = listener.propertyStart;
+            this.$$onPropertyEnd = listener.propertyEnd;
+            this.$$onError = listener.error;
+            this.$$onEnd = listener.end;
+
+            if (this.$$extension) {
+                this.$$extension
+                    .onResolveType(this.$$onResolveType)
+                    .onResolveObject(this.$$onResolveObject);
+            }
+
+            return this;
         }
 
         setNamespaces (defaultXmlns: string, xXmlns: string): XamlParser {
             this.$$defaultXmlns = defaultXmlns;
             this.$$xXmlns = xXmlns;
-            this.extension.setNamespaces(defaultXmlns, xXmlns);
+            if (this.$$extension)
+                this.$$extension.setNamespaces(this.$$defaultXmlns, this.$$xXmlns);
             return this;
         }
 
-        createExtensionParser (): extensions.XamlExtensionParser {
-            return new extensions.XamlExtensionParser();
+        setExtensionParser (parser: IMarkupExtensionParser): XamlParser {
+            this.$$extension = parser;
+            if (parser) {
+                parser.setNamespaces(this.$$defaultXmlns, this.$$xXmlns)
+                    .onResolveType(this.$$onResolveType)
+                    .onResolveObject(this.$$onResolveObject)
+                    .onError((e) => {
+                        throw e;
+                    });
+            }
+            return this;
         }
 
         parse (el: Element): XamlParser {
-            this.$$ensure();
+            if (!this.$$extension)
+                throw new Error("No extension parser exists on parser.");
             this.$$handleElement(el, true);
             this.$$destroy();
             return this;
@@ -206,92 +213,7 @@ module nullstone.markup.xaml {
         private $$getAttrValue (val: string, attr: Attr): any {
             if (val[0] !== "{")
                 return val;
-            return this.extension.parse(val, attr, this.$$objectStack);
-        }
-
-        private $$ensure () {
-            this.onResolveType(this.$$onResolveType)
-                .onResolveObject(this.$$onResolveObject)
-                .onObject(this.$$onObject)
-                .onObjectEnd(this.$$onObjectEnd)
-                .onContentObject(this.$$onContentObject)
-                .onContentText(this.$$onContentText)
-                .onName(this.$$onName)
-                .onKey(this.$$onKey)
-                .onPropertyStart(this.$$onPropertyStart)
-                .onPropertyEnd(this.$$onPropertyEnd)
-                .onError(this.$$onError);
-            this.extension
-                .onResolveType(this.$$onResolveType)
-                .onResolveObject(this.$$onResolveObject);
-        }
-
-        onResolveType (cb?: events.IResolveType): XamlParser {
-            this.$$onResolveType = cb || ((xmlns, name) => Object);
-            return this;
-        }
-
-        onResolveObject (cb?: events.IResolveObject): XamlParser {
-            this.$$onResolveObject = cb || ((type) => new type());
-            return this;
-        }
-
-        onObject (cb?: events.IObject): XamlParser {
-            this.$$onObject = cb || ((obj) => {
-            });
-            return this;
-        }
-
-        onObjectEnd (cb?: events.IObject): XamlParser {
-            this.$$onObjectEnd = cb || ((obj) => {
-            });
-            return this;
-        }
-
-        onContentObject (cb?: events.IObject): XamlParser {
-            this.$$onContentObject = cb || ((obj) => {
-            });
-            return this;
-        }
-
-        onContentText (cb?: events.IObject): XamlParser {
-            this.$$onContentText = cb || ((text) => {
-            });
-            return this;
-        }
-
-        onName (cb?: events.IName): XamlParser {
-            this.$$onName = cb || ((name) => {
-            });
-            return this;
-        }
-
-        onKey (cb?: events.IKey): XamlParser {
-            this.$$onKey = cb || ((key) => {
-            });
-            return this;
-        }
-
-        onPropertyStart (cb?: events.IPropertyStart): XamlParser {
-            this.$$onPropertyStart = cb || ((ownerType, propName) => {
-            });
-            return this;
-        }
-
-        onPropertyEnd (cb?: events.IPropertyEnd): XamlParser {
-            this.$$onPropertyEnd = cb || ((ownerType, propName) => {
-            });
-            return this;
-        }
-
-        onError (cb?: events.IError): XamlParser {
-            this.$$onError = cb || ((e) => true);
-            return this;
-        }
-
-        onEnd (cb: () => any): XamlParser {
-            this.$$onEnd = cb;
-            return this;
+            return this.$$extension.parse(val, attr, this.$$objectStack);
         }
 
         private $$destroy () {

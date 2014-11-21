@@ -25,69 +25,82 @@ module nullstone.markup.xaml.tests {
         export function parse (el: Element, cb: (cmds: any[]) => any) {
             var cmds = [];
             var parser = new XamlParser()
-                .onResolveType((xmlns, name) => {
-                    var func = new Function("return function " + name + "() { }");
-                    var type = func();
-                    cmds.push({
-                        cmd: 'rt',
-                        xmlns: xmlns,
-                        name: name,
-                        type: type
-                    });
-                    return type;
-                }).onResolveObject((type) => {
-                    var obj = new type();
-                    cmds.push({
-                        cmd: 'or',
-                        type: type,
-                        obj: obj
-                    });
-                    return obj;
-                }).onObject((obj) => {
-                    cmds.push({
-                        cmd: 'o',
-                        obj: obj
-                    });
-                }).onObjectEnd((obj) => {
-                    cmds.push({
-                        cmd: 'oe',
-                        obj: obj
-                    });
-                }).onContentObject((obj) => {
-                    cmds.push({
-                        cmd: 'co',
-                        obj: obj
-                    });
-                }).onContentText((text) => {
-                    cmds.push({
-                        cmd: 'ct',
-                        text: text
-                    });
-                }).onName((name) => {
-                    cmds.push({
-                        cmd: 'name',
-                        name: name
-                    });
-                }).onKey((key) => {
-                    cmds.push({
-                        cmd: 'key',
-                        name: key
-                    });
-                }).onPropertyStart((ownerType, propName) => {
-                    cmds.push({
-                        cmd: 'ps',
-                        ownerType: ownerType,
-                        propName: propName
-                    });
-                }).onPropertyEnd((ownerType, propName) => {
-                    cmds.push({
-                        cmd: 'pe',
-                        ownerType: ownerType,
-                        propName: propName
-                    });
-                }).onEnd(() => {
-                    cb(cmds);
-                }).parse(el);
+                .on({
+                    resolveType: (xmlns, name) => {
+                        var func = new Function("return function " + name + "() { }");
+                        var type = func();
+                        cmds.push({
+                            cmd: 'rt',
+                            xmlns: xmlns,
+                            name: name,
+                            type: type
+                        });
+                        return type;
+                    },
+                    resolveObject: (type) => {
+                        var obj = new type();
+                        cmds.push({
+                            cmd: 'or',
+                            type: type,
+                            obj: obj
+                        });
+                        return obj;
+                    },
+                    object: (obj) => {
+                        cmds.push({
+                            cmd: 'o',
+                            obj: obj
+                        });
+                    },
+                    objectEnd: (obj) => {
+                        cmds.push({
+                            cmd: 'oe',
+                            obj: obj
+                        });
+                    },
+                    contentObject: (obj) => {
+                        cmds.push({
+                            cmd: 'co',
+                            obj: obj
+                        });
+                    },
+                    contentText: (text) => {
+                        cmds.push({
+                            cmd: 'ct',
+                            text: text
+                        });
+                    },
+                    name: (name) => {
+                        cmds.push({
+                            cmd: 'name',
+                            name: name
+                        });
+                    },
+                    key: (key) => {
+                        cmds.push({
+                            cmd: 'key',
+                            name: key
+                        });
+                    },
+                    propertyStart: (ownerType, propName) => {
+                        cmds.push({
+                            cmd: 'ps',
+                            ownerType: ownerType,
+                            propName: propName
+                        });
+                    },
+                    propertyEnd: (ownerType, propName) => {
+                        cmds.push({
+                            cmd: 'pe',
+                            ownerType: ownerType,
+                            propName: propName
+                        });
+                    },
+                    end: () => {
+                        cb(cmds);
+                    }
+                })
+                .parse(el);
         }
     }
 }

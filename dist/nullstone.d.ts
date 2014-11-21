@@ -249,11 +249,80 @@ declare module nullstone.markup {
     }
 }
 declare module nullstone.markup {
+    module extevents {
+        interface IResolveType {
+            (xmlns: string, name: string): any;
+        }
+        interface IResolveObject {
+            (type: any): any;
+        }
+        interface IError {
+            (e: Error): any;
+        }
+    }
+    interface INsPrefixResolver {
+        lookupNamespaceURI(prefix: string): string;
+    }
+    interface IMarkupExtensionParser {
+        setNamespaces(defaultXmlns: string, xXmlns: string): IMarkupExtensionParser;
+        onResolveType(cb?: extevents.IResolveType): IMarkupExtensionParser;
+        onResolveObject(cb?: extevents.IResolveObject): IMarkupExtensionParser;
+        onError(cb?: extevents.IError): IMarkupExtensionParser;
+        parse(val: string, resolver: INsPrefixResolver, os: any[]): any;
+    }
+}
+declare module nullstone.markup {
     interface IMarkupParser<T> {
-        onResolveType(cb?: (uri: string, name: string) => any): IMarkupParser<T>;
+        on(listener: IMarkupSax): IMarkupParser<T>;
+        setNamespaces(defaultXmlns: string, xXmlns: string): IMarkupParser<T>;
+        setExtensionParser(parser: IMarkupExtensionParser): IMarkupParser<T>;
         parse(root: T): any;
     }
     var NO_PARSER: IMarkupParser<any>;
+    module events {
+        interface IResolveType {
+            (xmlns: string, name: string): any;
+        }
+        interface IResolveObject {
+            (type: any): any;
+        }
+        interface IObject {
+            (obj: any): any;
+        }
+        interface IText {
+            (text: string): any;
+        }
+        interface IName {
+            (name: string): any;
+        }
+        interface IKey {
+            (key: string): any;
+        }
+        interface IPropertyStart {
+            (ownerType: any, propName: string): any;
+        }
+        interface IPropertyEnd {
+            (ownerType: any, propName: string): any;
+        }
+        interface IError {
+            (e: Error): boolean;
+        }
+    }
+    interface IMarkupSax {
+        resolveType?: events.IResolveType;
+        resolveObject?: events.IResolveObject;
+        object?: events.IObject;
+        objectEnd?: events.IObject;
+        contentObject?: events.IObject;
+        contentText?: events.IText;
+        name?: events.IName;
+        key?: events.IKey;
+        propertyStart?: events.IPropertyStart;
+        propertyEnd?: events.IPropertyEnd;
+        error?: events.IError;
+        end?: () => any;
+    }
+    function createMarkupSax(listener: IMarkupSax): IMarkupSax;
 }
 declare module nullstone.markup {
     class Markup<T> {
@@ -286,6 +355,27 @@ declare module nullstone.markup {
     }
 }
 declare module nullstone.markup.xaml {
+    class XamlExtensionParser implements IMarkupExtensionParser {
+        private $$defaultXmlns;
+        private $$xXmlns;
+        private $$onResolveType;
+        private $$onResolveObject;
+        private $$onError;
+        public setNamespaces(defaultXmlns: string, xXmlns: string): XamlExtensionParser;
+        public parse(value: string, resolver: INsPrefixResolver, os: any[]): any;
+        private $$doParse(ctx, os);
+        private $$parseName(ctx);
+        private $$startExtension(ctx, os);
+        private $$parseXExt(ctx, os, name, val);
+        private $$parseKeyValue(ctx, os);
+        private $$finishKeyValue(acc, key, val, os);
+        private $$ensure();
+        public onResolveType(cb?: extevents.IResolveType): XamlExtensionParser;
+        public onResolveObject(cb?: extevents.IResolveObject): XamlExtensionParser;
+        public onError(cb?: extevents.IError): XamlExtensionParser;
+    }
+}
+declare module nullstone.markup.xaml {
     class XamlMarkup extends Markup<Element> {
         static create(uri: string): XamlMarkup;
         static create(uri: Uri): XamlMarkup;
@@ -296,35 +386,6 @@ declare module nullstone.markup.xaml {
 declare module nullstone.markup.xaml {
     var DEFAULT_XMLNS: string;
     var DEFAULT_XMLNS_X: string;
-    module events {
-        interface IResolveType {
-            (xmlns: string, name: string): any;
-        }
-        interface IResolveObject {
-            (type: any): any;
-        }
-        interface IObject {
-            (obj: any): any;
-        }
-        interface IText {
-            (text: string): any;
-        }
-        interface IName {
-            (name: string): any;
-        }
-        interface IKey {
-            (key: string): any;
-        }
-        interface IPropertyStart {
-            (ownerType: any, propName: string): any;
-        }
-        interface IPropertyEnd {
-            (ownerType: any, propName: string): any;
-        }
-        interface IError {
-            (e: Error): boolean;
-        }
-    }
     class XamlParser implements IMarkupParser<Element> {
         private $$onResolveType;
         private $$onResolveObject;
@@ -338,13 +399,14 @@ declare module nullstone.markup.xaml {
         private $$onPropertyEnd;
         private $$onError;
         private $$onEnd;
-        public extension: extensions.XamlExtensionParser;
+        private $$extension;
         private $$defaultXmlns;
         private $$xXmlns;
         private $$objectStack;
         constructor();
+        public on(listener: IMarkupSax): XamlParser;
         public setNamespaces(defaultXmlns: string, xXmlns: string): XamlParser;
-        public createExtensionParser(): extensions.XamlExtensionParser;
+        public setExtensionParser(parser: IMarkupExtensionParser): XamlParser;
         public parse(el: Element): XamlParser;
         private $$handleElement(el, isContent);
         private $$tryHandleError(el, xmlns, name);
@@ -354,57 +416,6 @@ declare module nullstone.markup.xaml {
         private $$tryHandleXAttribute(uri, name, value);
         private $$handleAttribute(uri, name, value, attr);
         private $$getAttrValue(val, attr);
-        private $$ensure();
-        public onResolveType(cb?: events.IResolveType): XamlParser;
-        public onResolveObject(cb?: events.IResolveObject): XamlParser;
-        public onObject(cb?: events.IObject): XamlParser;
-        public onObjectEnd(cb?: events.IObject): XamlParser;
-        public onContentObject(cb?: events.IObject): XamlParser;
-        public onContentText(cb?: events.IObject): XamlParser;
-        public onName(cb?: events.IName): XamlParser;
-        public onKey(cb?: events.IKey): XamlParser;
-        public onPropertyStart(cb?: events.IPropertyStart): XamlParser;
-        public onPropertyEnd(cb?: events.IPropertyEnd): XamlParser;
-        public onError(cb?: events.IError): XamlParser;
-        public onEnd(cb: () => any): XamlParser;
-        private $$destroy();
-    }
-}
-declare module nullstone.markup.xaml.extensions {
-    module events {
-        interface IResolveType {
-            (xmlns: string, name: string): any;
-        }
-        interface IResolveObject {
-            (type: any): any;
-        }
-        interface IError {
-            (e: Error): any;
-        }
-    }
-    interface INamespacePrefixResolver {
-        lookupNamespaceURI(prefix: string): string;
-    }
-    class XamlExtensionParser {
-        private $$defaultXmlns;
-        private $$xXmlns;
-        private $$onResolveType;
-        private $$onResolveObject;
-        private $$onError;
-        private $$onEnd;
-        public setNamespaces(defaultXmlns: string, xXmlns: string): void;
-        public parse(value: string, resolver: INamespacePrefixResolver, os: any[]): any;
-        private $$doParse(ctx, os);
-        private $$parseName(ctx);
-        private $$startExtension(ctx, os);
-        private $$parseXExt(ctx, os, name, val);
-        private $$parseKeyValue(ctx, os);
-        private $$finishKeyValue(acc, key, val, os);
-        private $$ensure();
-        public onResolveType(cb?: events.IResolveType): XamlExtensionParser;
-        public onResolveObject(cb?: events.IResolveObject): XamlExtensionParser;
-        public onError(cb?: events.IError): XamlExtensionParser;
-        public onEnd(cb: () => any): XamlExtensionParser;
         private $$destroy();
     }
 }

@@ -6,12 +6,13 @@ module nullstone.markup.xaml.tests.invalid {
             QUnit.start();
             var errored = false;
             var parser = new XamlParser()
-                .onError((e) => {
-                    errored = true;
-                    return true;
-                })
-                .onEnd(() => {
-                    ok(errored);
+                .on({
+                    error: (e) => {
+                        errored = true;
+                        return true;
+                    }, end: () => {
+                        ok(errored);
+                    }
                 })
                 .parse(doc.documentElement);
         }, (err) => {

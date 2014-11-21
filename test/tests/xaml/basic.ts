@@ -4,9 +4,11 @@ module nullstone.markup.xaml.tests {
     QUnit.asyncTest("No callbacks - Graceful", () => {
         getDoc("docs/basic.xml", (doc) => {
             var parser = new XamlParser()
-                .onEnd(() => {
-                    QUnit.start();
-                    ok(true);
+                .on({
+                    end: () => {
+                        QUnit.start();
+                        ok(true);
+                    }
                 })
                 .parse(doc.documentElement);
         }, (err) => {

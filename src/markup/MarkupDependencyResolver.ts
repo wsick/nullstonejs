@@ -13,10 +13,16 @@ module nullstone.markup {
         }
 
         collect (root: T) {
+            var blank = {};
             this.parser
-                .onResolveType((uri, name) => {
-                    this.add(uri, name);
-                    return Object;
+                .on({
+                    resolveType: (uri, name) => {
+                        this.add(uri, name);
+                        return Object;
+                    },
+                    resolveObject: (type) => {
+                        return blank;
+                    }
                 })
                 .parse(root);
         }
