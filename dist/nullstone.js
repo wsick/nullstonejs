@@ -938,6 +938,10 @@ var nullstone;
                 }),
                 propertyEnd: listener.propertyEnd || (function (ownerType, propName) {
                 }),
+                resourcesStart: listener.resourcesStart || (function (owner) {
+                }),
+                resourcesEnd: listener.resourcesEnd || (function (owner) {
+                }),
                 error: listener.error || (function (e) {
                     return true;
                 }),
@@ -1301,6 +1305,8 @@ var nullstone;
                     this.$$onKey = listener.key;
                     this.$$onPropertyStart = listener.propertyStart;
                     this.$$onPropertyEnd = listener.propertyEnd;
+                    this.$$onResourcesStart = listener.resourcesStart;
+                    this.$$onResourcesEnd = listener.resourcesEnd;
                     this.$$onError = listener.error;
                     this.$$onEnd = listener.end;
 
@@ -1359,10 +1365,15 @@ var nullstone;
                         this.$$processAttribute(attrs[i]);
                     }
 
+                    var resEl = findResourcesElement(el, xmlns, name);
+                    if (resEl)
+                        this.$$handleResources(obj, resEl);
+
                     var child = el.firstElementChild;
                     var hasChildren = !!child;
                     while (child) {
-                        this.$$handleElement(child, true);
+                        if (!resEl || child !== resEl)
+                            this.$$handleElement(child, true);
                         child = child.nextElementSibling;
                     }
 
@@ -1374,6 +1385,16 @@ var nullstone;
 
                     this.$$objectStack.pop();
                     this.$$onObjectEnd(obj);
+                };
+
+                XamlParser.prototype.$$handleResources = function (owner, resEl) {
+                    this.$$onResourcesStart(owner);
+                    var child = resEl.firstElementChild;
+                    while (child) {
+                        this.$$handleElement(child, true);
+                        child = child.nextElementSibling;
+                    }
+                    this.$$onResourcesEnd(owner);
                 };
 
                 XamlParser.prototype.$$tryHandleError = function (el, xmlns, name) {
@@ -1460,6 +1481,17 @@ var nullstone;
                 return XamlParser;
             })();
             xaml.XamlParser = XamlParser;
+
+            function findResourcesElement(ownerEl, uri, name) {
+                var expected = name + ".Resources";
+                var child = ownerEl.firstElementChild;
+                while (child) {
+                    if (child.localName === expected && child.namespaceURI === uri)
+                        return child;
+                    child = child.nextElementSibling;
+                }
+                return null;
+            }
         })(markup.xaml || (markup.xaml = {}));
         var xaml = markup.xaml;
     })(nullstone.markup || (nullstone.markup = {}));

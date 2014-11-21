@@ -279,6 +279,8 @@ declare module nullstone.markup {
         key?: events.IKey;
         propertyStart?: events.IPropertyStart;
         propertyEnd?: events.IPropertyEnd;
+        resourcesStart?: events.IResourcesStart;
+        resourcesEnd?: events.IResourcesEnd;
         error?: events.IResumableError;
         end?: () => any;
     }
@@ -339,6 +341,12 @@ declare module nullstone.markup.events {
     interface IPropertyEnd {
         (ownerType: any, propName: string): any;
     }
+    interface IResourcesStart {
+        (owner: any): any;
+    }
+    interface IResourcesEnd {
+        (owner: any): any;
+    }
     interface IResumableError {
         (e: Error): boolean;
     }
@@ -389,6 +397,8 @@ declare module nullstone.markup.xaml {
         private $$onKey;
         private $$onPropertyStart;
         private $$onPropertyEnd;
+        private $$onResourcesStart;
+        private $$onResourcesEnd;
         private $$onError;
         private $$onEnd;
         private $$extension;
@@ -401,6 +411,7 @@ declare module nullstone.markup.xaml {
         public setExtensionParser(parser: IMarkupExtensionParser): XamlParser;
         public parse(el: Element): XamlParser;
         private $$handleElement(el, isContent);
+        private $$handleResources(owner, resEl);
         private $$tryHandleError(el, xmlns, name);
         private $$tryHandlePropertyTag(el, xmlns, name);
         private $$processAttribute(attr);

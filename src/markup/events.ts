@@ -23,6 +23,12 @@ module nullstone.markup.events {
     export interface IPropertyEnd {
         (ownerType: any, propName: string);
     }
+    export interface IResourcesStart {
+        (owner: any);
+    }
+    export interface IResourcesEnd {
+        (owner: any);
+    }
     export interface IResumableError {
         (e: Error): boolean;
     }

@@ -15,6 +15,8 @@ module nullstone.markup.xaml {
         private $$onKey: events.IKey;
         private $$onPropertyStart: events.IPropertyStart;
         private $$onPropertyEnd: events.IPropertyEnd;
+        private $$onResourcesStart: events.IResourcesStart;
+        private $$onResourcesEnd: events.IResourcesEnd;
         private $$onError: events.IError;
         private $$onEnd: () => any = null;
 
@@ -44,6 +46,8 @@ module nullstone.markup.xaml {
             this.$$onKey = listener.key;
             this.$$onPropertyStart = listener.propertyStart;
             this.$$onPropertyEnd = listener.propertyEnd;
+            this.$$onResourcesStart = listener.resourcesStart;
+            this.$$onResourcesEnd = listener.resourcesEnd;
             this.$$onError = listener.error;
             this.$$onEnd = listener.end;
 
@@ -111,11 +115,17 @@ module nullstone.markup.xaml {
                 this.$$processAttribute(attrs[i]);
             }
 
+            // NOTE: Handle resources first
+            var resEl = findResourcesElement(el, xmlns, name);
+            if (resEl)
+                this.$$handleResources(obj, resEl);
+
             // NOTE: Walk Children
             var child = el.firstElementChild;
             var hasChildren = !!child;
             while (child) {
-                this.$$handleElement(child, true);
+                if (!resEl || child !== resEl) //Skip Resources (will be done first)
+                    this.$$handleElement(child, true);
                 child = child.nextElementSibling;
             }
 
@@ -131,6 +141,16 @@ module nullstone.markup.xaml {
             //  </[ns:]Type>
             this.$$objectStack.pop();
             this.$$onObjectEnd(obj);
+        }
+
+        private $$handleResources (owner: any, resEl: Element) {
+            this.$$onResourcesStart(owner);
+            var child = resEl.firstElementChild;
+            while (child) {
+                this.$$handleElement(child, true);
+                child = child.nextElementSibling;
+            }
+            this.$$onResourcesEnd(owner);
         }
 
         private $$tryHandleError (el: Element, xmlns: string, name: string): boolean {
@@ -219,5 +239,16 @@ module nullstone.markup.xaml {
         private $$destroy () {
             this.$$onEnd && this.$$onEnd();
         }
+    }
+
+    function findResourcesElement (ownerEl: Element, uri: string, name: string): Element {
+        var expected = name + ".Resources";
+        var child = ownerEl.firstElementChild;
+        while (child) {
+            if (child.localName === expected && child.namespaceURI === uri)
+                return child;
+            child = child.nextElementSibling;
+        }
+        return null;
     }
 }

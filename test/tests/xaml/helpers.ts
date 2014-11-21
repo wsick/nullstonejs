@@ -79,7 +79,7 @@ module nullstone.markup.xaml.tests {
                     key: (key) => {
                         cmds.push({
                             cmd: 'key',
-                            name: key
+                            key: key
                         });
                     },
                     propertyStart: (ownerType, propName) => {
@@ -94,6 +94,18 @@ module nullstone.markup.xaml.tests {
                             cmd: 'pe',
                             ownerType: ownerType,
                             propName: propName
+                        });
+                    },
+                    resourcesStart: (owner) => {
+                        cmds.push({
+                            cmd: 'ress',
+                            owner: owner
+                        });
+                    },
+                    resourcesEnd: (owner) => {
+                        cmds.push({
+                            cmd: 'rese',
+                            owner: owner
                         });
                     },
                     end: () => {
