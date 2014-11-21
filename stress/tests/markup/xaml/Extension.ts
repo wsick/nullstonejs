@@ -1,7 +1,7 @@
 import StressTest = require('../../../StressTest');
 
 class Extension extends StressTest {
-    parser = new sax.xaml.extensions.ExtensionParser();
+    parser = new nullstone.markup.xaml.XamlExtensionParser();
     os: any[] = [];
 
     runIteration () {

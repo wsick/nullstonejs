@@ -249,25 +249,14 @@ declare module nullstone.markup {
     }
 }
 declare module nullstone.markup {
-    module extevents {
-        interface IResolveType {
-            (xmlns: string, name: string): any;
-        }
-        interface IResolveObject {
-            (type: any): any;
-        }
-        interface IError {
-            (e: Error): any;
-        }
-    }
     interface INsPrefixResolver {
         lookupNamespaceURI(prefix: string): string;
     }
     interface IMarkupExtensionParser {
         setNamespaces(defaultXmlns: string, xXmlns: string): IMarkupExtensionParser;
-        onResolveType(cb?: extevents.IResolveType): IMarkupExtensionParser;
-        onResolveObject(cb?: extevents.IResolveObject): IMarkupExtensionParser;
-        onError(cb?: extevents.IError): IMarkupExtensionParser;
+        onResolveType(cb?: events.IResolveType): IMarkupExtensionParser;
+        onResolveObject(cb?: events.IResolveObject): IMarkupExtensionParser;
+        onError(cb?: events.IError): IMarkupExtensionParser;
         parse(val: string, resolver: INsPrefixResolver, os: any[]): any;
     }
 }
@@ -279,35 +268,6 @@ declare module nullstone.markup {
         parse(root: T): any;
     }
     var NO_PARSER: IMarkupParser<any>;
-    module events {
-        interface IResolveType {
-            (xmlns: string, name: string): any;
-        }
-        interface IResolveObject {
-            (type: any): any;
-        }
-        interface IObject {
-            (obj: any): any;
-        }
-        interface IText {
-            (text: string): any;
-        }
-        interface IName {
-            (name: string): any;
-        }
-        interface IKey {
-            (key: string): any;
-        }
-        interface IPropertyStart {
-            (ownerType: any, propName: string): any;
-        }
-        interface IPropertyEnd {
-            (ownerType: any, propName: string): any;
-        }
-        interface IError {
-            (e: Error): boolean;
-        }
-    }
     interface IMarkupSax {
         resolveType?: events.IResolveType;
         resolveObject?: events.IResolveObject;
@@ -319,7 +279,7 @@ declare module nullstone.markup {
         key?: events.IKey;
         propertyStart?: events.IPropertyStart;
         propertyEnd?: events.IPropertyEnd;
-        error?: events.IError;
+        error?: events.IResumableError;
         end?: () => any;
     }
     function createMarkupSax(listener: IMarkupSax): IMarkupSax;
@@ -354,6 +314,38 @@ declare module nullstone.markup {
         public resolve(): async.IAsyncRequest<any>;
     }
 }
+declare module nullstone.markup.events {
+    interface IResolveType {
+        (xmlns: string, name: string): any;
+    }
+    interface IResolveObject {
+        (type: any): any;
+    }
+    interface IObject {
+        (obj: any): any;
+    }
+    interface IText {
+        (text: string): any;
+    }
+    interface IName {
+        (name: string): any;
+    }
+    interface IKey {
+        (key: string): any;
+    }
+    interface IPropertyStart {
+        (ownerType: any, propName: string): any;
+    }
+    interface IPropertyEnd {
+        (ownerType: any, propName: string): any;
+    }
+    interface IResumableError {
+        (e: Error): boolean;
+    }
+    interface IError {
+        (e: Error): any;
+    }
+}
 declare module nullstone.markup.xaml {
     class XamlExtensionParser implements IMarkupExtensionParser {
         private $$defaultXmlns;
@@ -370,9 +362,9 @@ declare module nullstone.markup.xaml {
         private $$parseKeyValue(ctx, os);
         private $$finishKeyValue(acc, key, val, os);
         private $$ensure();
-        public onResolveType(cb?: extevents.IResolveType): XamlExtensionParser;
-        public onResolveObject(cb?: extevents.IResolveObject): XamlExtensionParser;
-        public onError(cb?: extevents.IError): XamlExtensionParser;
+        public onResolveType(cb?: events.IResolveType): XamlExtensionParser;
+        public onResolveObject(cb?: events.IResolveObject): XamlExtensionParser;
+        public onError(cb?: events.IError): XamlExtensionParser;
     }
 }
 declare module nullstone.markup.xaml {

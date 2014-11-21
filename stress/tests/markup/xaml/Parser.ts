@@ -14,7 +14,7 @@ class Parser extends StressTest {
     }
 
     runIteration () {
-        var parser = new sax.xaml.Parser()
+        var parser = new nullstone.markup.xaml.XamlParser()
             .parse(this.xmlDoc.documentElement);
     }
 }

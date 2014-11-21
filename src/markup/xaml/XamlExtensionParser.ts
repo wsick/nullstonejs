@@ -177,17 +177,17 @@ module nullstone.markup.xaml {
                 .onError(this.$$onError);
         }
 
-        onResolveType (cb?: extevents.IResolveType): XamlExtensionParser {
+        onResolveType (cb?: events.IResolveType): XamlExtensionParser {
             this.$$onResolveType = cb || ((xmlns, name) => Object);
             return this;
         }
 
-        onResolveObject (cb?: extevents.IResolveObject): XamlExtensionParser {
+        onResolveObject (cb?: events.IResolveObject): XamlExtensionParser {
             this.$$onResolveObject = cb || ((type) => new type());
             return this;
         }
 
-        onError (cb?: extevents.IError): XamlExtensionParser {
+        onError (cb?: events.IError): XamlExtensionParser {
             this.$$onError = cb || ((e) => {
             });
             return this;
