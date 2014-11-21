@@ -35,4 +35,12 @@ module nullstone {
         }
         Object.defineProperty(type, "$$interfaces", {value: interfaces, writable: false});
     }
+
+    export function doesInheritFrom (t: Function, type: any): boolean {
+        var temp = <Function><any>t;
+        while (temp && temp !== type) {
+            temp = getTypeParent(temp);
+        }
+        return temp != null;
+    }
 }

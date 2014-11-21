@@ -162,6 +162,7 @@ declare module nullstone {
     function getTypeName(type: Function): string;
     function getTypeParent(type: Function): Function;
     function addTypeInterfaces(type: Function, ...interfaces: IInterfaceDeclaration<any>[]): void;
+    function doesInheritFrom(t: Function, type: any): boolean;
 }
 declare module nullstone {
     function convertAnyToType(val: any, type: Function): any;

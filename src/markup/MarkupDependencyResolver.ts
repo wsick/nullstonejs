@@ -13,6 +13,12 @@ module nullstone.markup {
         }
 
         collect (root: T) {
+            //TODO: We need to collect
+            //  ResourceDictionary.Source
+            //  DataTemplate.DataType
+            //  ControlTemplate.TargetType
+            //  Style.TargetType
+            //  Application.ThemeName
             var blank = {};
             this.parser
                 .on({

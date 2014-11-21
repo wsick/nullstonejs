@@ -533,6 +533,15 @@ var nullstone;
         Object.defineProperty(type, "$$interfaces", { value: interfaces, writable: false });
     }
     nullstone.addTypeInterfaces = addTypeInterfaces;
+
+    function doesInheritFrom(t, type) {
+        var temp = t;
+        while (temp && temp !== type) {
+            temp = getTypeParent(temp);
+        }
+        return temp != null;
+    }
+    nullstone.doesInheritFrom = doesInheritFrom;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
