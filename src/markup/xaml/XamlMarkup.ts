@@ -10,7 +10,7 @@ module nullstone.markup.xaml {
         }
 
         createParser () {
-            return new sax.xaml.Parser();
+            return new XamlParser();
         }
 
         loadRoot (data: string): Element {

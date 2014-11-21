@@ -243,6 +243,12 @@ declare module nullstone {
     function equals(val1: any, val2: any): boolean;
 }
 declare module nullstone.markup {
+    interface IMarkupExtension {
+        init(val: string): any;
+        transmute? (os: any[]): any;
+    }
+}
+declare module nullstone.markup {
     interface IMarkupParser<T> {
         onResolveType(cb?: (uri: string, name: string) => any): IMarkupParser<T>;
         parse(root: T): any;
@@ -283,7 +289,122 @@ declare module nullstone.markup.xaml {
     class XamlMarkup extends Markup<Element> {
         static create(uri: string): XamlMarkup;
         static create(uri: Uri): XamlMarkup;
-        public createParser(): sax.xaml.Parser;
+        public createParser(): XamlParser;
         public loadRoot(data: string): Element;
+    }
+}
+declare module nullstone.markup.xaml {
+    var DEFAULT_XMLNS: string;
+    var DEFAULT_XMLNS_X: string;
+    module events {
+        interface IResolveType {
+            (xmlns: string, name: string): any;
+        }
+        interface IResolveObject {
+            (type: any): any;
+        }
+        interface IObject {
+            (obj: any): any;
+        }
+        interface IText {
+            (text: string): any;
+        }
+        interface IName {
+            (name: string): any;
+        }
+        interface IKey {
+            (key: string): any;
+        }
+        interface IPropertyStart {
+            (ownerType: any, propName: string): any;
+        }
+        interface IPropertyEnd {
+            (ownerType: any, propName: string): any;
+        }
+        interface IError {
+            (e: Error): boolean;
+        }
+    }
+    class XamlParser {
+        private $$onResolveType;
+        private $$onResolveObject;
+        private $$onObject;
+        private $$onObjectEnd;
+        private $$onContentObject;
+        private $$onContentText;
+        private $$onName;
+        private $$onKey;
+        private $$onPropertyStart;
+        private $$onPropertyEnd;
+        private $$onError;
+        private $$onEnd;
+        public extension: extensions.XamlExtensionParser;
+        private $$defaultXmlns;
+        private $$xXmlns;
+        private $$objectStack;
+        constructor();
+        public setNamespaces(defaultXmlns: string, xXmlns: string): XamlParser;
+        public createExtensionParser(): extensions.XamlExtensionParser;
+        public parse(el: Element): XamlParser;
+        private $$handleElement(el, isContent);
+        private $$tryHandleError(el, xmlns, name);
+        private $$tryHandlePropertyTag(el, xmlns, name);
+        private $$processAttribute(attr);
+        private $$shouldSkipAttr(prefix, name);
+        private $$tryHandleXAttribute(uri, name, value);
+        private $$handleAttribute(uri, name, value, attr);
+        private $$getAttrValue(val, attr);
+        private $$ensure();
+        public onResolveType(cb?: events.IResolveType): XamlParser;
+        public onResolveObject(cb?: events.IResolveObject): XamlParser;
+        public onObject(cb?: events.IObject): XamlParser;
+        public onObjectEnd(cb?: events.IObject): XamlParser;
+        public onContentObject(cb?: events.IObject): XamlParser;
+        public onContentText(cb?: events.IObject): XamlParser;
+        public onName(cb?: events.IName): XamlParser;
+        public onKey(cb?: events.IKey): XamlParser;
+        public onPropertyStart(cb?: events.IPropertyStart): XamlParser;
+        public onPropertyEnd(cb?: events.IPropertyEnd): XamlParser;
+        public onError(cb?: events.IError): XamlParser;
+        public onEnd(cb: () => any): XamlParser;
+        private $$destroy();
+    }
+}
+declare module nullstone.markup.xaml.extensions {
+    module events {
+        interface IResolveType {
+            (xmlns: string, name: string): any;
+        }
+        interface IResolveObject {
+            (type: any): any;
+        }
+        interface IError {
+            (e: Error): any;
+        }
+    }
+    interface INamespacePrefixResolver {
+        lookupNamespaceURI(prefix: string): string;
+    }
+    class XamlExtensionParser {
+        private $$defaultXmlns;
+        private $$xXmlns;
+        private $$onResolveType;
+        private $$onResolveObject;
+        private $$onError;
+        private $$onEnd;
+        public setNamespaces(defaultXmlns: string, xXmlns: string): void;
+        public parse(value: string, resolver: INamespacePrefixResolver, os: any[]): any;
+        private $$doParse(ctx, os);
+        private $$parseName(ctx);
+        private $$startExtension(ctx, os);
+        private $$parseXExt(ctx, os, name, val);
+        private $$parseKeyValue(ctx, os);
+        private $$finishKeyValue(acc, key, val, os);
+        private $$ensure();
+        public onResolveType(cb?: events.IResolveType): XamlExtensionParser;
+        public onResolveObject(cb?: events.IResolveObject): XamlExtensionParser;
+        public onError(cb?: events.IError): XamlExtensionParser;
+        public onEnd(cb: () => any): XamlExtensionParser;
+        private $$destroy();
     }
 }

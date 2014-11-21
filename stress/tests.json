@@ -2,7 +2,17 @@
   "tests": [
     {
       "name": "Collect Dependencies (Metro)",
-      "test": "tests/Metro",
+      "test": "tests/markup/xaml/Resolver",
+      "runCount": 10
+    },
+    {
+      "name": "Parser (Metro)",
+      "test": "tests/markup/xaml/Parser",
+      "runCount": 10
+    },
+    {
+      "name": "Extension Parser",
+      "test": "tests/markup/xaml/Extension",
       "runCount": 10
     }
   ]

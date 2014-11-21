@@ -1,10 +1,10 @@
-import StressTest = require('../StressTest');
+import StressTest = require('../../../StressTest');
 import XamlMarkup = nullstone.markup.xaml.XamlMarkup;
 import MarkupDependencyResolver = nullstone.markup.MarkupDependencyResolver;
 
 var typemgr = new nullstone.TypeManager("http://schemas.wsick.com/fayde", "http://schemas.wsick.com/fayde/x");
 
-class Metro extends StressTest {
+class Resolver extends StressTest {
     resolver: MarkupDependencyResolver<Element>;
     xm: XamlMarkup;
 
@@ -22,4 +22,4 @@ class Metro extends StressTest {
         this.resolver.collect(this.xm.root);
     }
 }
-export = Metro;
+export = Resolver;

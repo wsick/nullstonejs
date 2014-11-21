@@ -1025,7 +1025,7 @@ var nullstone;
                 };
 
                 XamlMarkup.prototype.createParser = function () {
-                    return new sax.xaml.Parser();
+                    return new xaml.XamlParser();
                 };
 
                 XamlMarkup.prototype.loadRoot = function (data) {
@@ -1035,6 +1035,449 @@ var nullstone;
                 return XamlMarkup;
             })(markup.Markup);
             xaml.XamlMarkup = XamlMarkup;
+        })(markup.xaml || (markup.xaml = {}));
+        var xaml = markup.xaml;
+    })(nullstone.markup || (nullstone.markup = {}));
+    var markup = nullstone.markup;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    (function (markup) {
+        (function (xaml) {
+            xaml.DEFAULT_XMLNS = "http://schemas.wsick.com/fayde";
+            xaml.DEFAULT_XMLNS_X = "http://schemas.wsick.com/fayde/x";
+            var ERROR_XMLNS = "http://www.w3.org/1999/xhtml";
+            var ERROR_NAME = "parsererror";
+
+            var XamlParser = (function () {
+                function XamlParser() {
+                    this.$$onEnd = null;
+                    this.$$objectStack = [];
+                    this.extension = this.createExtensionParser();
+                    this.setNamespaces(xaml.DEFAULT_XMLNS, xaml.DEFAULT_XMLNS_X);
+                }
+                XamlParser.prototype.setNamespaces = function (defaultXmlns, xXmlns) {
+                    this.$$defaultXmlns = defaultXmlns;
+                    this.$$xXmlns = xXmlns;
+                    this.extension.setNamespaces(defaultXmlns, xXmlns);
+                    return this;
+                };
+
+                XamlParser.prototype.createExtensionParser = function () {
+                    return new xaml.extensions.XamlExtensionParser();
+                };
+
+                XamlParser.prototype.parse = function (el) {
+                    this.$$ensure();
+                    this.$$handleElement(el, true);
+                    this.$$destroy();
+                    return this;
+                };
+
+                XamlParser.prototype.$$handleElement = function (el, isContent) {
+                    var name = el.localName;
+                    var xmlns = el.namespaceURI;
+                    if (this.$$tryHandleError(el, xmlns, name))
+                        return;
+                    if (this.$$tryHandlePropertyTag(el, xmlns, name))
+                        return;
+
+                    var type = this.$$onResolveType(xmlns, name);
+                    var obj = this.$$onResolveObject(type);
+                    this.$$objectStack.push(obj);
+
+                    if (isContent) {
+                        this.$$onContentObject(obj);
+                    } else {
+                        this.$$onObject(obj);
+                    }
+
+                    for (var i = 0, attrs = el.attributes, len = attrs.length; i < len; i++) {
+                        this.$$processAttribute(attrs[i]);
+                    }
+
+                    var child = el.firstElementChild;
+                    var hasChildren = !!child;
+                    while (child) {
+                        this.$$handleElement(child, true);
+                        child = child.nextElementSibling;
+                    }
+
+                    if (!hasChildren) {
+                        var text = el.textContent;
+                        if (text)
+                            this.$$onContentText(text.trim());
+                    }
+
+                    this.$$objectStack.pop();
+                    this.$$onObjectEnd(obj);
+                };
+
+                XamlParser.prototype.$$tryHandleError = function (el, xmlns, name) {
+                    if (xmlns !== ERROR_XMLNS || name !== ERROR_NAME)
+                        return false;
+                    this.$$onError(new Error(el.textContent));
+                    return true;
+                };
+
+                XamlParser.prototype.$$tryHandlePropertyTag = function (el, xmlns, name) {
+                    var ind = name.indexOf('.');
+                    if (ind < 0)
+                        return false;
+
+                    var type = this.$$onResolveType(xmlns, name.substr(0, ind));
+                    name = name.substr(ind + 1);
+
+                    this.$$onPropertyStart(type, name);
+
+                    var child = el.firstElementChild;
+                    while (child) {
+                        this.$$handleElement(child, false);
+                        child = child.nextElementSibling;
+                    }
+
+                    this.$$onPropertyEnd(type, name);
+
+                    return true;
+                };
+
+                XamlParser.prototype.$$processAttribute = function (attr) {
+                    var prefix = attr.prefix;
+                    var name = attr.localName;
+                    if (this.$$shouldSkipAttr(prefix, name))
+                        return true;
+                    var uri = attr.namespaceURI;
+                    var value = attr.value;
+                    if (this.$$tryHandleXAttribute(uri, name, value))
+                        return true;
+                    return this.$$handleAttribute(uri, name, value, attr);
+                };
+
+                XamlParser.prototype.$$shouldSkipAttr = function (prefix, name) {
+                    if (prefix === "xmlns")
+                        return true;
+                    return (!prefix && name === "xmlns");
+                };
+
+                XamlParser.prototype.$$tryHandleXAttribute = function (uri, name, value) {
+                    if (uri !== this.$$xXmlns)
+                        return false;
+                    if (name === "Name")
+                        this.$$onName(value);
+                    if (name === "Key")
+                        this.$$onKey(value);
+                    return true;
+                };
+
+                XamlParser.prototype.$$handleAttribute = function (uri, name, value, attr) {
+                    var type = null;
+                    var name = name;
+                    var ind = name.indexOf('.');
+                    if (ind > -1) {
+                        type = this.$$onResolveType(uri, name.substr(0, ind));
+                        name = name.substr(ind + 1);
+                    }
+                    this.$$onPropertyStart(type, name);
+                    var val = this.$$getAttrValue(value, attr);
+                    this.$$onObject(val);
+                    this.$$onObjectEnd(val);
+                    this.$$onPropertyEnd(type, name);
+                    return true;
+                };
+
+                XamlParser.prototype.$$getAttrValue = function (val, attr) {
+                    if (val[0] !== "{")
+                        return val;
+                    return this.extension.parse(val, attr, this.$$objectStack);
+                };
+
+                XamlParser.prototype.$$ensure = function () {
+                    this.onResolveType(this.$$onResolveType).onResolveObject(this.$$onResolveObject).onObject(this.$$onObject).onObjectEnd(this.$$onObjectEnd).onContentObject(this.$$onContentObject).onContentText(this.$$onContentText).onName(this.$$onName).onKey(this.$$onKey).onPropertyStart(this.$$onPropertyStart).onPropertyEnd(this.$$onPropertyEnd).onError(this.$$onError);
+                    this.extension.onResolveType(this.$$onResolveType).onResolveObject(this.$$onResolveObject);
+                };
+
+                XamlParser.prototype.onResolveType = function (cb) {
+                    this.$$onResolveType = cb || (function (xmlns, name) {
+                        return Object;
+                    });
+                    return this;
+                };
+
+                XamlParser.prototype.onResolveObject = function (cb) {
+                    this.$$onResolveObject = cb || (function (type) {
+                        return new type();
+                    });
+                    return this;
+                };
+
+                XamlParser.prototype.onObject = function (cb) {
+                    this.$$onObject = cb || (function (obj) {
+                    });
+                    return this;
+                };
+
+                XamlParser.prototype.onObjectEnd = function (cb) {
+                    this.$$onObjectEnd = cb || (function (obj) {
+                    });
+                    return this;
+                };
+
+                XamlParser.prototype.onContentObject = function (cb) {
+                    this.$$onContentObject = cb || (function (obj) {
+                    });
+                    return this;
+                };
+
+                XamlParser.prototype.onContentText = function (cb) {
+                    this.$$onContentText = cb || (function (text) {
+                    });
+                    return this;
+                };
+
+                XamlParser.prototype.onName = function (cb) {
+                    this.$$onName = cb || (function (name) {
+                    });
+                    return this;
+                };
+
+                XamlParser.prototype.onKey = function (cb) {
+                    this.$$onKey = cb || (function (key) {
+                    });
+                    return this;
+                };
+
+                XamlParser.prototype.onPropertyStart = function (cb) {
+                    this.$$onPropertyStart = cb || (function (ownerType, propName) {
+                    });
+                    return this;
+                };
+
+                XamlParser.prototype.onPropertyEnd = function (cb) {
+                    this.$$onPropertyEnd = cb || (function (ownerType, propName) {
+                    });
+                    return this;
+                };
+
+                XamlParser.prototype.onError = function (cb) {
+                    this.$$onError = cb || (function (e) {
+                        return true;
+                    });
+                    return this;
+                };
+
+                XamlParser.prototype.onEnd = function (cb) {
+                    this.$$onEnd = cb;
+                    return this;
+                };
+
+                XamlParser.prototype.$$destroy = function () {
+                    this.$$onEnd && this.$$onEnd();
+                };
+                return XamlParser;
+            })();
+            xaml.XamlParser = XamlParser;
+        })(markup.xaml || (markup.xaml = {}));
+        var xaml = markup.xaml;
+    })(nullstone.markup || (nullstone.markup = {}));
+    var markup = nullstone.markup;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    (function (markup) {
+        (function (xaml) {
+            (function (extensions) {
+                
+
+                var XamlExtensionParser = (function () {
+                    function XamlExtensionParser() {
+                        this.$$defaultXmlns = "http://schemas.wsick.com/fayde";
+                        this.$$xXmlns = "http://schemas.wsick.com/fayde/x";
+                        this.$$onEnd = null;
+                    }
+                    XamlExtensionParser.prototype.setNamespaces = function (defaultXmlns, xXmlns) {
+                        this.$$defaultXmlns = defaultXmlns;
+                        this.$$xXmlns = xXmlns;
+                    };
+
+                    XamlExtensionParser.prototype.parse = function (value, resolver, os) {
+                        this.$$ensure();
+                        var ctx = {
+                            text: value,
+                            i: 1,
+                            acc: "",
+                            error: "",
+                            resolver: resolver
+                        };
+                        var obj = this.$$doParse(ctx, os);
+                        if (ctx.error)
+                            this.$$onError(ctx.error);
+                        this.$$destroy();
+                        return obj;
+                    };
+
+                    XamlExtensionParser.prototype.$$doParse = function (ctx, os) {
+                        if (!this.$$parseName(ctx))
+                            return undefined;
+                        if (!this.$$startExtension(ctx, os))
+                            return undefined;
+
+                        while (ctx.i < ctx.text.length) {
+                            if (!this.$$parseKeyValue(ctx, os))
+                                break;
+                            if (ctx.text[ctx.i] === "}") {
+                                break;
+                            }
+                        }
+
+                        return os.pop();
+                    };
+
+                    XamlExtensionParser.prototype.$$parseName = function (ctx) {
+                        var ind = ctx.text.indexOf(" ", ctx.i);
+                        if (ind > ctx.i) {
+                            ctx.acc = ctx.text.substr(ctx.i, ind - ctx.i);
+                            ctx.i = ind + 1;
+                            return true;
+                        }
+                        ind = ctx.text.indexOf("}", ctx.i);
+                        if (ind > ctx.i) {
+                            ctx.acc = ctx.text.substr(ctx.i, ind - ctx.i);
+                            ctx.i = ind;
+                            return true;
+                        }
+                        ctx.error = "Missing closing bracket.";
+                        return false;
+                    };
+
+                    XamlExtensionParser.prototype.$$startExtension = function (ctx, os) {
+                        var full = ctx.acc;
+                        var ind = full.indexOf(":");
+                        var prefix = (ind < 0) ? null : full.substr(0, ind);
+                        var name = (ind < 0) ? full : full.substr(ind + 1);
+                        var uri = prefix ? ctx.resolver.lookupNamespaceURI(prefix) : xaml.DEFAULT_XMLNS;
+
+                        if (uri === this.$$xXmlns) {
+                            var val = ctx.text.substr(ctx.i, ctx.text.length - ctx.i - 1);
+                            ctx.i = ctx.text.length;
+                            return this.$$parseXExt(ctx, os, name, val);
+                        }
+
+                        var type = this.$$onResolveType(uri, name);
+                        var obj = this.$$onResolveObject(type);
+                        os.push(obj);
+                        return true;
+                    };
+
+                    XamlExtensionParser.prototype.$$parseXExt = function (ctx, os, name, val) {
+                        if (name === "Null") {
+                            os.push(null);
+                            return true;
+                        }
+                        if (name === "Type") {
+                            var ind = val.indexOf(":");
+                            var prefix = (ind < 0) ? null : val.substr(0, ind);
+                            var name = (ind < 0) ? val : val.substr(ind + 1);
+                            var uri = ctx.resolver.lookupNamespaceURI(prefix);
+                            var type = this.$$onResolveType(uri, name);
+                            os.push(type);
+                            return true;
+                        }
+                        if (name === "Static") {
+                            var func = new Function("return (" + val + ");");
+                            os.push(func());
+                            return true;
+                        }
+                        return true;
+                    };
+
+                    XamlExtensionParser.prototype.$$parseKeyValue = function (ctx, os) {
+                        var text = ctx.text;
+                        ctx.acc = "";
+                        var key = "";
+                        var val = undefined;
+                        for (; ctx.i < text.length; ctx.i++) {
+                            var cur = text[ctx.i];
+                            if (cur === "\\") {
+                                ctx.i++;
+                                ctx.acc += text[ctx.i];
+                            } else if (cur === "{") {
+                                if (!key) {
+                                    ctx.error = "A sub extension must be set to a key.";
+                                    return false;
+                                }
+                                ctx.i++;
+                                val = this.$$doParse(ctx, os);
+                                if (ctx.error)
+                                    return false;
+                            } else if (cur === "=") {
+                                key = ctx.acc;
+                                ctx.acc = "";
+                            } else if (cur === "}") {
+                                this.$$finishKeyValue(ctx.acc, key, val, os);
+                                return true;
+                            } else if (cur === ",") {
+                                ctx.i++;
+                                this.$$finishKeyValue(ctx.acc, key, val, os);
+                                return true;
+                            } else {
+                                ctx.acc += cur;
+                            }
+                        }
+                    };
+
+                    XamlExtensionParser.prototype.$$finishKeyValue = function (acc, key, val, os) {
+                        if (val === undefined) {
+                            if (!(val = acc.trim()))
+                                return;
+                        }
+                        if (typeof val.transmute === "function") {
+                            val = val.transmute(os);
+                        }
+                        var co = os[os.length - 1];
+                        if (!key) {
+                            co.init && co.init(val);
+                        } else {
+                            co[key] = val;
+                        }
+                    };
+
+                    XamlExtensionParser.prototype.$$ensure = function () {
+                        this.onResolveType(this.$$onResolveType).onResolveObject(this.$$onResolveObject).onError(this.$$onError);
+                    };
+
+                    XamlExtensionParser.prototype.onResolveType = function (cb) {
+                        this.$$onResolveType = cb || (function (xmlns, name) {
+                            return Object;
+                        });
+                        return this;
+                    };
+
+                    XamlExtensionParser.prototype.onResolveObject = function (cb) {
+                        this.$$onResolveObject = cb || (function (type) {
+                            return new type();
+                        });
+                        return this;
+                    };
+
+                    XamlExtensionParser.prototype.onError = function (cb) {
+                        this.$$onError = cb || (function (e) {
+                        });
+                        return this;
+                    };
+
+                    XamlExtensionParser.prototype.onEnd = function (cb) {
+                        this.$$onEnd = cb;
+                        return this;
+                    };
+
+                    XamlExtensionParser.prototype.$$destroy = function () {
+                        this.$$onEnd && this.$$onEnd();
+                    };
+                    return XamlExtensionParser;
+                })();
+                extensions.XamlExtensionParser = XamlExtensionParser;
+            })(xaml.extensions || (xaml.extensions = {}));
+            var extensions = xaml.extensions;
         })(markup.xaml || (markup.xaml = {}));
         var xaml = markup.xaml;
     })(nullstone.markup || (nullstone.markup = {}));
