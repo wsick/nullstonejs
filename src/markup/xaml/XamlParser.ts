@@ -34,7 +34,7 @@ module nullstone.markup.xaml {
         }
     }
 
-    export class XamlParser {
+    export class XamlParser implements IMarkupParser<Element> {
         private $$onResolveType: events.IResolveType;
         private $$onResolveObject: events.IResolveObject;
         private $$onObject: events.IObject;

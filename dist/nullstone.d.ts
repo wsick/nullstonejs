@@ -325,7 +325,7 @@ declare module nullstone.markup.xaml {
             (e: Error): boolean;
         }
     }
-    class XamlParser {
+    class XamlParser implements IMarkupParser<Element> {
         private $$onResolveType;
         private $$onResolveObject;
         private $$onObject;
