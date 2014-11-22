@@ -958,7 +958,7 @@ var nullstone;
                 }),
                 object: listener.object || (function (obj) {
                 }),
-                objectEnd: listener.objectEnd || (function (obj) {
+                objectEnd: listener.objectEnd || (function (obj, prev) {
                 }),
                 contentObject: listener.contentObject || (function (obj) {
                 }),
@@ -1407,12 +1407,13 @@ var nullstone;
                     if (this.$$tryHandlePropertyTag(el, xmlns, name))
                         return;
 
+                    var os = this.$$objectStack;
                     var ort = this.$$onResolveType(xmlns, name);
                     var obj;
                     if (ort.isPrimitive) {
                         obj = this.$$onResolvePrimitive(ort.type, el.textContent);
                         (isContent) ? this.$$onContentObject(obj) : this.$$onObject(obj);
-                        this.$$onObjectEnd(obj);
+                        this.$$onObjectEnd(obj, os[os.length - 1]);
                         return;
                     }
 
@@ -1424,7 +1425,7 @@ var nullstone;
                         return;
                     }
 
-                    this.$$objectStack.push(obj);
+                    os.push(obj);
 
                     if (isContent) {
                         this.$$onContentObject(obj);
@@ -1454,8 +1455,8 @@ var nullstone;
                             this.$$onContentText(text.trim());
                     }
 
-                    this.$$objectStack.pop();
-                    this.$$onObjectEnd(obj);
+                    os.pop();
+                    this.$$onObjectEnd(obj, os[os.length - 1]);
                 };
 
                 XamlParser.prototype.$$handleResources = function (owner, resEl) {
@@ -1529,13 +1530,15 @@ var nullstone;
                     var name = name;
                     var ind = name.indexOf('.');
                     if (ind > -1) {
-                        type = this.$$onResolveType(uri, name.substr(0, ind));
+                        var oresolve = this.$$onResolveType(uri, name.substr(0, ind));
+                        type = oresolve.type;
                         name = name.substr(ind + 1);
                     }
+                    var os = this.$$objectStack;
                     this.$$onPropertyStart(type, name);
                     var val = this.$$getAttrValue(value, attr);
                     this.$$onObject(val);
-                    this.$$onObjectEnd(val);
+                    this.$$onObjectEnd(val, os[os.length - 1]);
                     this.$$onPropertyEnd(type, name);
                     return true;
                 };

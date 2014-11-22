@@ -278,7 +278,7 @@ declare module nullstone.markup {
         resolvePrimitive?: events.IResolvePrimitive;
         elementSkip?: events.IElementSkip<T>;
         object?: events.IObject;
-        objectEnd?: events.IObject;
+        objectEnd?: events.IObjectEnd;
         contentObject?: events.IObject;
         contentText?: events.IText;
         name?: events.IName;
@@ -337,6 +337,9 @@ declare module nullstone.markup.events {
     }
     interface IObject {
         (obj: any): any;
+    }
+    interface IObjectEnd {
+        (obj: any, prev: any): any;
     }
     interface IText {
         (text: string): any;

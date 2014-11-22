@@ -14,6 +14,9 @@ module nullstone.markup.events {
     export interface IObject {
         (obj: any);
     }
+    export interface IObjectEnd {
+        (obj: any, prev: any);
+    }
     export interface IText {
         (text: string);
     }

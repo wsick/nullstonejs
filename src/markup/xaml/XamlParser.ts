@@ -10,7 +10,7 @@ module nullstone.markup.xaml {
         private $$onResolvePrimitive: events.IResolvePrimitive;
         private $$onElementSkip: events.IElementSkip<Element>;
         private $$onObject: events.IObject;
-        private $$onObjectEnd: events.IObject;
+        private $$onObjectEnd: events.IObjectEnd;
         private $$onContentObject: events.IObject;
         private $$onContentText: events.IText;
         private $$onName: events.IName;
@@ -111,6 +111,7 @@ module nullstone.markup.xaml {
             if (this.$$tryHandlePropertyTag(el, xmlns, name))
                 return;
 
+            var os = this.$$objectStack;
             var ort = this.$$onResolveType(xmlns, name);
             var obj;
             if (ort.isPrimitive) {
@@ -118,7 +119,7 @@ module nullstone.markup.xaml {
                 (isContent)
                     ? this.$$onContentObject(obj)
                     : this.$$onObject(obj);
-                this.$$onObjectEnd(obj);
+                this.$$onObjectEnd(obj, os[os.length - 1]);
                 return;
             }
 
@@ -130,7 +131,7 @@ module nullstone.markup.xaml {
                 return;
             }
 
-            this.$$objectStack.push(obj);
+            os.push(obj);
 
             if (isContent) {
                 this.$$onContentObject(obj);
@@ -167,8 +168,8 @@ module nullstone.markup.xaml {
             // NOTE: Handle tag close
             //  </[ns:]Type.Name>
             //  </[ns:]Type>
-            this.$$objectStack.pop();
-            this.$$onObjectEnd(obj);
+            os.pop();
+            this.$$onObjectEnd(obj, os[os.length - 1]);
         }
 
         private $$handleResources (owner: any, resEl: Element) {
@@ -247,13 +248,15 @@ module nullstone.markup.xaml {
             var name = name;
             var ind = name.indexOf('.');
             if (ind > -1) {
-                type = this.$$onResolveType(uri, name.substr(0, ind));
+                var oresolve = this.$$onResolveType(uri, name.substr(0, ind));
+                type = oresolve.type;
                 name = name.substr(ind + 1);
             }
+            var os = this.$$objectStack;
             this.$$onPropertyStart(type, name);
             var val = this.$$getAttrValue(value, attr);
             this.$$onObject(val);
-            this.$$onObjectEnd(val);
+            this.$$onObjectEnd(val, os[os.length - 1]);
             this.$$onPropertyEnd(type, name);
             return true;
         }

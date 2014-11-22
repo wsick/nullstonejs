@@ -29,7 +29,7 @@ module nullstone.markup {
         resolvePrimitive?: events.IResolvePrimitive;
         elementSkip?: events.IElementSkip<T>;
         object?: events.IObject;
-        objectEnd?: events.IObject;
+        objectEnd?: events.IObjectEnd;
         contentObject?: events.IObject;
         contentText?: events.IText;
         name?: events.IName;
@@ -56,7 +56,7 @@ module nullstone.markup {
             }),
             object: listener.object || ((obj) => {
             }),
-            objectEnd: listener.objectEnd || ((obj) => {
+            objectEnd: listener.objectEnd || ((obj, prev) => {
             }),
             contentObject: listener.contentObject || ((obj) => {
             }),

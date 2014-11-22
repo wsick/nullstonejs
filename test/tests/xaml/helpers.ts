@@ -61,7 +61,7 @@ module nullstone.markup.xaml.tests {
                             obj: obj
                         });
                     },
-                    objectEnd: (obj) => {
+                    objectEnd: (obj, prev) => {
                         cmds.push({
                             cmd: 'oe',
                             obj: obj
