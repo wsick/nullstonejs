@@ -258,6 +258,7 @@ declare module nullstone.markup {
         setNamespaces(defaultXmlns: string, xXmlns: string): IMarkupExtensionParser;
         onResolveType(cb?: events.IResolveType): IMarkupExtensionParser;
         onResolveObject(cb?: events.IResolveObject): IMarkupExtensionParser;
+        onResolvePrimitive(cb?: events.IResolvePrimitive): IMarkupExtensionParser;
         onError(cb?: events.IError): IMarkupExtensionParser;
         parse(val: string, resolver: INsPrefixResolver, os: any[]): any;
     }
@@ -274,6 +275,7 @@ declare module nullstone.markup {
     interface IMarkupSax<T> {
         resolveType?: events.IResolveType;
         resolveObject?: events.IResolveObject;
+        resolvePrimitive?: events.IResolvePrimitive;
         elementSkip?: events.IElementSkip<T>;
         object?: events.IObject;
         objectEnd?: events.IObject;
@@ -322,10 +324,13 @@ declare module nullstone.markup {
 }
 declare module nullstone.markup.events {
     interface IResolveType {
-        (xmlns: string, name: string): any;
+        (xmlns: string, name: string): IOutType;
     }
     interface IResolveObject {
         (type: any): any;
+    }
+    interface IResolvePrimitive {
+        (type: any, text: string): any;
     }
     interface IElementSkip<T> {
         (root: T, obj: any): any;
@@ -367,6 +372,7 @@ declare module nullstone.markup.xaml {
         private $$xXmlns;
         private $$onResolveType;
         private $$onResolveObject;
+        private $$onResolvePrimitive;
         private $$onError;
         public setNamespaces(defaultXmlns: string, xXmlns: string): XamlExtensionParser;
         public parse(value: string, resolver: INsPrefixResolver, os: any[]): any;
@@ -379,6 +385,7 @@ declare module nullstone.markup.xaml {
         private $$ensure();
         public onResolveType(cb?: events.IResolveType): XamlExtensionParser;
         public onResolveObject(cb?: events.IResolveObject): XamlExtensionParser;
+        public onResolvePrimitive(cb?: events.IResolvePrimitive): XamlExtensionParser;
         public onError(cb?: events.IError): XamlExtensionParser;
     }
 }
@@ -396,6 +403,7 @@ declare module nullstone.markup.xaml {
     class XamlParser implements IMarkupParser<Element> {
         private $$onResolveType;
         private $$onResolveObject;
+        private $$onResolvePrimitive;
         private $$onElementSkip;
         private $$onObject;
         private $$onObjectEnd;

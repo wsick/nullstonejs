@@ -4,7 +4,7 @@ module nullstone.markup.xaml.extensions.tests {
     var parser = new XamlExtensionParser()
         .onResolveType((xmlns, name) => {
             var func = new Function("return function " + name + "() { }");
-            return func();
+            return { isPrimitive: false, type: func() };
         });
     var mock = {
         resolver: function (): INsPrefixResolver {

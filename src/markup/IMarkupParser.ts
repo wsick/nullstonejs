@@ -26,6 +26,7 @@ module nullstone.markup {
     export interface IMarkupSax<T> {
         resolveType?: events.IResolveType;
         resolveObject?: events.IResolveObject;
+        resolvePrimitive?: events.IResolvePrimitive;
         elementSkip?: events.IElementSkip<T>;
         object?: events.IObject;
         objectEnd?: events.IObject;
@@ -41,10 +42,16 @@ module nullstone.markup {
         end?: () => any;
     }
 
+    var oresolve: IOutType = {
+        isPrimitive: false,
+        type: Object
+    };
+
     export function createMarkupSax<T> (listener: IMarkupSax<T>): IMarkupSax<T> {
         return {
-            resolveType: listener.resolveType || ((uri, name) => Object),
+            resolveType: listener.resolveType || ((uri, name) => oresolve),
             resolveObject: listener.resolveObject || ((type) => new (type)()),
+            resolvePrimitive: listener.resolvePrimitive || ((type, text) => new (type)(text)),
             elementSkip: listener.elementSkip || ((el, obj) => {
             }),
             object: listener.object || ((obj) => {

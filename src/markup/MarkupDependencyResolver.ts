@@ -20,11 +20,15 @@ module nullstone.markup {
             //  Style.TargetType
             //  Application.ThemeName
             var blank = {};
+            var oresolve: IOutType = {
+                isPrimitive: false,
+                type: Object
+            };
             this.parser
                 .on({
                     resolveType: (uri, name) => {
                         this.add(uri, name);
-                        return Object;
+                        return oresolve;
                     },
                     resolveObject: (type) => {
                         return blank;

@@ -938,13 +938,21 @@ var nullstone;
             }
         };
 
+        var oresolve = {
+            isPrimitive: false,
+            type: Object
+        };
+
         function createMarkupSax(listener) {
             return {
                 resolveType: listener.resolveType || (function (uri, name) {
-                    return Object;
+                    return oresolve;
                 }),
                 resolveObject: listener.resolveObject || (function (type) {
                     return new (type)();
+                }),
+                resolvePrimitive: listener.resolvePrimitive || (function (type, text) {
+                    return new (type)(text);
                 }),
                 elementSkip: listener.elementSkip || (function (el, obj) {
                 }),
@@ -1035,10 +1043,14 @@ var nullstone;
             MarkupDependencyResolver.prototype.collect = function (root) {
                 var _this = this;
                 var blank = {};
+                var oresolve = {
+                    isPrimitive: false,
+                    type: Object
+                };
                 this.parser.on({
                     resolveType: function (uri, name) {
                         _this.add(uri, name);
-                        return Object;
+                        return oresolve;
                     },
                     resolveObject: function (type) {
                         return blank;
@@ -1153,8 +1165,8 @@ var nullstone;
                         return this.$$parseXExt(ctx, os, name, val);
                     }
 
-                    var type = this.$$onResolveType(uri, name);
-                    var obj = this.$$onResolveObject(type);
+                    var oresolve = this.$$onResolveType(uri, name);
+                    var obj = this.$$onResolveObject(oresolve.type);
                     os.push(obj);
                     return true;
                 };
@@ -1169,8 +1181,8 @@ var nullstone;
                         var prefix = (ind < 0) ? null : val.substr(0, ind);
                         var name = (ind < 0) ? val : val.substr(ind + 1);
                         var uri = ctx.resolver.lookupNamespaceURI(prefix);
-                        var type = this.$$onResolveType(uri, name);
-                        os.push(type);
+                        var oresolve = this.$$onResolveType(uri, name);
+                        os.push(oresolve.type);
                         return true;
                     }
                     if (name === "Static") {
@@ -1237,8 +1249,12 @@ var nullstone;
                 };
 
                 XamlExtensionParser.prototype.onResolveType = function (cb) {
+                    var oresolve = {
+                        isPrimitive: false,
+                        type: Object
+                    };
                     this.$$onResolveType = cb || (function (xmlns, name) {
-                        return Object;
+                        return oresolve;
                     });
                     return this;
                 };
@@ -1246,6 +1262,13 @@ var nullstone;
                 XamlExtensionParser.prototype.onResolveObject = function (cb) {
                     this.$$onResolveObject = cb || (function (type) {
                         return new type();
+                    });
+                    return this;
+                };
+
+                XamlExtensionParser.prototype.onResolvePrimitive = function (cb) {
+                    this.$$onResolvePrimitive = cb || (function (type, text) {
+                        return new type(text);
                     });
                     return this;
                 };
@@ -1324,6 +1347,7 @@ var nullstone;
 
                     this.$$onResolveType = listener.resolveType;
                     this.$$onResolveObject = listener.resolveObject;
+                    this.$$onResolvePrimitive = listener.resolvePrimitive;
                     this.$$onElementSkip = listener.elementSkip;
                     this.$$onObject = listener.object;
                     this.$$onObjectEnd = listener.objectEnd;
@@ -1339,7 +1363,7 @@ var nullstone;
                     this.$$onEnd = listener.end;
 
                     if (this.$$extension) {
-                        this.$$extension.onResolveType(this.$$onResolveType).onResolveObject(this.$$onResolveObject);
+                        this.$$extension.onResolveType(this.$$onResolveType).onResolveObject(this.$$onResolveObject).onResolvePrimitive(this.$$onResolvePrimitive);
                     }
 
                     return this;
@@ -1356,7 +1380,7 @@ var nullstone;
                 XamlParser.prototype.setExtensionParser = function (parser) {
                     this.$$extension = parser;
                     if (parser) {
-                        parser.setNamespaces(this.$$defaultXmlns, this.$$xXmlns).onResolveType(this.$$onResolveType).onResolveObject(this.$$onResolveObject).onError(function (e) {
+                        parser.setNamespaces(this.$$defaultXmlns, this.$$xXmlns).onResolveType(this.$$onResolveType).onResolveObject(this.$$onResolveObject).onResolvePrimitive(this.$$onResolvePrimitive).onError(function (e) {
                             throw e;
                         });
                     }
@@ -1383,8 +1407,16 @@ var nullstone;
                     if (this.$$tryHandlePropertyTag(el, xmlns, name))
                         return;
 
-                    var type = this.$$onResolveType(xmlns, name);
-                    var obj = this.$$onResolveObject(type);
+                    var ort = this.$$onResolveType(xmlns, name);
+                    var obj;
+                    if (ort.isPrimitive) {
+                        obj = this.$$onResolvePrimitive(ort.type, el.textContent);
+                        this.$$onObject(obj);
+                        this.$$onObjectEnd(obj);
+                        return;
+                    }
+
+                    obj = this.$$onResolveObject(ort.type);
 
                     if (this.$$skipnext) {
                         this.$$skipnext = false;

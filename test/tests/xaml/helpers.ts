@@ -37,7 +37,7 @@ module nullstone.markup.xaml.tests {
                         });
                         if (skipTagName && name === skipTagName)
                             parser.skipNextElement();
-                        return type;
+                        return { isPrimitive: false, type: type };
                     },
                     resolveObject: (type) => {
                         var obj = new type();

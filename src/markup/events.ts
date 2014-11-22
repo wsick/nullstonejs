@@ -1,9 +1,12 @@
 module nullstone.markup.events {
     export interface IResolveType {
-        (xmlns: string, name: string): any;
+        (xmlns: string, name: string): IOutType;
     }
     export interface IResolveObject {
         (type: any): any;
+    }
+    export interface IResolvePrimitive {
+        (type: any, text: string): any;
     }
     export interface IElementSkip<T> {
         (root: T, obj: any);

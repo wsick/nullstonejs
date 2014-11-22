@@ -7,6 +7,7 @@ module nullstone.markup.xaml {
     export class XamlParser implements IMarkupParser<Element> {
         private $$onResolveType: events.IResolveType;
         private $$onResolveObject: events.IResolveObject;
+        private $$onResolvePrimitive: events.IResolvePrimitive;
         private $$onElementSkip: events.IElementSkip<Element>;
         private $$onObject: events.IObject;
         private $$onObjectEnd: events.IObject;
@@ -40,6 +41,7 @@ module nullstone.markup.xaml {
 
             this.$$onResolveType = listener.resolveType;
             this.$$onResolveObject = listener.resolveObject;
+            this.$$onResolvePrimitive = listener.resolvePrimitive;
             this.$$onElementSkip = listener.elementSkip;
             this.$$onObject = listener.object;
             this.$$onObjectEnd = listener.objectEnd;
@@ -57,7 +59,8 @@ module nullstone.markup.xaml {
             if (this.$$extension) {
                 this.$$extension
                     .onResolveType(this.$$onResolveType)
-                    .onResolveObject(this.$$onResolveObject);
+                    .onResolveObject(this.$$onResolveObject)
+                    .onResolvePrimitive(this.$$onResolvePrimitive);
             }
 
             return this;
@@ -77,6 +80,7 @@ module nullstone.markup.xaml {
                 parser.setNamespaces(this.$$defaultXmlns, this.$$xXmlns)
                     .onResolveType(this.$$onResolveType)
                     .onResolveObject(this.$$onResolveObject)
+                    .onResolvePrimitive(this.$$onResolvePrimitive)
                     .onError((e) => {
                         throw e;
                     });
@@ -107,8 +111,16 @@ module nullstone.markup.xaml {
             if (this.$$tryHandlePropertyTag(el, xmlns, name))
                 return;
 
-            var type = this.$$onResolveType(xmlns, name);
-            var obj = this.$$onResolveObject(type);
+            var ort = this.$$onResolveType(xmlns, name);
+            var obj;
+            if (ort.isPrimitive) {
+                obj = this.$$onResolvePrimitive(ort.type, el.textContent);
+                this.$$onObject(obj);
+                this.$$onObjectEnd(obj);
+                return;
+            }
+
+            obj = this.$$onResolveObject(ort.type);
 
             if (this.$$skipnext) {
                 this.$$skipnext = false;

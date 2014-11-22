@@ -22,6 +22,7 @@ module nullstone.markup.xaml {
 
         private $$onResolveType: events.IResolveType;
         private $$onResolveObject: events.IResolveObject;
+        private $$onResolvePrimitive: events.IResolvePrimitive;
         private $$onError: events.IError;
 
         setNamespaces (defaultXmlns: string, xXmlns: string): XamlExtensionParser {
@@ -92,8 +93,8 @@ module nullstone.markup.xaml {
                 return this.$$parseXExt(ctx, os, name, val);
             }
 
-            var type = this.$$onResolveType(uri, name);
-            var obj = this.$$onResolveObject(type);
+            var oresolve = this.$$onResolveType(uri, name);
+            var obj = this.$$onResolveObject(oresolve.type);
             os.push(obj);
             return true;
         }
@@ -108,8 +109,8 @@ module nullstone.markup.xaml {
                 var prefix = (ind < 0) ? null : val.substr(0, ind);
                 var name = (ind < 0) ? val : val.substr(ind + 1);
                 var uri = ctx.resolver.lookupNamespaceURI(prefix);
-                var type = this.$$onResolveType(uri, name);
-                os.push(type);
+                var oresolve = this.$$onResolveType(uri, name);
+                os.push(oresolve.type);
                 return true;
             }
             if (name === "Static") {
@@ -178,12 +179,21 @@ module nullstone.markup.xaml {
         }
 
         onResolveType (cb?: events.IResolveType): XamlExtensionParser {
-            this.$$onResolveType = cb || ((xmlns, name) => Object);
+            var oresolve: IOutType = {
+                isPrimitive: false,
+                type: Object
+            };
+            this.$$onResolveType = cb || ((xmlns, name) => oresolve);
             return this;
         }
 
         onResolveObject (cb?: events.IResolveObject): XamlExtensionParser {
             this.$$onResolveObject = cb || ((type) => new type());
+            return this;
+        }
+
+        onResolvePrimitive (cb?: events.IResolvePrimitive): XamlExtensionParser {
+            this.$$onResolvePrimitive = cb || ((type, text) => new type(text));
             return this;
         }
 

@@ -17,18 +17,26 @@ module nullstone.markup.xaml.extensions.tests {
 
     class Random implements IMarkupExtension {
         Foo: number;
+
         init (val: string) {
         }
     }
 
+    var oresolve: IOutType = {
+        isPrimitive: false,
+        type: Object
+    };
     var parser = new XamlExtensionParser()
         .onResolveType((xmlns, name) => {
-            if (xmlns === DEFAULT_XMLNS && name === "StaticResource")
-                return StaticResource;
-            if (xmlns === DEFAULT_XMLNS && name === "Random")
-                return Random;
-            var func = new Function("return function " + name + "() { }");
-            return func();
+            if (xmlns === DEFAULT_XMLNS && name === "StaticResource") {
+                oresolve.type = StaticResource;
+            } else if (xmlns === DEFAULT_XMLNS && name === "Random") {
+                oresolve.type = Random;
+            } else {
+                var func = new Function("return function " + name + "() { }");
+                oresolve.type = func();
+            }
+            return oresolve;
         });
     var mock = {
         resolver: function (): INsPrefixResolver {
