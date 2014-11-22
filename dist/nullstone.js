@@ -1411,7 +1411,7 @@ var nullstone;
                     var obj;
                     if (ort.isPrimitive) {
                         obj = this.$$onResolvePrimitive(ort.type, el.textContent);
-                        this.$$onObject(obj);
+                        (isContent) ? this.$$onContentObject(obj) : this.$$onObject(obj);
                         this.$$onObjectEnd(obj);
                         return;
                     }
