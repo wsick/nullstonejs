@@ -166,6 +166,7 @@ declare module nullstone {
 }
 declare module nullstone {
     function convertAnyToType(val: any, type: Function): any;
+    function convertStringToEnum<T>(val: string, en: any): T;
     function registerTypeConverter(type: Function, converter: (val: any) => any): void;
     function registerEnumConverter(e: any, converter: (val: any) => any): void;
 }

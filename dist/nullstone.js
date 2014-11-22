@@ -597,6 +597,13 @@ var nullstone;
     }
     nullstone.convertAnyToType = convertAnyToType;
 
+    function convertStringToEnum(val, en) {
+        if (!val)
+            return 0;
+        return en[val];
+    }
+    nullstone.convertStringToEnum = convertStringToEnum;
+
     function registerTypeConverter(type, converter) {
         converters[type] = converter;
     }

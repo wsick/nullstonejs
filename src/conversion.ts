@@ -48,6 +48,12 @@ module nullstone {
         return val;
     }
 
+    export function convertStringToEnum<T> (val: string, en: any): T {
+        if (!val)
+            return <T><any>0;
+        return <T>en[val];
+    }
+
     export function registerTypeConverter (type: Function, converter: (val: any) => any) {
         converters[type] = converter;
     }
