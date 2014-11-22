@@ -323,7 +323,7 @@ var nullstone;
             return oresolve.type !== undefined;
         };
 
-        Library.prototype.add = function (name, type) {
+        Library.prototype.add = function (type, name) {
             if (!type)
                 throw new Error("A type must be specified when registering '" + name + "'`.");
             Object.defineProperty(type, "$$uri", { value: this.uri, writable: false });
@@ -331,7 +331,7 @@ var nullstone;
             return this;
         };
 
-        Library.prototype.addPrimitive = function (name, type) {
+        Library.prototype.addPrimitive = function (type, name) {
             if (!type)
                 throw new Error("A type must be specified when registering '" + name + "'`.");
             Object.defineProperty(type, "$$uri", { value: this.uri, writable: false });
@@ -339,7 +339,7 @@ var nullstone;
             return this;
         };
 
-        Library.prototype.addEnum = function (name, enu) {
+        Library.prototype.addEnum = function (enu, name) {
             this.add(name, enu);
             Object.defineProperty(enu, "$$enum", { value: true, writable: false });
             enu.name = name;
@@ -730,9 +730,9 @@ var nullstone;
             this.defaultUri = defaultUri;
             this.xUri = xUri;
             this.libResolver = new nullstone.LibraryResolver();
-            this.libResolver.resolve(defaultUri).add("Array", Array);
+            this.libResolver.resolve(defaultUri).add(Array, "Array");
 
-            this.libResolver.resolve(xUri).addPrimitive("String", String).addPrimitive("Number", Number).addPrimitive("Double", Number).addPrimitive("Date", Date).addPrimitive("RegExp", RegExp).addPrimitive("Boolean", Boolean).addPrimitive("Uri", nullstone.Uri);
+            this.libResolver.resolve(xUri).addPrimitive(String, "String").addPrimitive(Number, "Number").addPrimitive(Number, "Double").addPrimitive(Date, "Date").addPrimitive(RegExp, "RegExp").addPrimitive(Boolean, "Boolean").addPrimitive(nullstone.Uri, "Uri");
         }
         TypeManager.prototype.resolveLibrary = function (uri) {
             return this.libResolver.resolve(uri);
@@ -751,21 +751,21 @@ var nullstone;
         TypeManager.prototype.add = function (uri, name, type) {
             var lib = this.libResolver.resolve(uri);
             if (lib)
-                lib.add(name, type);
+                lib.add(type, name);
             return this;
         };
 
         TypeManager.prototype.addPrimitive = function (uri, name, type) {
             var lib = this.libResolver.resolve(uri);
             if (lib)
-                lib.addPrimitive(name, type);
+                lib.addPrimitive(type, name);
             return this;
         };
 
         TypeManager.prototype.addEnum = function (uri, name, enu) {
             var lib = this.libResolver.resolve(uri);
             if (lib)
-                lib.addEnum(name, enu);
+                lib.addEnum(enu, name);
             return this;
         };
         return TypeManager;

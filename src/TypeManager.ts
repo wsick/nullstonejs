@@ -24,16 +24,16 @@ module nullstone {
 
         constructor (public defaultUri: string, public xUri: string) {
             this.libResolver.resolve(defaultUri)
-                .add("Array", Array);
+                .add(Array, "Array");
 
             this.libResolver.resolve(xUri)
-                .addPrimitive("String", String)
-                .addPrimitive("Number", Number)
-                .addPrimitive("Double", Number)
-                .addPrimitive("Date", Date)
-                .addPrimitive("RegExp", RegExp)
-                .addPrimitive("Boolean", Boolean)
-                .addPrimitive("Uri", Uri);
+                .addPrimitive(String, "String")
+                .addPrimitive(Number, "Number")
+                .addPrimitive(Number, "Double")
+                .addPrimitive(Date, "Date")
+                .addPrimitive(RegExp, "RegExp")
+                .addPrimitive(Boolean, "Boolean")
+                .addPrimitive(Uri, "Uri");
         }
 
         resolveLibrary (uri: string): ILibrary {
@@ -53,21 +53,21 @@ module nullstone {
         add (uri: string, name: string, type: any): ITypeManager {
             var lib = this.libResolver.resolve(uri);
             if (lib)
-                lib.add(name, type);
+                lib.add(type, name);
             return this;
         }
 
         addPrimitive (uri: string, name: string, type: any): ITypeManager {
             var lib = this.libResolver.resolve(uri);
             if (lib)
-                lib.addPrimitive(name, type);
+                lib.addPrimitive(type, name);
             return this;
         }
 
         addEnum (uri: string, name: string, enu: any): ITypeManager {
             var lib = this.libResolver.resolve(uri);
             if (lib)
-                lib.addEnum(name, enu);
+                lib.addEnum(enu, name);
             return this;
         }
     }

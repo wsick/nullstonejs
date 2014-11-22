@@ -97,9 +97,9 @@ declare module nullstone {
         rootModule: any;
         loadAsync(): async.IAsyncRequest<Library>;
         resolveType(moduleName: string, name: string, oresolve: IOutType): boolean;
-        add(name: string, type: any): ILibrary;
-        addPrimitive(name: string, type: any): ILibrary;
-        addEnum(name: string, enu: any): ILibrary;
+        add(type: any, name?: string): ILibrary;
+        addPrimitive(type: any, name?: string): ILibrary;
+        addEnum(enu: any, name: string): ILibrary;
     }
     class Library implements ILibrary {
         private $$module;
@@ -114,9 +114,9 @@ declare module nullstone {
         public loadAsync(): async.IAsyncRequest<Library>;
         private $configModule();
         public resolveType(moduleName: string, name: string, oresolve: IOutType): boolean;
-        public add(name: string, type: any): ILibrary;
-        public addPrimitive(name: string, type: any): ILibrary;
-        public addEnum(name: string, enu: any): ILibrary;
+        public add(type: any, name?: string): ILibrary;
+        public addPrimitive(type: any, name?: string): ILibrary;
+        public addEnum(enu: any, name: string): ILibrary;
     }
 }
 declare module nullstone {

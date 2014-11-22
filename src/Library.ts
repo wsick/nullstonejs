@@ -7,9 +7,9 @@ module nullstone {
         loadAsync (): async.IAsyncRequest<Library>;
         resolveType (moduleName: string, name: string, /* out */oresolve: IOutType): boolean;
 
-        add (name: string, type: any): ILibrary;
-        addPrimitive (name: string, type: any): ILibrary;
-        addEnum (name: string, enu: any): ILibrary;
+        add (type: any, name?: string): ILibrary;
+        addPrimitive (type: any, name?: string): ILibrary;
+        addEnum (enu: any, name: string): ILibrary;
     }
     export class Library implements ILibrary {
         private $$module: any = null;
@@ -89,7 +89,7 @@ module nullstone {
             return oresolve.type !== undefined;
         }
 
-        add (name: string, type: any): ILibrary {
+        add (type: any, name?: string): ILibrary {
             if (!type)
                 throw new Error("A type must be specified when registering '" + name + "'`.");
             Object.defineProperty(type, "$$uri", {value: this.uri, writable: false});
@@ -97,7 +97,7 @@ module nullstone {
             return this;
         }
 
-        addPrimitive (name: string, type: any): ILibrary {
+        addPrimitive (type: any, name?: string): ILibrary {
             if (!type)
                 throw new Error("A type must be specified when registering '" + name + "'`.");
             Object.defineProperty(type, "$$uri", {value: this.uri, writable: false});
@@ -105,7 +105,7 @@ module nullstone {
             return this;
         }
 
-        addEnum (name: string, enu: any): ILibrary {
+        addEnum (enu: any, name: string): ILibrary {
             this.add(name, enu);
             Object.defineProperty(enu, "$$enum", {value: true, writable: false});
             enu.name = name;
