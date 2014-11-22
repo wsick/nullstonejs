@@ -92,6 +92,9 @@ module nullstone {
         add (type: any, name?: string): ILibrary {
             if (!type)
                 throw new Error("A type must be specified when registering '" + name + "'`.");
+            name = name || getTypeName(type);
+            if (!name)
+                throw new Error("No type name found.");
             Object.defineProperty(type, "$$uri", {value: this.uri, writable: false});
             this.$$types[name] = type;
             return this;
@@ -100,6 +103,9 @@ module nullstone {
         addPrimitive (type: any, name?: string): ILibrary {
             if (!type)
                 throw new Error("A type must be specified when registering '" + name + "'`.");
+            name = name || getTypeName(type);
+            if (!name)
+                throw new Error("No type name found.");
             Object.defineProperty(type, "$$uri", {value: this.uri, writable: false});
             this.$$primtypes[name] = type;
             return this;
