@@ -112,7 +112,7 @@ module nullstone {
         }
 
         addEnum (enu: any, name: string): ILibrary {
-            this.add(name, enu);
+            this.add(enu, name);
             Object.defineProperty(enu, "$$enum", {value: true, writable: false});
             enu.name = name;
             return this;
