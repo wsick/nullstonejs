@@ -934,7 +934,7 @@ var nullstone;
             },
             parse: function (root) {
             },
-            skipNextElement: function () {
+            skipBranch: function () {
             }
         };
 
@@ -957,7 +957,7 @@ var nullstone;
                 resolveResources: listener.resolveResources || (function (owner, ownerType) {
                     return new Object();
                 }),
-                elementSkip: listener.elementSkip || (function (el, obj) {
+                branchSkip: listener.branchSkip || (function (root, obj) {
                 }),
                 object: listener.object || (function (obj) {
                 }),
@@ -1348,7 +1348,7 @@ var nullstone;
                     this.$$onResolveObject = listener.resolveObject;
                     this.$$onResolvePrimitive = listener.resolvePrimitive;
                     this.$$onResolveResources = listener.resolveResources;
-                    this.$$onElementSkip = listener.elementSkip;
+                    this.$$onBranchSkip = listener.branchSkip;
                     this.$$onObject = listener.object;
                     this.$$onObjectEnd = listener.objectEnd;
                     this.$$onContentObject = listener.contentObject;
@@ -1393,7 +1393,7 @@ var nullstone;
                     return this;
                 };
 
-                XamlParser.prototype.skipNextElement = function () {
+                XamlParser.prototype.skipBranch = function () {
                     this.$$skipnext = true;
                 };
 
@@ -1419,7 +1419,7 @@ var nullstone;
 
                     if (this.$$skipnext) {
                         this.$$skipnext = false;
-                        this.$$onElementSkip(el, obj);
+                        this.$$onBranchSkip(el, obj);
                         return;
                     }
 

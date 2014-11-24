@@ -11,7 +11,7 @@ module nullstone.markup.events {
     export interface IResolveResources {
         (owner: any, ownerType: any): any;
     }
-    export interface IElementSkip<T> {
+    export interface IBranchSkip<T> {
         (root: T, obj: any);
     }
     export interface IObject {

@@ -269,7 +269,7 @@ declare module nullstone.markup {
         setNamespaces(defaultXmlns: string, xXmlns: string): IMarkupParser<T>;
         setExtensionParser(parser: IMarkupExtensionParser): IMarkupParser<T>;
         parse(root: T): any;
-        skipNextElement(): any;
+        skipBranch(): any;
     }
     var NO_PARSER: IMarkupParser<any>;
     interface IMarkupSax<T> {
@@ -277,7 +277,7 @@ declare module nullstone.markup {
         resolveObject?: events.IResolveObject;
         resolvePrimitive?: events.IResolvePrimitive;
         resolveResources?: events.IResolveResources;
-        elementSkip?: events.IElementSkip<T>;
+        branchSkip?: events.IBranchSkip<T>;
         object?: events.IObject;
         objectEnd?: events.IObjectEnd;
         contentObject?: events.IObject;
@@ -334,7 +334,7 @@ declare module nullstone.markup.events {
     interface IResolveResources {
         (owner: any, ownerType: any): any;
     }
-    interface IElementSkip<T> {
+    interface IBranchSkip<T> {
         (root: T, obj: any): any;
     }
     interface IObject {
@@ -404,7 +404,7 @@ declare module nullstone.markup.xaml {
         private $$onResolveObject;
         private $$onResolvePrimitive;
         private $$onResolveResources;
-        private $$onElementSkip;
+        private $$onBranchSkip;
         private $$onObject;
         private $$onObjectEnd;
         private $$onContentObject;
@@ -425,7 +425,7 @@ declare module nullstone.markup.xaml {
         public setNamespaces(defaultXmlns: string, xXmlns: string): XamlParser;
         public setExtensionParser(parser: IMarkupExtensionParser): XamlParser;
         public parse(el: Element): XamlParser;
-        public skipNextElement(): void;
+        public skipBranch(): void;
         private $$handleElement(el, isContent);
         private $$handleResources(owner, ownerType, resEl);
         private $$tryHandleError(el, xmlns, name);

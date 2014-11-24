@@ -4,7 +4,7 @@ module nullstone.markup {
         setNamespaces (defaultXmlns: string, xXmlns: string): IMarkupParser<T>;
         setExtensionParser (parser: IMarkupExtensionParser): IMarkupParser<T>;
         parse(root: T);
-        skipNextElement();
+        skipBranch();
     }
     export var NO_PARSER: IMarkupParser<any> = {
         on (listener: IMarkupSax<any>): IMarkupParser<any> {
@@ -18,7 +18,7 @@ module nullstone.markup {
         },
         parse (root: any) {
         },
-        skipNextElement (): any {
+        skipBranch (): any {
         }
     };
 
@@ -28,7 +28,7 @@ module nullstone.markup {
         resolveObject?: events.IResolveObject;
         resolvePrimitive?: events.IResolvePrimitive;
         resolveResources?: events.IResolveResources;
-        elementSkip?: events.IElementSkip<T>;
+        branchSkip?: events.IBranchSkip<T>;
         object?: events.IObject;
         objectEnd?: events.IObjectEnd;
         contentObject?: events.IObject;
@@ -52,7 +52,7 @@ module nullstone.markup {
             resolveObject: listener.resolveObject || ((type) => new (type)()),
             resolvePrimitive: listener.resolvePrimitive || ((type, text) => new (type)(text)),
             resolveResources: listener.resolveResources || ((owner, ownerType) => new Object()),
-            elementSkip: listener.elementSkip || ((el, obj) => {
+            branchSkip: listener.branchSkip || ((root, obj) => {
             }),
             object: listener.object || ((obj) => {
             }),

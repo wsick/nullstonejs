@@ -9,7 +9,7 @@ module nullstone.markup.xaml {
         private $$onResolveObject: events.IResolveObject;
         private $$onResolvePrimitive: events.IResolvePrimitive;
         private $$onResolveResources: events.IResolveResources;
-        private $$onElementSkip: events.IElementSkip<Element>;
+        private $$onBranchSkip: events.IBranchSkip<Element>;
         private $$onObject: events.IObject;
         private $$onObjectEnd: events.IObjectEnd;
         private $$onContentObject: events.IObject;
@@ -42,7 +42,7 @@ module nullstone.markup.xaml {
             this.$$onResolveObject = listener.resolveObject;
             this.$$onResolvePrimitive = listener.resolvePrimitive;
             this.$$onResolveResources = listener.resolveResources;
-            this.$$onElementSkip = listener.elementSkip;
+            this.$$onBranchSkip = listener.branchSkip;
             this.$$onObject = listener.object;
             this.$$onObjectEnd = listener.objectEnd;
             this.$$onContentObject = listener.contentObject;
@@ -94,7 +94,7 @@ module nullstone.markup.xaml {
             return this;
         }
 
-        skipNextElement () {
+        skipBranch () {
             this.$$skipnext = true;
         }
 
@@ -125,7 +125,7 @@ module nullstone.markup.xaml {
 
             if (this.$$skipnext) {
                 this.$$skipnext = false;
-                this.$$onElementSkip(el, obj);
+                this.$$onBranchSkip(el, obj);
                 return;
             }
 

@@ -36,7 +36,7 @@ module nullstone.markup.xaml.tests {
                             type: type
                         });
                         if (skipTagName && name === skipTagName)
-                            parser.skipNextElement();
+                            parser.skipBranch();
                         return {isPrimitive: false, type: type};
                     },
                     resolveObject: (type) => {
@@ -66,10 +66,10 @@ module nullstone.markup.xaml.tests {
                         });
                         return obj;
                     },
-                    elementSkip: (el, obj) => {
+                    branchSkip: (root, obj) => {
                         cmds.push({
-                            cmd: 'eskip',
-                            el: el,
+                            cmd: 'bskip',
+                            root: root,
                             obj: obj
                         });
                     },

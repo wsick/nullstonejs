@@ -42,10 +42,10 @@ module nullstone.markup.xaml.tests {
                 }, 'or SkipMe');
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'eskip',
-                    el: cmds[i].el,
+                    cmd: 'bskip',
+                    root: cmds[i].root,
                     obj: sm
-                }, 'eskip');
+                }, 'bskip');
                 //Application - End
                 i++;
                 deepEqual(cmds[i], {
