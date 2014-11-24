@@ -46,6 +46,7 @@ declare module nullstone {
     interface ICollection<T> {
         GetValueAt(index: number): T;
         SetValueAt(index: number, value: T): any;
+        Insert(index: number, value: T): any;
     }
     var ICollection_: Interface<{}>;
 }
