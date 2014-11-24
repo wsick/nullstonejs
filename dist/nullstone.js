@@ -1419,7 +1419,7 @@ var nullstone;
 
                     if (this.$$skipnext) {
                         this.$$skipnext = false;
-                        this.$$onBranchSkip(el, obj);
+                        this.$$onBranchSkip(el.firstElementChild, obj);
                         return;
                     }
 
