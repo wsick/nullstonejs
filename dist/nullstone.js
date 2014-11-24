@@ -59,7 +59,7 @@ var nullstone;
             var cbs = this.$$callbacks;
             var scopes = this.$$scopes;
             var search = cbs.length - 1;
-            while (search > 0) {
+            while (search > -1) {
                 search = cbs.lastIndexOf(callback, search);
                 if (scopes[search] === scope) {
                     cbs.splice(search, 1);

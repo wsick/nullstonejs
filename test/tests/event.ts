@@ -37,5 +37,10 @@ module nullstone.tests.event {
         ev.raise({}, {});
         assert.strictEqual(list1.raisecount, 2);
         assert.strictEqual(list2.raisecount, 2);
+
+        ev.off(list2.func, list2.scope);
+        ev.raise({}, {});
+        assert.strictEqual(list1.raisecount, 2);
+        assert.strictEqual(list2.raisecount, 2);
     });
 }
