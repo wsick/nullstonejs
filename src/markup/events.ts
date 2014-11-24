@@ -8,6 +8,9 @@ module nullstone.markup.events {
     export interface IResolvePrimitive {
         (type: any, text: string): any;
     }
+    export interface IResolveResources {
+        (owner: any, ownerType: any): any;
+    }
     export interface IElementSkip<T> {
         (root: T, obj: any);
     }
@@ -31,12 +34,6 @@ module nullstone.markup.events {
     }
     export interface IPropertyEnd {
         (ownerType: any, propName: string);
-    }
-    export interface IResourcesStart {
-        (owner: any);
-    }
-    export interface IResourcesEnd {
-        (owner: any);
     }
     export interface IResumableError {
         (e: Error): boolean;

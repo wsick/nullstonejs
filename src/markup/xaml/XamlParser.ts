@@ -8,6 +8,7 @@ module nullstone.markup.xaml {
         private $$onResolveType: events.IResolveType;
         private $$onResolveObject: events.IResolveObject;
         private $$onResolvePrimitive: events.IResolvePrimitive;
+        private $$onResolveResources: events.IResolveResources;
         private $$onElementSkip: events.IElementSkip<Element>;
         private $$onObject: events.IObject;
         private $$onObjectEnd: events.IObjectEnd;
@@ -17,8 +18,6 @@ module nullstone.markup.xaml {
         private $$onKey: events.IKey;
         private $$onPropertyStart: events.IPropertyStart;
         private $$onPropertyEnd: events.IPropertyEnd;
-        private $$onResourcesStart: events.IResourcesStart;
-        private $$onResourcesEnd: events.IResourcesEnd;
         private $$onError: events.IError;
         private $$onEnd: () => any = null;
 
@@ -42,6 +41,7 @@ module nullstone.markup.xaml {
             this.$$onResolveType = listener.resolveType;
             this.$$onResolveObject = listener.resolveObject;
             this.$$onResolvePrimitive = listener.resolvePrimitive;
+            this.$$onResolveResources = listener.resolveResources;
             this.$$onElementSkip = listener.elementSkip;
             this.$$onObject = listener.object;
             this.$$onObjectEnd = listener.objectEnd;
@@ -51,8 +51,6 @@ module nullstone.markup.xaml {
             this.$$onKey = listener.key;
             this.$$onPropertyStart = listener.propertyStart;
             this.$$onPropertyEnd = listener.propertyEnd;
-            this.$$onResourcesStart = listener.resourcesStart;
-            this.$$onResourcesEnd = listener.resourcesEnd;
             this.$$onError = listener.error;
             this.$$onEnd = listener.end;
 
@@ -147,7 +145,7 @@ module nullstone.markup.xaml {
             // NOTE: Handle resources first
             var resEl = findResourcesElement(el, xmlns, name);
             if (resEl)
-                this.$$handleResources(obj, resEl);
+                this.$$handleResources(obj, ort.type, resEl);
 
             // NOTE: Walk Children
             var child = el.firstElementChild;
@@ -172,14 +170,18 @@ module nullstone.markup.xaml {
             this.$$onObjectEnd(obj, os[os.length - 1]);
         }
 
-        private $$handleResources (owner: any, resEl: Element) {
-            this.$$onResourcesStart(owner);
+        private $$handleResources (owner: any, ownerType: any, resEl: Element) {
+            var os = this.$$objectStack;
+            var rd = this.$$onResolveResources(owner, ownerType);
+            os.push(rd);
+            this.$$onObject(rd);
             var child = resEl.firstElementChild;
             while (child) {
                 this.$$handleElement(child, true);
                 child = child.nextElementSibling;
             }
-            this.$$onResourcesEnd(owner);
+            os.pop();
+            this.$$onObjectEnd(rd, os[os.length - 1]);
         }
 
         private $$tryHandleError (el: Element, xmlns: string, name: string): boolean {

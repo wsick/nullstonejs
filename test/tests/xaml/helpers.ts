@@ -37,13 +37,31 @@ module nullstone.markup.xaml.tests {
                         });
                         if (skipTagName && name === skipTagName)
                             parser.skipNextElement();
-                        return { isPrimitive: false, type: type };
+                        return {isPrimitive: false, type: type};
                     },
                     resolveObject: (type) => {
                         var obj = new type();
                         cmds.push({
                             cmd: 'or',
                             type: type,
+                            obj: obj
+                        });
+                        return obj;
+                    },
+                    resolvePrimitive: (type, text) => {
+                        cmds.push({
+                            cmd: 'rp',
+                            type: type,
+                            text: text
+                        });
+                        return new type(text);
+                    },
+                    resolveResources: (owner, ownerType) => {
+                        var obj = new Object();
+                        cmds.push({
+                            cmd: 'rr',
+                            owner: owner,
+                            ownerType: ownerType,
                             obj: obj
                         });
                         return obj;

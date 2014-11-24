@@ -1,7 +1,7 @@
 module nullstone.markup.xaml.tests {
     QUnit.module('Markup:XAML');
 
-    QUnit.asyncTest("Basic", () => {
+    QUnit.asyncTest("Resources", () => {
         getDoc("docs/resources.xml", (doc) => {
             mock.parse(doc.documentElement, (cmds) => {
                 QUnit.start();
@@ -28,10 +28,18 @@ module nullstone.markup.xaml.tests {
                 }, 'co Application');
                 //Application.Resources
                 i++;
+                var ares = cmds[i].obj;
                 deepEqual(cmds[i], {
-                    cmd: 'ress',
-                    owner: app
-                }, 'ress Application');
+                    cmd: 'rr',
+                    owner: app,
+                    ownerType: app.constructor,
+                    obj: ares
+                }, 'rr Application.Resources');
+                i++;
+                deepEqual(cmds[i], {
+                    cmd: 'o',
+                    obj: cmds[i - 1].obj
+                }, 'o Resources');
                 //Test1
                 i++;
                 deepEqual(cmds[i], {
@@ -125,9 +133,9 @@ module nullstone.markup.xaml.tests {
                 //End Application.Resources
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'rese',
-                    owner: app
-                }, 'rese Application');
+                    cmd: 'oe',
+                    obj: ares
+                }, 'oe Application.Resources');
                 //End Application
                 i++;
                 deepEqual(cmds[i], {

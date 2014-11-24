@@ -27,6 +27,7 @@ module nullstone.markup {
         resolveType?: events.IResolveType;
         resolveObject?: events.IResolveObject;
         resolvePrimitive?: events.IResolvePrimitive;
+        resolveResources?: events.IResolveResources;
         elementSkip?: events.IElementSkip<T>;
         object?: events.IObject;
         objectEnd?: events.IObjectEnd;
@@ -36,8 +37,6 @@ module nullstone.markup {
         key?: events.IKey;
         propertyStart?: events.IPropertyStart;
         propertyEnd?: events.IPropertyEnd;
-        resourcesStart?: events.IResourcesStart;
-        resourcesEnd?: events.IResourcesEnd;
         error?: events.IResumableError;
         end?: () => any;
     }
@@ -52,6 +51,7 @@ module nullstone.markup {
             resolveType: listener.resolveType || ((uri, name) => oresolve),
             resolveObject: listener.resolveObject || ((type) => new (type)()),
             resolvePrimitive: listener.resolvePrimitive || ((type, text) => new (type)(text)),
+            resolveResources: listener.resolveResources || ((owner, ownerType) => new Object()),
             elementSkip: listener.elementSkip || ((el, obj) => {
             }),
             object: listener.object || ((obj) => {
@@ -69,10 +69,6 @@ module nullstone.markup {
             propertyStart: listener.propertyStart || ((ownerType, propName) => {
             }),
             propertyEnd: listener.propertyEnd || ((ownerType, propName) => {
-            }),
-            resourcesStart: listener.resourcesStart || ((owner) => {
-            }),
-            resourcesEnd: listener.resourcesEnd || ((owner) => {
             }),
             error: listener.error || ((e) => true),
             end: listener.end || (() => {

@@ -954,6 +954,9 @@ var nullstone;
                 resolvePrimitive: listener.resolvePrimitive || (function (type, text) {
                     return new (type)(text);
                 }),
+                resolveResources: listener.resolveResources || (function (owner, ownerType) {
+                    return new Object();
+                }),
                 elementSkip: listener.elementSkip || (function (el, obj) {
                 }),
                 object: listener.object || (function (obj) {
@@ -971,10 +974,6 @@ var nullstone;
                 propertyStart: listener.propertyStart || (function (ownerType, propName) {
                 }),
                 propertyEnd: listener.propertyEnd || (function (ownerType, propName) {
-                }),
-                resourcesStart: listener.resourcesStart || (function (owner) {
-                }),
-                resourcesEnd: listener.resourcesEnd || (function (owner) {
                 }),
                 error: listener.error || (function (e) {
                     return true;
@@ -1348,6 +1347,7 @@ var nullstone;
                     this.$$onResolveType = listener.resolveType;
                     this.$$onResolveObject = listener.resolveObject;
                     this.$$onResolvePrimitive = listener.resolvePrimitive;
+                    this.$$onResolveResources = listener.resolveResources;
                     this.$$onElementSkip = listener.elementSkip;
                     this.$$onObject = listener.object;
                     this.$$onObjectEnd = listener.objectEnd;
@@ -1357,8 +1357,6 @@ var nullstone;
                     this.$$onKey = listener.key;
                     this.$$onPropertyStart = listener.propertyStart;
                     this.$$onPropertyEnd = listener.propertyEnd;
-                    this.$$onResourcesStart = listener.resourcesStart;
-                    this.$$onResourcesEnd = listener.resourcesEnd;
                     this.$$onError = listener.error;
                     this.$$onEnd = listener.end;
 
@@ -1439,7 +1437,7 @@ var nullstone;
 
                     var resEl = findResourcesElement(el, xmlns, name);
                     if (resEl)
-                        this.$$handleResources(obj, resEl);
+                        this.$$handleResources(obj, ort.type, resEl);
 
                     var child = el.firstElementChild;
                     var hasChildren = !!child;
@@ -1459,14 +1457,18 @@ var nullstone;
                     this.$$onObjectEnd(obj, os[os.length - 1]);
                 };
 
-                XamlParser.prototype.$$handleResources = function (owner, resEl) {
-                    this.$$onResourcesStart(owner);
+                XamlParser.prototype.$$handleResources = function (owner, ownerType, resEl) {
+                    var os = this.$$objectStack;
+                    var rd = this.$$onResolveResources(owner, ownerType);
+                    os.push(rd);
+                    this.$$onObject(rd);
                     var child = resEl.firstElementChild;
                     while (child) {
                         this.$$handleElement(child, true);
                         child = child.nextElementSibling;
                     }
-                    this.$$onResourcesEnd(owner);
+                    os.pop();
+                    this.$$onObjectEnd(rd, os[os.length - 1]);
                 };
 
                 XamlParser.prototype.$$tryHandleError = function (el, xmlns, name) {
