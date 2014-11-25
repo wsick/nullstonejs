@@ -935,6 +935,9 @@ var nullstone;
             parse: function (root) {
             },
             skipBranch: function () {
+            },
+            resolvePrefix: function (prefix) {
+                return "";
             }
         };
 
@@ -1340,6 +1343,7 @@ var nullstone;
                     this.$$onEnd = null;
                     this.$$objectStack = [];
                     this.$$skipnext = false;
+                    this.$$curel = null;
                     this.setExtensionParser(new xaml.XamlExtensionParser()).setNamespaces(xaml.DEFAULT_XMLNS, xaml.DEFAULT_XMLNS_X).on({});
                 }
                 XamlParser.prototype.on = function (listener) {
@@ -1397,18 +1401,26 @@ var nullstone;
                     this.$$skipnext = true;
                 };
 
+                XamlParser.prototype.resolvePrefix = function (prefix) {
+                    return this.$$curel.lookupNamespaceURI(prefix);
+                };
+
                 XamlParser.prototype.$$handleElement = function (el, isContent) {
+                    var old = this.$$curel;
+                    this.$$curel = el;
                     var name = el.localName;
                     var xmlns = el.namespaceURI;
-                    if (this.$$tryHandleError(el, xmlns, name))
+                    if (this.$$tryHandleError(el, xmlns, name) || this.$$tryHandlePropertyTag(el, xmlns, name)) {
+                        this.$$curel = old;
                         return;
-                    if (this.$$tryHandlePropertyTag(el, xmlns, name))
-                        return;
+                    }
 
                     var os = this.$$objectStack;
                     var ort = this.$$onResolveType(xmlns, name);
-                    if (this.$$tryHandlePrimitive(el, ort, isContent))
+                    if (this.$$tryHandlePrimitive(el, ort, isContent)) {
+                        this.$$curel = old;
                         return;
+                    }
 
                     var obj = this.$$onResolveObject(ort.type);
                     os.push(obj);
@@ -1422,6 +1434,7 @@ var nullstone;
                         os.pop();
                         this.$$onObjectEnd(obj, isContent, os[os.length - 1]);
                         this.$$onBranchSkip(el.firstElementChild, obj);
+                        this.$$curel = old;
                         return;
                     }
 
@@ -1445,6 +1458,7 @@ var nullstone;
 
                     os.pop();
                     this.$$onObjectEnd(obj, isContent, os[os.length - 1]);
+                    this.$$curel = old;
                 };
 
                 XamlParser.prototype.$$handleResources = function (owner, ownerType, resEl) {

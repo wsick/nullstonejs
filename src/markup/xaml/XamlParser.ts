@@ -27,6 +27,7 @@ module nullstone.markup.xaml {
 
         private $$objectStack: any[] = [];
         private $$skipnext = false;
+        private $$curel: Element = null;
 
         constructor () {
             this.setExtensionParser(new XamlExtensionParser())
@@ -96,21 +97,29 @@ module nullstone.markup.xaml {
             this.$$skipnext = true;
         }
 
+        resolvePrefix (prefix: string): string {
+            return this.$$curel.lookupNamespaceURI(prefix);
+        }
+
         private $$handleElement (el: Element, isContent: boolean) {
             // NOTE: Handle tag open
             //  <[ns:]Type.Name>
             //  <[ns:]Type>
+            var old = this.$$curel;
+            this.$$curel = el;
             var name = el.localName;
             var xmlns = el.namespaceURI;
-            if (this.$$tryHandleError(el, xmlns, name))
+            if (this.$$tryHandleError(el, xmlns, name) || this.$$tryHandlePropertyTag(el, xmlns, name)) {
+                this.$$curel = old;
                 return;
-            if (this.$$tryHandlePropertyTag(el, xmlns, name))
-                return;
+            }
 
             var os = this.$$objectStack;
             var ort = this.$$onResolveType(xmlns, name);
-            if (this.$$tryHandlePrimitive(el, ort, isContent))
+            if (this.$$tryHandlePrimitive(el, ort, isContent)) {
+                this.$$curel = old;
                 return;
+            }
 
             var obj = this.$$onResolveObject(ort.type);
             os.push(obj);
@@ -125,6 +134,7 @@ module nullstone.markup.xaml {
                 os.pop();
                 this.$$onObjectEnd(obj, isContent, os[os.length - 1]);
                 this.$$onBranchSkip(el.firstElementChild, obj);
+                this.$$curel = old;
                 return;
             }
 
@@ -154,6 +164,7 @@ module nullstone.markup.xaml {
             //  </[ns:]Type>
             os.pop();
             this.$$onObjectEnd(obj, isContent, os[os.length - 1]);
+            this.$$curel = old;
         }
 
         private $$handleResources (owner: any, ownerType: any, resEl: Element) {

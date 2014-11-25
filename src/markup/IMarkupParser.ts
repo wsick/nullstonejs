@@ -5,6 +5,7 @@ module nullstone.markup {
         setExtensionParser (parser: IMarkupExtensionParser): IMarkupParser<T>;
         parse(root: T);
         skipBranch();
+        resolvePrefix (prefix: string): string;
     }
     export var NO_PARSER: IMarkupParser<any> = {
         on (listener: IMarkupSax<any>): IMarkupParser<any> {
@@ -19,6 +20,9 @@ module nullstone.markup {
         parse (root: any) {
         },
         skipBranch (): any {
+        },
+        resolvePrefix (prefix: string): string {
+            return "";
         }
     };
 

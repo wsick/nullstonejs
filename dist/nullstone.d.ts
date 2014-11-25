@@ -272,6 +272,7 @@ declare module nullstone.markup {
         setExtensionParser(parser: IMarkupExtensionParser): IMarkupParser<T>;
         parse(root: T): any;
         skipBranch(): any;
+        resolvePrefix(prefix: string): string;
     }
     var NO_PARSER: IMarkupParser<any>;
     interface IMarkupSax<T> {
@@ -420,12 +421,14 @@ declare module nullstone.markup.xaml {
         private $$xXmlns;
         private $$objectStack;
         private $$skipnext;
+        private $$curel;
         constructor();
         public on(listener: IMarkupSax<Element>): XamlParser;
         public setNamespaces(defaultXmlns: string, xXmlns: string): XamlParser;
         public setExtensionParser(parser: IMarkupExtensionParser): XamlParser;
         public parse(el: Element): XamlParser;
         public skipBranch(): void;
+        public resolvePrefix(prefix: string): string;
         private $$handleElement(el, isContent);
         private $$handleResources(owner, ownerType, resEl);
         private $$tryHandleError(el, xmlns, name);
