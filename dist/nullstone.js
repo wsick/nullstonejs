@@ -1442,6 +1442,10 @@ var nullstone;
 
                     this.$$onObject(obj, isContent);
 
+                    var resEl = findResourcesElement(el, xmlns, name);
+                    if (resEl)
+                        this.$$handleResources(obj, ort.type, resEl);
+
                     this.$$processAttributes(el);
 
                     if (this.$$skipnext) {
@@ -1452,10 +1456,6 @@ var nullstone;
                         this.$$curel = old;
                         return;
                     }
-
-                    var resEl = findResourcesElement(el, xmlns, name);
-                    if (resEl)
-                        this.$$handleResources(obj, ort.type, resEl);
 
                     var child = el.firstElementChild;
                     var hasChildren = !!child;

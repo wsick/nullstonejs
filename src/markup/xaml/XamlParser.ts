@@ -138,6 +138,11 @@ module nullstone.markup.xaml {
 
             this.$$onObject(obj, isContent);
 
+            // NOTE: Handle resources before attributes and child elements
+            var resEl = findResourcesElement(el, xmlns, name);
+            if (resEl)
+                this.$$handleResources(obj, ort.type, resEl);
+
             // NOTE: Walk attributes
             this.$$processAttributes(el);
 
@@ -149,11 +154,6 @@ module nullstone.markup.xaml {
                 this.$$curel = old;
                 return;
             }
-
-            // NOTE: Handle resources first
-            var resEl = findResourcesElement(el, xmlns, name);
-            if (resEl)
-                this.$$handleResources(obj, ort.type, resEl);
 
             // NOTE: Walk Children
             var child = el.firstElementChild;
