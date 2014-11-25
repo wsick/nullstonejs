@@ -43,6 +43,9 @@ module nullstone.markup.xaml {
             var obj = this.$$doParse(ctx, os);
             if (ctx.error)
                 this.$$onError(ctx.error);
+            if (obj && typeof obj.transmute === "function") {
+                obj = (<IMarkupExtension>obj).transmute(os);
+            }
             return obj;
         }
 

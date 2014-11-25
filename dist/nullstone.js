@@ -1114,6 +1114,9 @@ var nullstone;
                     var obj = this.$$doParse(ctx, os);
                     if (ctx.error)
                         this.$$onError(ctx.error);
+                    if (obj && typeof obj.transmute === "function") {
+                        obj = obj.transmute(os);
+                    }
                     return obj;
                 };
 
