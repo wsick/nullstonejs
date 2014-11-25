@@ -959,11 +959,9 @@ var nullstone;
                 }),
                 branchSkip: listener.branchSkip || (function (root, obj) {
                 }),
-                object: listener.object || (function (obj) {
+                object: listener.object || (function (obj, isContent) {
                 }),
-                objectEnd: listener.objectEnd || (function (obj, prev) {
-                }),
-                contentObject: listener.contentObject || (function (obj) {
+                objectEnd: listener.objectEnd || (function (obj, isContent, prev) {
                 }),
                 contentText: listener.contentText || (function (text) {
                 }),
@@ -1351,7 +1349,6 @@ var nullstone;
                     this.$$onBranchSkip = listener.branchSkip;
                     this.$$onObject = listener.object;
                     this.$$onObjectEnd = listener.objectEnd;
-                    this.$$onContentObject = listener.contentObject;
                     this.$$onContentText = listener.contentText;
                     this.$$onName = listener.name;
                     this.$$onKey = listener.key;
@@ -1413,18 +1410,14 @@ var nullstone;
                     var obj = this.$$onResolveObject(ort.type);
                     os.push(obj);
 
-                    if (isContent) {
-                        this.$$onContentObject(obj);
-                    } else {
-                        this.$$onObject(obj);
-                    }
+                    this.$$onObject(obj, isContent);
 
                     this.$$processAttributes(el);
 
                     if (this.$$skipnext) {
                         this.$$skipnext = false;
                         os.pop();
-                        this.$$onObjectEnd(obj, os[os.length - 1]);
+                        this.$$onObjectEnd(obj, isContent, os[os.length - 1]);
                         this.$$onBranchSkip(el.firstElementChild, obj);
                         return;
                     }
@@ -1448,21 +1441,21 @@ var nullstone;
                     }
 
                     os.pop();
-                    this.$$onObjectEnd(obj, os[os.length - 1]);
+                    this.$$onObjectEnd(obj, isContent, os[os.length - 1]);
                 };
 
                 XamlParser.prototype.$$handleResources = function (owner, ownerType, resEl) {
                     var os = this.$$objectStack;
                     var rd = this.$$onResolveResources(owner, ownerType);
                     os.push(rd);
-                    this.$$onObject(rd);
+                    this.$$onObject(rd, false);
                     var child = resEl.firstElementChild;
                     while (child) {
                         this.$$handleElement(child, true);
                         child = child.nextElementSibling;
                     }
                     os.pop();
-                    this.$$onObjectEnd(rd, os[os.length - 1]);
+                    this.$$onObjectEnd(rd, false, os[os.length - 1]);
                 };
 
                 XamlParser.prototype.$$tryHandleError = function (el, xmlns, name) {
@@ -1497,10 +1490,10 @@ var nullstone;
                     if (!oresolve.isPrimitive)
                         return false;
                     var obj = this.$$onResolvePrimitive(oresolve.type, el.textContent);
-                    (isContent) ? this.$$onContentObject(obj) : this.$$onObject(obj);
+                    this.$$onObject(obj, isContent);
                     this.$$processAttributes(el);
                     var os = this.$$objectStack;
-                    this.$$onObjectEnd(obj, os[os.length - 1]);
+                    this.$$onObjectEnd(obj, isContent, os[os.length - 1]);
                     return true;
                 };
 
@@ -1550,8 +1543,8 @@ var nullstone;
                     var os = this.$$objectStack;
                     this.$$onPropertyStart(type, name);
                     var val = this.$$getAttrValue(value, attr);
-                    this.$$onObject(val);
-                    this.$$onObjectEnd(val, os[os.length - 1]);
+                    this.$$onObject(val, false);
+                    this.$$onObjectEnd(val, false, os[os.length - 1]);
                     this.$$onPropertyEnd(type, name);
                     return true;
                 };

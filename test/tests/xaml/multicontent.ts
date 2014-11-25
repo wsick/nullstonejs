@@ -23,9 +23,10 @@ module nullstone.markup.xaml.tests {
                 }, 'or Application');
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'co',
-                    obj: app
-                }, 'co Application');
+                    cmd: 'o',
+                    obj: app,
+                    isContent: true
+                }, 'o(c) Application');
 
                 //Grid
                 i++;
@@ -44,9 +45,10 @@ module nullstone.markup.xaml.tests {
                 }, 'or Grid');
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'co',
-                    obj: grid
-                }, 'co Grid');
+                    cmd: 'o',
+                    obj: grid,
+                    isContent: true
+                }, 'o(c) Grid');
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'name',
@@ -70,13 +72,15 @@ module nullstone.markup.xaml.tests {
                 }, 'or Border');
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'co',
-                    obj: brd
-                }, 'co Border');
+                    cmd: 'o',
+                    obj: brd,
+                    isContent: true
+                }, 'o(c) Border');
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
-                    obj: brd
+                    obj: brd,
+                    isContent: true
                 }, 'oe Border');
 
                 //Border 2
@@ -96,13 +100,15 @@ module nullstone.markup.xaml.tests {
                 });
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'co',
-                    obj: brd
+                    cmd: 'o',
+                    obj: brd,
+                    isContent: true
                 });
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
-                    obj: brd
+                    obj: brd,
+                    isContent: true
                 });
 
                 //Border 3
@@ -122,27 +128,31 @@ module nullstone.markup.xaml.tests {
                 });
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'co',
-                    obj: brd
+                    cmd: 'o',
+                    obj: brd,
+                    isContent: true
                 });
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
-                    obj: brd
+                    obj: brd,
+                    isContent: true
                 });
 
                 //Grid - End
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
-                    obj: grid
+                    obj: grid,
+                    isContent: true
                 });
 
                 //Application - End
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
-                    obj: app
+                    obj: app,
+                    isContent: true
                 });
                 strictEqual(cmds.length, i + 1);
             });

@@ -15,10 +15,10 @@ module nullstone.markup.events {
         (root: T, obj: any);
     }
     export interface IObject {
-        (obj: any);
+        (obj: any, isContent: boolean);
     }
     export interface IObjectEnd {
-        (obj: any, prev: any);
+        (obj: any, isContent: boolean, prev: any);
     }
     export interface IText {
         (text: string);

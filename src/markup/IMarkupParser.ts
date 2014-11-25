@@ -31,7 +31,6 @@ module nullstone.markup {
         branchSkip?: events.IBranchSkip<T>;
         object?: events.IObject;
         objectEnd?: events.IObjectEnd;
-        contentObject?: events.IObject;
         contentText?: events.IText;
         name?: events.IName;
         key?: events.IKey;
@@ -54,11 +53,9 @@ module nullstone.markup {
             resolveResources: listener.resolveResources || ((owner, ownerType) => new Object()),
             branchSkip: listener.branchSkip || ((root, obj) => {
             }),
-            object: listener.object || ((obj) => {
+            object: listener.object || ((obj, isContent) => {
             }),
-            objectEnd: listener.objectEnd || ((obj, prev) => {
-            }),
-            contentObject: listener.contentObject || ((obj) => {
+            objectEnd: listener.objectEnd || ((obj, isContent, prev) => {
             }),
             contentText: listener.contentText || ((text) => {
             }),

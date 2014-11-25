@@ -282,7 +282,6 @@ declare module nullstone.markup {
         branchSkip?: events.IBranchSkip<T>;
         object?: events.IObject;
         objectEnd?: events.IObjectEnd;
-        contentObject?: events.IObject;
         contentText?: events.IText;
         name?: events.IName;
         key?: events.IKey;
@@ -340,10 +339,10 @@ declare module nullstone.markup.events {
         (root: T, obj: any): any;
     }
     interface IObject {
-        (obj: any): any;
+        (obj: any, isContent: boolean): any;
     }
     interface IObjectEnd {
-        (obj: any, prev: any): any;
+        (obj: any, isContent: boolean, prev: any): any;
     }
     interface IText {
         (text: string): any;
@@ -409,7 +408,6 @@ declare module nullstone.markup.xaml {
         private $$onBranchSkip;
         private $$onObject;
         private $$onObjectEnd;
-        private $$onContentObject;
         private $$onContentText;
         private $$onName;
         private $$onKey;

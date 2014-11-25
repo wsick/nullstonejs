@@ -23,9 +23,10 @@ module nullstone.markup.xaml.tests {
                 }, 'or Application');
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'co',
-                    obj: app
-                }, 'co Application');
+                    cmd: 'o',
+                    obj: app,
+                    isContent: true
+                }, 'o(c) Application');
                 //Application.Resources
                 i++;
                 var ares = cmds[i].obj;
@@ -38,7 +39,8 @@ module nullstone.markup.xaml.tests {
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'o',
-                    obj: cmds[i - 1].obj
+                    obj: cmds[i - 1].obj,
+                    isContent: false
                 }, 'o Resources');
                 //Test1
                 i++;
@@ -57,9 +59,10 @@ module nullstone.markup.xaml.tests {
                 }, 'or Test');
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'co',
-                    obj: test1
-                }, 'co Test');
+                    cmd: 'o',
+                    obj: test1,
+                    isContent: true
+                }, 'o(c) Test');
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'key',
@@ -68,7 +71,8 @@ module nullstone.markup.xaml.tests {
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
-                    obj: test1
+                    obj: test1,
+                    isContent: true
                 }, 'oe Test');
                 //Test2
                 i++;
@@ -87,9 +91,10 @@ module nullstone.markup.xaml.tests {
                 }, 'or Test');
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'co',
-                    obj: test2
-                }, 'co Test');
+                    cmd: 'o',
+                    obj: test2,
+                    isContent: true
+                }, 'o(c) Test');
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'key',
@@ -98,7 +103,8 @@ module nullstone.markup.xaml.tests {
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
-                    obj: test2
+                    obj: test2,
+                    isContent: true
                 }, 'oe Test');
                 //Test3
                 i++;
@@ -117,9 +123,10 @@ module nullstone.markup.xaml.tests {
                 }, 'or Test');
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'co',
-                    obj: test3
-                }, 'co Test');
+                    cmd: 'o',
+                    obj: test3,
+                    isContent: true
+                }, 'o(c) Test');
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'key',
@@ -128,19 +135,22 @@ module nullstone.markup.xaml.tests {
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
-                    obj: test3
+                    obj: test3,
+                    isContent: true
                 }, 'oe Test');
                 //End Application.Resources
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
-                    obj: ares
+                    obj: ares,
+                    isContent: false
                 }, 'oe Application.Resources');
                 //End Application
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
-                    obj: app
+                    obj: app,
+                    isContent: true
                 }, 'oe Application');
                 strictEqual(cmds.length, i + 1);
             });

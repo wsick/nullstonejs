@@ -39,9 +39,10 @@ module nullstone.markup.xaml.tests {
                 }, 'or Application');
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'co',
-                    obj: app
-                }, 'co Application');
+                    cmd: 'o',
+                    obj: app,
+                    isContent: true
+                }, 'o(c) Application');
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'rt',
@@ -58,9 +59,10 @@ module nullstone.markup.xaml.tests {
                 }, 'or Button');
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'co',
-                    obj: btn
-                }, 'co Button');
+                    cmd: 'o',
+                    obj: btn,
+                    isContent: true
+                }, 'o(c) Button');
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'name',
@@ -74,12 +76,14 @@ module nullstone.markup.xaml.tests {
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
-                    obj: btn
+                    obj: btn,
+                    isContent: true
                 }, 'oe Button');
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
-                    obj: app
+                    obj: app,
+                    isContent: true
                 }, 'oe Application');
                 strictEqual(cmds.length, i + 1);
             });

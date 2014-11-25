@@ -12,7 +12,6 @@ module nullstone.markup.xaml {
         private $$onBranchSkip: events.IBranchSkip<Element>;
         private $$onObject: events.IObject;
         private $$onObjectEnd: events.IObjectEnd;
-        private $$onContentObject: events.IObject;
         private $$onContentText: events.IText;
         private $$onName: events.IName;
         private $$onKey: events.IKey;
@@ -45,7 +44,6 @@ module nullstone.markup.xaml {
             this.$$onBranchSkip = listener.branchSkip;
             this.$$onObject = listener.object;
             this.$$onObjectEnd = listener.objectEnd;
-            this.$$onContentObject = listener.contentObject;
             this.$$onContentText = listener.contentText;
             this.$$onName = listener.name;
             this.$$onKey = listener.key;
@@ -117,11 +115,7 @@ module nullstone.markup.xaml {
             var obj = this.$$onResolveObject(ort.type);
             os.push(obj);
 
-            if (isContent) {
-                this.$$onContentObject(obj);
-            } else {
-                this.$$onObject(obj);
-            }
+            this.$$onObject(obj, isContent);
 
             // NOTE: Walk attributes
             this.$$processAttributes(el);
@@ -129,7 +123,7 @@ module nullstone.markup.xaml {
             if (this.$$skipnext) {
                 this.$$skipnext = false;
                 os.pop();
-                this.$$onObjectEnd(obj, os[os.length - 1]);
+                this.$$onObjectEnd(obj, isContent, os[os.length - 1]);
                 this.$$onBranchSkip(el.firstElementChild, obj);
                 return;
             }
@@ -159,21 +153,21 @@ module nullstone.markup.xaml {
             //  </[ns:]Type.Name>
             //  </[ns:]Type>
             os.pop();
-            this.$$onObjectEnd(obj, os[os.length - 1]);
+            this.$$onObjectEnd(obj, isContent, os[os.length - 1]);
         }
 
         private $$handleResources (owner: any, ownerType: any, resEl: Element) {
             var os = this.$$objectStack;
             var rd = this.$$onResolveResources(owner, ownerType);
             os.push(rd);
-            this.$$onObject(rd);
+            this.$$onObject(rd, false);
             var child = resEl.firstElementChild;
             while (child) {
                 this.$$handleElement(child, true);
                 child = child.nextElementSibling;
             }
             os.pop();
-            this.$$onObjectEnd(rd, os[os.length - 1]);
+            this.$$onObjectEnd(rd, false, os[os.length - 1]);
         }
 
         private $$tryHandleError (el: Element, xmlns: string, name: string): boolean {
@@ -208,12 +202,10 @@ module nullstone.markup.xaml {
             if (!oresolve.isPrimitive)
                 return false;
             var obj = this.$$onResolvePrimitive(oresolve.type, el.textContent);
-            (isContent)
-                ? this.$$onContentObject(obj)
-                : this.$$onObject(obj);
+            this.$$onObject(obj, isContent);
             this.$$processAttributes(el);
             var os = this.$$objectStack;
-            this.$$onObjectEnd(obj, os[os.length - 1]);
+            this.$$onObjectEnd(obj, isContent, os[os.length - 1]);
             return true;
         }
 
@@ -268,8 +260,8 @@ module nullstone.markup.xaml {
             var os = this.$$objectStack;
             this.$$onPropertyStart(type, name);
             var val = this.$$getAttrValue(value, attr);
-            this.$$onObject(val);
-            this.$$onObjectEnd(val, os[os.length - 1]);
+            this.$$onObject(val, false);
+            this.$$onObjectEnd(val, false, os[os.length - 1]);
             this.$$onPropertyEnd(type, name);
             return true;
         }

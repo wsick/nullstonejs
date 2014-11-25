@@ -73,22 +73,18 @@ module nullstone.markup.xaml.tests {
                             obj: obj
                         });
                     },
-                    object: (obj) => {
+                    object: (obj, isContent) => {
                         cmds.push({
                             cmd: 'o',
-                            obj: obj
+                            obj: obj,
+                            isContent: isContent
                         });
                     },
-                    objectEnd: (obj, prev) => {
+                    objectEnd: (obj, isContent, prev) => {
                         cmds.push({
                             cmd: 'oe',
-                            obj: obj
-                        });
-                    },
-                    contentObject: (obj) => {
-                        cmds.push({
-                            cmd: 'co',
-                            obj: obj
+                            obj: obj,
+                            isContent: isContent
                         });
                     },
                     contentText: (text) => {
@@ -121,18 +117,6 @@ module nullstone.markup.xaml.tests {
                             cmd: 'pe',
                             ownerType: ownerType,
                             propName: propName
-                        });
-                    },
-                    resourcesStart: (owner) => {
-                        cmds.push({
-                            cmd: 'ress',
-                            owner: owner
-                        });
-                    },
-                    resourcesEnd: (owner) => {
-                        cmds.push({
-                            cmd: 'rese',
-                            owner: owner
                         });
                     },
                     end: () => {
