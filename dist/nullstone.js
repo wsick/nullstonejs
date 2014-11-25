@@ -1474,9 +1474,10 @@ var nullstone;
                         return false;
 
                     var ort = this.$$onResolveType(xmlns, name.substr(0, ind));
+                    var type = ort.type;
                     name = name.substr(ind + 1);
 
-                    this.$$onPropertyStart(ort.type, name);
+                    this.$$onPropertyStart(type, name);
 
                     var child = el.firstElementChild;
                     while (child) {
@@ -1484,7 +1485,7 @@ var nullstone;
                         child = child.nextElementSibling;
                     }
 
-                    this.$$onPropertyEnd(ort.type, name);
+                    this.$$onPropertyEnd(type, name);
 
                     return true;
                 };
