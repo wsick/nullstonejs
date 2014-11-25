@@ -182,10 +182,10 @@ module nullstone.markup.xaml {
             if (ind < 0)
                 return false;
 
-            var type = this.$$onResolveType(xmlns, name.substr(0, ind));
+            var ort = this.$$onResolveType(xmlns, name.substr(0, ind));
             name = name.substr(ind + 1);
 
-            this.$$onPropertyStart(type, name);
+            this.$$onPropertyStart(ort.type, name);
 
             var child = el.firstElementChild;
             while (child) {
@@ -193,7 +193,7 @@ module nullstone.markup.xaml {
                 child = child.nextElementSibling;
             }
 
-            this.$$onPropertyEnd(type, name);
+            this.$$onPropertyEnd(ort.type, name);
 
             return true;
         }
@@ -253,8 +253,8 @@ module nullstone.markup.xaml {
             var name = name;
             var ind = name.indexOf('.');
             if (ind > -1) {
-                var oresolve = this.$$onResolveType(uri, name.substr(0, ind));
-                type = oresolve.type;
+                var ort = this.$$onResolveType(uri, name.substr(0, ind));
+                type = ort.type;
                 name = name.substr(ind + 1);
             }
             var os = this.$$objectStack;

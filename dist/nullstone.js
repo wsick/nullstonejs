@@ -1165,8 +1165,8 @@ var nullstone;
                         return this.$$parseXExt(ctx, os, name, val);
                     }
 
-                    var oresolve = this.$$onResolveType(uri, name);
-                    var obj = this.$$onResolveObject(oresolve.type);
+                    var ort = this.$$onResolveType(uri, name);
+                    var obj = this.$$onResolveObject(ort.type);
                     os.push(obj);
                     return true;
                 };
@@ -1181,8 +1181,8 @@ var nullstone;
                         var prefix = (ind < 0) ? null : val.substr(0, ind);
                         var name = (ind < 0) ? val : val.substr(ind + 1);
                         var uri = ctx.resolver.lookupNamespaceURI(prefix);
-                        var oresolve = this.$$onResolveType(uri, name);
-                        os.push(oresolve.type);
+                        var ort = this.$$onResolveType(uri, name);
+                        os.push(ort.type);
                         return true;
                     }
                     if (name === "Static") {
@@ -1473,10 +1473,10 @@ var nullstone;
                     if (ind < 0)
                         return false;
 
-                    var type = this.$$onResolveType(xmlns, name.substr(0, ind));
+                    var ort = this.$$onResolveType(xmlns, name.substr(0, ind));
                     name = name.substr(ind + 1);
 
-                    this.$$onPropertyStart(type, name);
+                    this.$$onPropertyStart(ort.type, name);
 
                     var child = el.firstElementChild;
                     while (child) {
@@ -1484,7 +1484,7 @@ var nullstone;
                         child = child.nextElementSibling;
                     }
 
-                    this.$$onPropertyEnd(type, name);
+                    this.$$onPropertyEnd(ort.type, name);
 
                     return true;
                 };
@@ -1539,8 +1539,8 @@ var nullstone;
                     var name = name;
                     var ind = name.indexOf('.');
                     if (ind > -1) {
-                        var oresolve = this.$$onResolveType(uri, name.substr(0, ind));
-                        type = oresolve.type;
+                        var ort = this.$$onResolveType(uri, name.substr(0, ind));
+                        type = ort.type;
                         name = name.substr(ind + 1);
                     }
                     var os = this.$$objectStack;

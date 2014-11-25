@@ -96,8 +96,8 @@ module nullstone.markup.xaml {
                 return this.$$parseXExt(ctx, os, name, val);
             }
 
-            var oresolve = this.$$onResolveType(uri, name);
-            var obj = this.$$onResolveObject(oresolve.type);
+            var ort = this.$$onResolveType(uri, name);
+            var obj = this.$$onResolveObject(ort.type);
             os.push(obj);
             return true;
         }
@@ -112,8 +112,8 @@ module nullstone.markup.xaml {
                 var prefix = (ind < 0) ? null : val.substr(0, ind);
                 var name = (ind < 0) ? val : val.substr(ind + 1);
                 var uri = ctx.resolver.lookupNamespaceURI(prefix);
-                var oresolve = this.$$onResolveType(uri, name);
-                os.push(oresolve.type);
+                var ort = this.$$onResolveType(uri, name);
+                os.push(ort.type);
                 return true;
             }
             if (name === "Static") {
