@@ -938,6 +938,9 @@ var nullstone;
             },
             resolvePrefix: function (prefix) {
                 return "";
+            },
+            walkUpObjects: function () {
+                return nullstone.IEnumerator_.empty;
             }
         };
 
@@ -1399,6 +1402,18 @@ var nullstone;
 
                 XamlParser.prototype.skipBranch = function () {
                     this.$$skipnext = true;
+                };
+
+                XamlParser.prototype.walkUpObjects = function () {
+                    var os = this.$$objectStack;
+                    var i = os.length;
+                    return {
+                        current: undefined,
+                        moveNext: function () {
+                            i--;
+                            return (this.current = os[i]) !== undefined;
+                        }
+                    };
                 };
 
                 XamlParser.prototype.resolvePrefix = function (prefix) {

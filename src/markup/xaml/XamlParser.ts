@@ -97,6 +97,18 @@ module nullstone.markup.xaml {
             this.$$skipnext = true;
         }
 
+        walkUpObjects (): IEnumerator<any> {
+            var os = this.$$objectStack;
+            var i = os.length;
+            return {
+                current: undefined,
+                moveNext (): boolean {
+                    i--;
+                    return (this.current = os[i]) !== undefined;
+                }
+            };
+        }
+
         resolvePrefix (prefix: string): string {
             return this.$$curel.lookupNamespaceURI(prefix);
         }
