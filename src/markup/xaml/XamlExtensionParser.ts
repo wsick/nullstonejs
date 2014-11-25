@@ -144,7 +144,7 @@ module nullstone.markup.xaml {
                     if (ctx.error)
                         return false;
                 } else if (cur === "=") {
-                    key = ctx.acc;
+                    key = ctx.acc.trim();
                     ctx.acc = "";
                 } else if (cur === "}") {
                     this.$$finishKeyValue(ctx.acc, key, val, os);

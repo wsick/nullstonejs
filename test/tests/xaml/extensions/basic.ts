@@ -17,6 +17,7 @@ module nullstone.markup.xaml.extensions.tests {
 
     class Random implements IMarkupExtension {
         Foo: number;
+        Other: string;
 
         init (val: string) {
         }
@@ -67,9 +68,10 @@ module nullstone.markup.xaml.extensions.tests {
     });
 
     QUnit.test("Subextension", () => {
-        var val = parser.parse("{Random Foo={StaticResource Two}}", mock.resolver(), []);
+        var val = parser.parse("{Random Foo={StaticResource Two}, Other=3}", mock.resolver(), []);
         var expected = new Random();
         expected.Foo = 2;
+        expected.Other = "3";
         deepEqual(val, expected);
     });
 }
