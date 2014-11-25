@@ -3,8 +3,10 @@ module nullstone {
         constructor (public Object: any) {
         }
 
-        static fromString<T>(enuType: any, val: string, fallback?: T) {
-            var obj = enuType[val];
+        static fromAny<T>(enuType: any, val: any, fallback?: number): number {
+            if (typeof val === "number")
+                return val;
+            var obj = enuType[val.toString()];
             return (obj == null) ? (fallback || 0) : obj;
         }
     }
