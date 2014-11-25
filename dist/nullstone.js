@@ -31,6 +31,10 @@ var nullstone;
         function Enum(Object) {
             this.Object = Object;
         }
+        Enum.fromString = function (enuType, val, fallback) {
+            var obj = enuType[val];
+            return (obj == null) ? (fallback || 0) : obj;
+        };
         return Enum;
     })();
     nullstone.Enum = Enum;

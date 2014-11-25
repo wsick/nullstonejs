@@ -11,6 +11,7 @@ declare module nullstone {
     class Enum {
         public Object: any;
         constructor(Object: any);
+        static fromString<T>(enuType: any, val: string, fallback?: T): any;
     }
 }
 declare module nullstone {
