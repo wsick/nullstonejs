@@ -1407,22 +1407,10 @@ var nullstone;
 
                     var os = this.$$objectStack;
                     var ort = this.$$onResolveType(xmlns, name);
-                    var obj;
-                    if (ort.isPrimitive) {
-                        obj = this.$$onResolvePrimitive(ort.type, el.textContent);
-                        (isContent) ? this.$$onContentObject(obj) : this.$$onObject(obj);
-                        this.$$onObjectEnd(obj, os[os.length - 1]);
+                    if (this.$$tryHandlePrimitive(el, ort, isContent))
                         return;
-                    }
 
-                    obj = this.$$onResolveObject(ort.type);
-
-                    if (this.$$skipnext) {
-                        this.$$skipnext = false;
-                        this.$$onBranchSkip(el.firstElementChild, obj);
-                        return;
-                    }
-
+                    var obj = this.$$onResolveObject(ort.type);
                     os.push(obj);
 
                     if (isContent) {
@@ -1431,8 +1419,14 @@ var nullstone;
                         this.$$onObject(obj);
                     }
 
-                    for (var i = 0, attrs = el.attributes, len = attrs.length; i < len; i++) {
-                        this.$$processAttribute(attrs[i]);
+                    this.$$processAttributes(el);
+
+                    if (this.$$skipnext) {
+                        this.$$skipnext = false;
+                        os.pop();
+                        this.$$onObjectEnd(obj, os[os.length - 1]);
+                        this.$$onBranchSkip(el.firstElementChild, obj);
+                        return;
                     }
 
                     var resEl = findResourcesElement(el, xmlns, name);
@@ -1497,6 +1491,23 @@ var nullstone;
                     this.$$onPropertyEnd(type, name);
 
                     return true;
+                };
+
+                XamlParser.prototype.$$tryHandlePrimitive = function (el, oresolve, isContent) {
+                    if (!oresolve.isPrimitive)
+                        return false;
+                    var obj = this.$$onResolvePrimitive(oresolve.type, el.textContent);
+                    (isContent) ? this.$$onContentObject(obj) : this.$$onObject(obj);
+                    this.$$processAttributes(el);
+                    var os = this.$$objectStack;
+                    this.$$onObjectEnd(obj, os[os.length - 1]);
+                    return true;
+                };
+
+                XamlParser.prototype.$$processAttributes = function (el) {
+                    for (var i = 0, attrs = el.attributes, len = attrs.length; i < len; i++) {
+                        this.$$processAttribute(attrs[i]);
+                    }
                 };
 
                 XamlParser.prototype.$$processAttribute = function (attr) {

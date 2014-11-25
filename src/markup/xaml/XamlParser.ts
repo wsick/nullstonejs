@@ -111,24 +111,10 @@ module nullstone.markup.xaml {
 
             var os = this.$$objectStack;
             var ort = this.$$onResolveType(xmlns, name);
-            var obj;
-            if (ort.isPrimitive) {
-                obj = this.$$onResolvePrimitive(ort.type, el.textContent);
-                (isContent)
-                    ? this.$$onContentObject(obj)
-                    : this.$$onObject(obj);
-                this.$$onObjectEnd(obj, os[os.length - 1]);
+            if (this.$$tryHandlePrimitive(el, ort, isContent))
                 return;
-            }
 
-            obj = this.$$onResolveObject(ort.type);
-
-            if (this.$$skipnext) {
-                this.$$skipnext = false;
-                this.$$onBranchSkip(el.firstElementChild, obj);
-                return;
-            }
-
+            var obj = this.$$onResolveObject(ort.type);
             os.push(obj);
 
             if (isContent) {
@@ -138,8 +124,14 @@ module nullstone.markup.xaml {
             }
 
             // NOTE: Walk attributes
-            for (var i = 0, attrs = el.attributes, len = attrs.length; i < len; i++) {
-                this.$$processAttribute(attrs[i]);
+            this.$$processAttributes(el);
+
+            if (this.$$skipnext) {
+                this.$$skipnext = false;
+                os.pop();
+                this.$$onObjectEnd(obj, os[os.length - 1]);
+                this.$$onBranchSkip(el.firstElementChild, obj);
+                return;
             }
 
             // NOTE: Handle resources first
@@ -210,6 +202,25 @@ module nullstone.markup.xaml {
             this.$$onPropertyEnd(type, name);
 
             return true;
+        }
+
+        private $$tryHandlePrimitive (el: Element, oresolve: IOutType, isContent: boolean): boolean {
+            if (!oresolve.isPrimitive)
+                return false;
+            var obj = this.$$onResolvePrimitive(oresolve.type, el.textContent);
+            (isContent)
+                ? this.$$onContentObject(obj)
+                : this.$$onObject(obj);
+            this.$$processAttributes(el);
+            var os = this.$$objectStack;
+            this.$$onObjectEnd(obj, os[os.length - 1]);
+            return true;
+        }
+
+        private $$processAttributes (el: Element) {
+            for (var i = 0, attrs = el.attributes, len = attrs.length; i < len; i++) {
+                this.$$processAttribute(attrs[i]);
+            }
         }
 
         private $$processAttribute (attr: Attr): boolean {

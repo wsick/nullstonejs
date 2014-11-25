@@ -42,6 +42,16 @@ module nullstone.markup.xaml.tests {
                 }, 'or SkipMe');
                 i++;
                 deepEqual(cmds[i], {
+                    cmd: 'co',
+                    obj: sm
+                }, 'co SkipMe');
+                i++;
+                deepEqual(cmds[i], {
+                    cmd: 'oe',
+                    obj: sm
+                }, 'oe SkipMe');
+                i++;
+                deepEqual(cmds[i], {
                     cmd: 'bskip',
                     root: cmds[i].root,
                     obj: sm
@@ -51,7 +61,7 @@ module nullstone.markup.xaml.tests {
                 deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: app
-                });
+                }, 'oe Application');
                 strictEqual(cmds.length, i + 1);
             }, 'SkipMe');
         }, (err) => {

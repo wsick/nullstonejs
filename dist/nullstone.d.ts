@@ -432,6 +432,8 @@ declare module nullstone.markup.xaml {
         private $$handleResources(owner, ownerType, resEl);
         private $$tryHandleError(el, xmlns, name);
         private $$tryHandlePropertyTag(el, xmlns, name);
+        private $$tryHandlePrimitive(el, oresolve, isContent);
+        private $$processAttributes(el);
         private $$processAttribute(attr);
         private $$shouldSkipAttr(prefix, name);
         private $$tryHandleXAttribute(uri, name, value);
