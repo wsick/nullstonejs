@@ -34,6 +34,8 @@ var nullstone;
         Enum.fromAny = function (enuType, val, fallback) {
             if (typeof val === "number")
                 return val;
+            if (!val)
+                return (fallback || 0);
             var obj = enuType[val.toString()];
             return (obj == null) ? (fallback || 0) : obj;
         };
