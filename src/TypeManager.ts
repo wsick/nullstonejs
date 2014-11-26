@@ -5,9 +5,6 @@ module nullstone {
         type: any;
         isPrimitive: boolean;
     }
-    // TODO: Primitives
-    // SIMPLES["Color"] = true;
-    // SIMPLES["FontFamily"] = true;
 
     export interface ITypeManager {
         defaultUri: string;
@@ -37,35 +34,35 @@ module nullstone {
         }
 
         resolveLibrary (uri: string): ILibrary {
-            return this.libResolver.resolve(uri);
+            return this.libResolver.resolve(uri || this.defaultUri);
         }
 
         loadTypeAsync (uri: string, name: string): async.IAsyncRequest<any> {
-            return this.libResolver.loadTypeAsync(uri, name);
+            return this.libResolver.loadTypeAsync(uri || this.defaultUri, name);
         }
 
         resolveType (uri: string, name: string, /* out */oresolve: IOutType): boolean {
             oresolve.isPrimitive = false;
             oresolve.type = undefined;
-            return this.libResolver.resolveType(uri, name, oresolve);
+            return this.libResolver.resolveType(uri || this.defaultUri, name, oresolve);
         }
 
         add (uri: string, name: string, type: any): ITypeManager {
-            var lib = this.libResolver.resolve(uri);
+            var lib = this.libResolver.resolve(uri || this.defaultUri);
             if (lib)
                 lib.add(type, name);
             return this;
         }
 
         addPrimitive (uri: string, name: string, type: any): ITypeManager {
-            var lib = this.libResolver.resolve(uri);
+            var lib = this.libResolver.resolve(uri || this.defaultUri);
             if (lib)
                 lib.addPrimitive(type, name);
             return this;
         }
 
         addEnum (uri: string, name: string, enu: any): ITypeManager {
-            var lib = this.libResolver.resolve(uri);
+            var lib = this.libResolver.resolve(uri || this.defaultUri);
             if (lib)
                 lib.addEnum(enu, name);
             return this;

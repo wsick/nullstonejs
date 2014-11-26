@@ -27,8 +27,7 @@ module nullstone.markup {
             this.parser
                 .on({
                     resolveType: (uri, name) => {
-                        if (uri)
-                            this.add(uri, name);
+                        this.add(uri, name);
                         return oresolve;
                     },
                     resolveObject: (type) => {

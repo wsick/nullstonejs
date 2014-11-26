@@ -752,7 +752,6 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
-    
     var TypeManager = (function () {
         function TypeManager(defaultUri, xUri) {
             this.defaultUri = defaultUri;
@@ -763,35 +762,35 @@ var nullstone;
             this.libResolver.resolve(xUri).addPrimitive(String, "String").addPrimitive(Number, "Number").addPrimitive(Number, "Double").addPrimitive(Date, "Date").addPrimitive(RegExp, "RegExp").addPrimitive(Boolean, "Boolean").addPrimitive(nullstone.Uri, "Uri");
         }
         TypeManager.prototype.resolveLibrary = function (uri) {
-            return this.libResolver.resolve(uri);
+            return this.libResolver.resolve(uri || this.defaultUri);
         };
 
         TypeManager.prototype.loadTypeAsync = function (uri, name) {
-            return this.libResolver.loadTypeAsync(uri, name);
+            return this.libResolver.loadTypeAsync(uri || this.defaultUri, name);
         };
 
         TypeManager.prototype.resolveType = function (uri, name, oresolve) {
             oresolve.isPrimitive = false;
             oresolve.type = undefined;
-            return this.libResolver.resolveType(uri, name, oresolve);
+            return this.libResolver.resolveType(uri || this.defaultUri, name, oresolve);
         };
 
         TypeManager.prototype.add = function (uri, name, type) {
-            var lib = this.libResolver.resolve(uri);
+            var lib = this.libResolver.resolve(uri || this.defaultUri);
             if (lib)
                 lib.add(type, name);
             return this;
         };
 
         TypeManager.prototype.addPrimitive = function (uri, name, type) {
-            var lib = this.libResolver.resolve(uri);
+            var lib = this.libResolver.resolve(uri || this.defaultUri);
             if (lib)
                 lib.addPrimitive(type, name);
             return this;
         };
 
         TypeManager.prototype.addEnum = function (uri, name, enu) {
-            var lib = this.libResolver.resolve(uri);
+            var lib = this.libResolver.resolve(uri || this.defaultUri);
             if (lib)
                 lib.addEnum(enu, name);
             return this;
@@ -1074,8 +1073,7 @@ var nullstone;
                 };
                 this.parser.on({
                     resolveType: function (uri, name) {
-                        if (uri)
-                            _this.add(uri, name);
+                        _this.add(uri, name);
                         return oresolve;
                     },
                     resolveObject: function (type) {
