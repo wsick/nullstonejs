@@ -167,8 +167,8 @@ module nullstone.markup.xaml {
             // NOTE: If we did not hit a child tag, use text content
             if (!hasChildren) {
                 var text = el.textContent;
-                if (text)
-                    this.$$onContentText(text.trim());
+                if (text && (text = text.trim()))
+                    this.$$onContentText(text);
             }
 
             // NOTE: Handle tag close

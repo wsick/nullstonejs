@@ -1475,8 +1475,8 @@ var nullstone;
 
                     if (!hasChildren) {
                         var text = el.textContent;
-                        if (text)
-                            this.$$onContentText(text.trim());
+                        if (text && (text = text.trim()))
+                            this.$$onContentText(text);
                     }
 
                     os.pop();
