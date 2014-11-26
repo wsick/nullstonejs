@@ -94,7 +94,8 @@ declare module nullstone {
 }
 declare module nullstone {
     interface ILibrary {
-        uri: string;
+        name: string;
+        uri: Uri;
         sourcePath: string;
         exports: string;
         rootModule: any;
@@ -110,10 +111,11 @@ declare module nullstone {
         private $$primtypes;
         private $$types;
         private $$loaded;
-        public uri: string;
+        public name: string;
+        public uri: Uri;
         public exports: string;
         public sourcePath : string;
-        constructor(uri: string);
+        constructor(name: string);
         public rootModule : any;
         public loadAsync(): async.IAsyncRequest<Library>;
         private $configModule();

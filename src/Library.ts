@@ -1,6 +1,7 @@
 module nullstone {
     export interface ILibrary {
-        uri: string;
+        name: string;
+        uri: Uri;
         sourcePath: string;
         exports: string;
         rootModule: any;
@@ -20,7 +21,8 @@ module nullstone {
 
         private $$loaded = false;
 
-        uri: string;
+        name: string;
+        uri: Uri;
         exports: string;
 
         get sourcePath (): string {
@@ -33,8 +35,12 @@ module nullstone {
             this.$$sourcePath = value;
         }
 
-        constructor (uri: string) {
-            Object.defineProperty(this, "uri", {value: uri, writable: false});
+        constructor (name: string) {
+            Object.defineProperty(this, "name", {value: name, writable: false});
+            var uri = name;
+            if (name.indexOf("http://") !== 0)
+                uri = "lib://" + name;
+            Object.defineProperty(this, "uri", {value: new Uri(uri), writable: false});
         }
 
         get rootModule (): any {
@@ -43,13 +49,13 @@ module nullstone {
 
         loadAsync (): async.IAsyncRequest<Library> {
             //NOTE: If using http library scheme and a custom source path was not set, we assume the library is preloaded
-            if (!this.$$sourcePath && this.uri && new Uri(this.uri).scheme === "http")
+            if (!this.$$sourcePath && this.uri.scheme === "http")
                 this.$$loaded = true;
             if (this.$$loaded)
                 return async.resolve(this);
             this.$configModule();
             return async.create((resolve, reject) => {
-                (<Function>require)([this.uri], (rootModule) => {
+                (<Function>require)([this.name], (rootModule) => {
                     this.$$module = rootModule;
                     this.$$loaded = true;
                     resolve(this);
@@ -66,11 +72,11 @@ module nullstone {
                 }
             };
             var srcPath = this.sourcePath;
-            co.paths[this.uri] = srcPath;
-            co.shim[this.uri] = {
+            co.paths[this.name] = srcPath;
+            co.shim[this.name] = {
                 exports: this.exports
             };
-            co.map['*'][srcPath] = this.uri;
+            co.map['*'][srcPath] = this.name;
             require.config(co);
         }
 
@@ -100,7 +106,7 @@ module nullstone {
             if (type === undefined)
                 return false;
             if (!type.$$uri)
-                Object.defineProperty(type, "$$uri", {value: this.uri, writable: false});
+                type.$$uri = this.uri.toString();
             return true;
         }
 
@@ -110,7 +116,7 @@ module nullstone {
             name = name || getTypeName(type);
             if (!name)
                 throw new Error("No type name found.");
-            Object.defineProperty(type, "$$uri", {value: this.uri, writable: false});
+            type.$$uri = this.uri.toString();
             this.$$types[name] = type;
             return this;
         }
@@ -121,7 +127,7 @@ module nullstone {
             name = name || getTypeName(type);
             if (!name)
                 throw new Error("No type name found.");
-            Object.defineProperty(type, "$$uri", {value: this.uri, writable: false});
+            type.$$uri = this.uri.toString();
             this.$$primtypes[name] = type;
             return this;
         }

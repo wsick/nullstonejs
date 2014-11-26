@@ -251,13 +251,17 @@ var nullstone;
 var nullstone;
 (function (nullstone) {
     var Library = (function () {
-        function Library(uri) {
+        function Library(name) {
             this.$$module = null;
             this.$$sourcePath = null;
             this.$$primtypes = {};
             this.$$types = {};
             this.$$loaded = false;
-            Object.defineProperty(this, "uri", { value: uri, writable: false });
+            Object.defineProperty(this, "name", { value: name, writable: false });
+            var uri = name;
+            if (name.indexOf("http://") !== 0)
+                uri = "lib://" + name;
+            Object.defineProperty(this, "uri", { value: new nullstone.Uri(uri), writable: false });
         }
         Object.defineProperty(Library.prototype, "sourcePath", {
             get: function () {
@@ -283,13 +287,13 @@ var nullstone;
 
         Library.prototype.loadAsync = function () {
             var _this = this;
-            if (!this.$$sourcePath && this.uri && new nullstone.Uri(this.uri).scheme === "http")
+            if (!this.$$sourcePath && this.uri.scheme === "http")
                 this.$$loaded = true;
             if (this.$$loaded)
                 return nullstone.async.resolve(this);
             this.$configModule();
             return nullstone.async.create(function (resolve, reject) {
-                require([_this.uri], function (rootModule) {
+                require([_this.name], function (rootModule) {
                     _this.$$module = rootModule;
                     _this.$$loaded = true;
                     resolve(_this);
@@ -306,11 +310,11 @@ var nullstone;
                 }
             };
             var srcPath = this.sourcePath;
-            co.paths[this.uri] = srcPath;
-            co.shim[this.uri] = {
+            co.paths[this.name] = srcPath;
+            co.shim[this.name] = {
                 exports: this.exports
             };
-            co.map['*'][srcPath] = this.uri;
+            co.map['*'][srcPath] = this.name;
             require.config(co);
         };
 
@@ -338,7 +342,7 @@ var nullstone;
             if (type === undefined)
                 return false;
             if (!type.$$uri)
-                Object.defineProperty(type, "$$uri", { value: this.uri, writable: false });
+                type.$$uri = this.uri.toString();
             return true;
         };
 
@@ -348,7 +352,7 @@ var nullstone;
             name = name || nullstone.getTypeName(type);
             if (!name)
                 throw new Error("No type name found.");
-            Object.defineProperty(type, "$$uri", { value: this.uri, writable: false });
+            type.$$uri = this.uri.toString();
             this.$$types[name] = type;
             return this;
         };
@@ -359,7 +363,7 @@ var nullstone;
             name = name || nullstone.getTypeName(type);
             if (!name)
                 throw new Error("No type name found.");
-            Object.defineProperty(type, "$$uri", { value: this.uri, writable: false });
+            type.$$uri = this.uri.toString();
             this.$$primtypes[name] = type;
             return this;
         };
