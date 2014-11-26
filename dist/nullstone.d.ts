@@ -109,6 +109,7 @@ declare module nullstone {
         private $$sourcePath;
         private $$primtypes;
         private $$types;
+        private $$loaded;
         public uri: string;
         public exports: string;
         public sourcePath : string;

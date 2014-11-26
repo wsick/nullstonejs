@@ -41,6 +41,9 @@ module nullstone.tests.typemanager {
 
     class MockClass {
     }
+    class MockClass2 {
+
+    }
 
     QUnit.test("Resolve Custom library type", (assert) => {
         var SOME_NS = "http://some.namespace/";
@@ -73,6 +76,20 @@ module nullstone.tests.typemanager {
                 QUnit.start();
                 ok(false, err);
             });
+    });
+
+    QUnit.asyncTest("Preloaded library", () => {
+        var lib = typemgr.resolveLibrary(DEFAULT_XMLNS);
+        lib.add(MockClass2);
+
+        typemgr.loadTypeAsync(DEFAULT_XMLNS, "MockClass2")
+            .then(cls => {
+                QUnit.start();
+                strictEqual(cls, MockClass2);
+            }, err => {
+                QUnit.start();
+                ok(false, err);
+            })
     });
 
     QUnit.asyncTest("Load amd class", () => {

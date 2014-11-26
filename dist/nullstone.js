@@ -256,6 +256,7 @@ var nullstone;
             this.$$sourcePath = null;
             this.$$primtypes = {};
             this.$$types = {};
+            this.$$loaded = false;
             Object.defineProperty(this, "uri", { value: uri, writable: false });
         }
         Object.defineProperty(Library.prototype, "sourcePath", {
@@ -282,10 +283,15 @@ var nullstone;
 
         Library.prototype.loadAsync = function () {
             var _this = this;
+            if (!this.$$sourcePath && this.uri && new nullstone.Uri(this.uri).scheme === "http")
+                this.$$loaded = true;
+            if (this.$$loaded)
+                return nullstone.async.resolve(this);
             this.$configModule();
             return nullstone.async.create(function (resolve, reject) {
                 require([_this.uri], function (rootModule) {
                     _this.$$module = rootModule;
+                    _this.$$loaded = true;
                     resolve(_this);
                 }, reject);
             });
@@ -376,9 +382,17 @@ var nullstone;
 
         LibraryResolver.prototype.loadTypeAsync = function (uri, name) {
             var lib = this.resolve(uri);
-            if (lib)
-                return lib.loadAsync();
-            return this.dirResolver.loadAsync(uri, name);
+            if (!lib)
+                return this.dirResolver.loadAsync(uri, name);
+            return nullstone.async.create(function (resolve, reject) {
+                lib.loadAsync().then(function (lib) {
+                    var oresolve = { isPrimitive: false, type: undefined };
+                    if (lib.resolveType(null, name, oresolve))
+                        resolve(oresolve.type);
+                    else
+                        resolve(null);
+                }, reject);
+            });
         };
 
         LibraryResolver.prototype.resolve = function (uri) {

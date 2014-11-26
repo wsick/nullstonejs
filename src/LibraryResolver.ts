@@ -23,9 +23,18 @@ module nullstone {
 
         loadTypeAsync (uri: string, name: string): async.IAsyncRequest<any> {
             var lib = this.resolve(uri);
-            if (lib)
-                return lib.loadAsync();
-            return this.dirResolver.loadAsync(uri, name);
+            if (!lib)
+                return this.dirResolver.loadAsync(uri, name);
+            return async.create((resolve, reject) => {
+                lib.loadAsync()
+                    .then((lib) => {
+                        var oresolve = {isPrimitive: false, type: undefined};
+                        if (lib.resolveType(null, name, oresolve))
+                            resolve(oresolve.type);
+                        else
+                            resolve(null);
+                    }, reject);
+            });
         }
 
         resolve (uri: string): ILibrary {

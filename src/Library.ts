@@ -18,6 +18,8 @@ module nullstone {
         private $$primtypes: any = {};
         private $$types: any = {};
 
+        private $$loaded = false;
+
         uri: string;
         exports: string;
 
@@ -40,10 +42,16 @@ module nullstone {
         }
 
         loadAsync (): async.IAsyncRequest<Library> {
+            //NOTE: If using http library scheme and a custom source path was not set, we assume the library is preloaded
+            if (!this.$$sourcePath && this.uri && new Uri(this.uri).scheme === "http")
+                this.$$loaded = true;
+            if (this.$$loaded)
+                return async.resolve(this);
             this.$configModule();
             return async.create((resolve, reject) => {
                 (<Function>require)([this.uri], (rootModule) => {
                     this.$$module = rootModule;
+                    this.$$loaded = true;
                     resolve(this);
                 }, reject);
             });
@@ -68,6 +76,7 @@ module nullstone {
 
         resolveType (moduleName: string, name: string, /* out */oresolve: IOutType): boolean {
             if (!moduleName) {
+                //Library URI: http://.../
                 oresolve.isPrimitive = true;
                 if ((oresolve.type = this.$$primtypes[name]) !== undefined)
                     return true;
@@ -75,6 +84,7 @@ module nullstone {
                 return (oresolve.type = this.$$types[name]) !== undefined;
             }
 
+            //Library URI: lib://.../
             var curModule = this.rootModule;
             oresolve.isPrimitive = false;
             oresolve.type = undefined;
