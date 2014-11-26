@@ -7,6 +7,10 @@ module nullstone {
         resolve(uri: string): ILibrary;
     }
 
+    export interface ILibraryCreatedEventArgs extends IEventArgs {
+        library: ILibrary;
+    }
+
     //NOTE:
     //  Library Uri syntax
     //      http://...
@@ -14,6 +18,8 @@ module nullstone {
     //      <dir>
     export class LibraryResolver implements ILibraryResolver {
         private $$libs: ILibraryHash = {};
+
+        libraryCreated = new Event();
 
         dirResolver = new DirResolver();
 
@@ -45,8 +51,10 @@ module nullstone {
 
             var libName = (scheme === "lib") ? libUri.host : uri;
             var lib = this.$$libs[libName];
-            if (!lib)
+            if (!lib) {
                 lib = this.$$libs[libName] = this.createLibrary(libName);
+                this.$$onLibraryCreated(lib);
+            }
             return lib;
         }
 
@@ -59,9 +67,15 @@ module nullstone {
             var libName = (scheme === "lib") ? libUri.host : uri;
             var modName = (scheme === "lib") ? libUri.absolutePath : "";
             var lib = this.$$libs[libName];
-            if (!lib)
+            if (!lib) {
                 lib = this.$$libs[libName] = this.createLibrary(libName);
+                this.$$onLibraryCreated(lib);
+            }
             return lib.resolveType(modName, name, oresolve);
+        }
+
+        private $$onLibraryCreated (lib: ILibrary) {
+            this.libraryCreated.raise(this, Object.freeze({library: lib}));
         }
     }
 }

@@ -334,7 +334,12 @@ var nullstone;
             if (!curModule)
                 return false;
             oresolve.type = curModule[name];
-            return oresolve.type !== undefined;
+            var type = oresolve.type;
+            if (type === undefined)
+                return false;
+            if (!type.$$uri)
+                Object.defineProperty(type, "$$uri", { value: this.uri, writable: false });
+            return true;
         };
 
         Library.prototype.add = function (type, name) {
@@ -374,6 +379,7 @@ var nullstone;
     var LibraryResolver = (function () {
         function LibraryResolver() {
             this.$$libs = {};
+            this.libraryCreated = new nullstone.Event();
             this.dirResolver = new nullstone.DirResolver();
         }
         LibraryResolver.prototype.createLibrary = function (uri) {
@@ -403,8 +409,10 @@ var nullstone;
 
             var libName = (scheme === "lib") ? libUri.host : uri;
             var lib = this.$$libs[libName];
-            if (!lib)
+            if (!lib) {
                 lib = this.$$libs[libName] = this.createLibrary(libName);
+                this.$$onLibraryCreated(lib);
+            }
             return lib;
         };
 
@@ -417,9 +425,15 @@ var nullstone;
             var libName = (scheme === "lib") ? libUri.host : uri;
             var modName = (scheme === "lib") ? libUri.absolutePath : "";
             var lib = this.$$libs[libName];
-            if (!lib)
+            if (!lib) {
                 lib = this.$$libs[libName] = this.createLibrary(libName);
+                this.$$onLibraryCreated(lib);
+            }
             return lib.resolveType(modName, name, oresolve);
+        };
+
+        LibraryResolver.prototype.$$onLibraryCreated = function (lib) {
+            this.libraryCreated.raise(this, Object.freeze({ library: lib }));
         };
         return LibraryResolver;
     })();

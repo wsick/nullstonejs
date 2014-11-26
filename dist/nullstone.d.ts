@@ -128,13 +128,18 @@ declare module nullstone {
         loadTypeAsync(uri: string, name: string): async.IAsyncRequest<any>;
         resolve(uri: string): ILibrary;
     }
+    interface ILibraryCreatedEventArgs extends IEventArgs {
+        library: ILibrary;
+    }
     class LibraryResolver implements ILibraryResolver {
         private $$libs;
+        public libraryCreated: Event<{}>;
         public dirResolver: DirResolver;
         public createLibrary(uri: string): ILibrary;
         public loadTypeAsync(uri: string, name: string): async.IAsyncRequest<any>;
         public resolve(uri: string): ILibrary;
         public resolveType(uri: string, name: string, oresolve: IOutType): boolean;
+        private $$onLibraryCreated(lib);
     }
 }
 declare module nullstone {

@@ -96,7 +96,12 @@ module nullstone {
             if (!curModule)
                 return false;
             oresolve.type = curModule[name];
-            return oresolve.type !== undefined;
+            var type = oresolve.type;
+            if (type === undefined)
+                return false;
+            if (!type.$$uri)
+                Object.defineProperty(type, "$$uri", {value: this.uri, writable: false});
+            return true;
         }
 
         add (type: any, name?: string): ILibrary {
