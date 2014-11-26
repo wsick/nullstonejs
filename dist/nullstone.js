@@ -1060,7 +1060,8 @@ var nullstone;
                 };
                 this.parser.on({
                     resolveType: function (uri, name) {
-                        _this.add(uri, name);
+                        if (uri)
+                            _this.add(uri, name);
                         return oresolve;
                     },
                     resolveObject: function (type) {
