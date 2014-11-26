@@ -3,6 +3,7 @@ module nullstone {
         [id:string]: ILibrary;
     }
     export interface ILibraryResolver extends ITypeResolver {
+        libraryCreated: Event<IEventArgs>;
         loadTypeAsync(uri: string, name: string): async.IAsyncRequest<any>;
         resolve(uri: string): ILibrary;
     }
