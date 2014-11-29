@@ -1012,8 +1012,6 @@ var nullstone;
                 }),
                 name: listener.name || (function (name) {
                 }),
-                key: listener.key || (function (key) {
-                }),
                 propertyStart: listener.propertyStart || (function (ownerType, propName) {
                 }),
                 propertyEnd: listener.propertyEnd || (function (ownerType, propName) {
@@ -1386,6 +1384,7 @@ var nullstone;
                     this.$$objectStack = [];
                     this.$$skipnext = false;
                     this.$$curel = null;
+                    this.$$curkey = undefined;
                     this.setExtensionParser(new xaml.XamlExtensionParser()).setNamespaces(xaml.DEFAULT_XMLNS, xaml.DEFAULT_XMLNS_X).on({});
                 }
                 XamlParser.prototype.on = function (listener) {
@@ -1400,7 +1399,6 @@ var nullstone;
                     this.$$onObjectEnd = listener.objectEnd;
                     this.$$onContentText = listener.contentText;
                     this.$$onName = listener.name;
-                    this.$$onKey = listener.key;
                     this.$$onPropertyStart = listener.propertyStart;
                     this.$$onPropertyEnd = listener.propertyEnd;
                     this.$$onError = listener.error;
@@ -1485,12 +1483,15 @@ var nullstone;
                     if (resEl)
                         this.$$handleResources(obj, ort.type, resEl);
 
+                    this.$$curkey = undefined;
+
                     this.$$processAttributes(el);
+                    var key = this.$$curkey;
 
                     if (this.$$skipnext) {
                         this.$$skipnext = false;
                         os.pop();
-                        this.$$onObjectEnd(obj, isContent, os[os.length - 1]);
+                        this.$$onObjectEnd(obj, key, isContent, os[os.length - 1]);
                         this.$$onBranchSkip(el.firstElementChild, obj);
                         this.$$curel = old;
                         return;
@@ -1511,7 +1512,7 @@ var nullstone;
                     }
 
                     os.pop();
-                    this.$$onObjectEnd(obj, isContent, os[os.length - 1]);
+                    this.$$onObjectEnd(obj, key, isContent, os[os.length - 1]);
                     this.$$curel = old;
                 };
 
@@ -1526,7 +1527,7 @@ var nullstone;
                         child = child.nextElementSibling;
                     }
                     os.pop();
-                    this.$$onObjectEnd(rd, false, os[os.length - 1]);
+                    this.$$onObjectEnd(rd, undefined, false, os[os.length - 1]);
                 };
 
                 XamlParser.prototype.$$tryHandleError = function (el, xmlns, name) {
@@ -1563,9 +1564,11 @@ var nullstone;
                         return false;
                     var obj = this.$$onResolvePrimitive(oresolve.type, el.textContent);
                     this.$$onObject(obj, isContent);
+                    this.$$curkey = undefined;
                     this.$$processAttributes(el);
+                    var key = this.$$curkey;
                     var os = this.$$objectStack;
-                    this.$$onObjectEnd(obj, isContent, os[os.length - 1]);
+                    this.$$onObjectEnd(obj, key, isContent, os[os.length - 1]);
                     return true;
                 };
 
@@ -1599,7 +1602,7 @@ var nullstone;
                     if (name === "Name")
                         this.$$onName(value);
                     if (name === "Key")
-                        this.$$onKey(value);
+                        this.$$curkey = value;
                     return true;
                 };
 
@@ -1616,7 +1619,7 @@ var nullstone;
                     this.$$onPropertyStart(type, name);
                     var val = this.$$getAttrValue(value, attr);
                     this.$$onObject(val, false);
-                    this.$$onObjectEnd(val, false, os[os.length - 1]);
+                    this.$$onObjectEnd(val, undefined, false, os[os.length - 1]);
                     this.$$onPropertyEnd(type, name);
                     return true;
                 };

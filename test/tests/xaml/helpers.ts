@@ -80,10 +80,11 @@ module nullstone.markup.xaml.tests {
                             isContent: isContent
                         });
                     },
-                    objectEnd: (obj, isContent, prev) => {
+                    objectEnd: (obj, key, isContent, prev) => {
                         cmds.push({
                             cmd: 'oe',
                             obj: obj,
+                            key: key,
                             isContent: isContent
                         });
                     },
@@ -97,12 +98,6 @@ module nullstone.markup.xaml.tests {
                         cmds.push({
                             cmd: 'name',
                             name: name
-                        });
-                    },
-                    key: (key) => {
-                        cmds.push({
-                            cmd: 'key',
-                            key: key
                         });
                     },
                     propertyStart: (ownerType, propName) => {

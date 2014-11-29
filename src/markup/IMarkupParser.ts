@@ -41,7 +41,6 @@ module nullstone.markup {
         objectEnd?: events.IObjectEnd;
         contentText?: events.IText;
         name?: events.IName;
-        key?: events.IKey;
         propertyStart?: events.IPropertyStart;
         propertyEnd?: events.IPropertyEnd;
         error?: events.IResumableError;
@@ -68,8 +67,6 @@ module nullstone.markup {
             contentText: listener.contentText || ((text) => {
             }),
             name: listener.name || ((name) => {
-            }),
-            key: listener.key || ((key) => {
             }),
             propertyStart: listener.propertyStart || ((ownerType, propName) => {
             }),

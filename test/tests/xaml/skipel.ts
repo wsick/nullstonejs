@@ -51,6 +51,7 @@ module nullstone.markup.xaml.tests {
                 deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: sm,
+                    key: undefined,
                     isContent: true
                 }, 'oe SkipMe');
                 i++;
@@ -64,6 +65,7 @@ module nullstone.markup.xaml.tests {
                 deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: app,
+                    key: undefined,
                     isContent: true
                 }, 'oe Application');
                 strictEqual(cmds.length, i + 1);

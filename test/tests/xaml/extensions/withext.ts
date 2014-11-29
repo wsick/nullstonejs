@@ -70,6 +70,7 @@ module nullstone.markup.xaml.tests.extensions {
                 deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: cmds[i - 2].type,
+                    key: undefined,
                     isContent: false
                 }, 'oe Grid');
                 i++;
@@ -82,12 +83,14 @@ module nullstone.markup.xaml.tests.extensions {
                 deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: grid,
+                    key: undefined,
                     isContent: true
                 }, 'oe Grid');
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: app,
+                    key: undefined,
                     isContent: true
                 }, 'oe Application');
                 strictEqual(cmds.length, i + 1);

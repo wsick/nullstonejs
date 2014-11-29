@@ -18,16 +18,13 @@ module nullstone.markup.events {
         (obj: any, isContent: boolean);
     }
     export interface IObjectEnd {
-        (obj: any, isContent: boolean, prev: any);
+        (obj: any, key: any, isContent: boolean, prev: any);
     }
     export interface IText {
         (text: string);
     }
     export interface IName {
         (name: string);
-    }
-    export interface IKey {
-        (key: string);
     }
     export interface IPropertyStart {
         (ownerType: any, propName: string);

@@ -14,7 +14,6 @@ module nullstone.markup.xaml {
         private $$onObjectEnd: events.IObjectEnd;
         private $$onContentText: events.IText;
         private $$onName: events.IName;
-        private $$onKey: events.IKey;
         private $$onPropertyStart: events.IPropertyStart;
         private $$onPropertyEnd: events.IPropertyEnd;
         private $$onError: events.IError;
@@ -28,6 +27,7 @@ module nullstone.markup.xaml {
         private $$objectStack: any[] = [];
         private $$skipnext = false;
         private $$curel: Element = null;
+        private $$curkey: string = undefined;
 
         constructor () {
             this.setExtensionParser(new XamlExtensionParser())
@@ -47,7 +47,6 @@ module nullstone.markup.xaml {
             this.$$onObjectEnd = listener.objectEnd;
             this.$$onContentText = listener.contentText;
             this.$$onName = listener.name;
-            this.$$onKey = listener.key;
             this.$$onPropertyStart = listener.propertyStart;
             this.$$onPropertyEnd = listener.propertyEnd;
             this.$$onError = listener.error;
@@ -143,13 +142,15 @@ module nullstone.markup.xaml {
             if (resEl)
                 this.$$handleResources(obj, ort.type, resEl);
 
+            this.$$curkey = undefined;
             // NOTE: Walk attributes
             this.$$processAttributes(el);
+            var key = this.$$curkey;
 
             if (this.$$skipnext) {
                 this.$$skipnext = false;
                 os.pop();
-                this.$$onObjectEnd(obj, isContent, os[os.length - 1]);
+                this.$$onObjectEnd(obj, key, isContent, os[os.length - 1]);
                 this.$$onBranchSkip(el.firstElementChild, obj);
                 this.$$curel = old;
                 return;
@@ -175,7 +176,7 @@ module nullstone.markup.xaml {
             //  </[ns:]Type.Name>
             //  </[ns:]Type>
             os.pop();
-            this.$$onObjectEnd(obj, isContent, os[os.length - 1]);
+            this.$$onObjectEnd(obj, key, isContent, os[os.length - 1]);
             this.$$curel = old;
         }
 
@@ -190,7 +191,7 @@ module nullstone.markup.xaml {
                 child = child.nextElementSibling;
             }
             os.pop();
-            this.$$onObjectEnd(rd, false, os[os.length - 1]);
+            this.$$onObjectEnd(rd, undefined, false, os[os.length - 1]);
         }
 
         private $$tryHandleError (el: Element, xmlns: string, name: string): boolean {
@@ -227,9 +228,11 @@ module nullstone.markup.xaml {
                 return false;
             var obj = this.$$onResolvePrimitive(oresolve.type, el.textContent);
             this.$$onObject(obj, isContent);
+            this.$$curkey = undefined;
             this.$$processAttributes(el);
+            var key = this.$$curkey;
             var os = this.$$objectStack;
-            this.$$onObjectEnd(obj, isContent, os[os.length - 1]);
+            this.$$onObjectEnd(obj, key, isContent, os[os.length - 1]);
             return true;
         }
 
@@ -265,7 +268,7 @@ module nullstone.markup.xaml {
             if (name === "Name")
                 this.$$onName(value);
             if (name === "Key")
-                this.$$onKey(value);
+                this.$$curkey = value;
             return true;
         }
 
@@ -285,7 +288,7 @@ module nullstone.markup.xaml {
             this.$$onPropertyStart(type, name);
             var val = this.$$getAttrValue(value, attr);
             this.$$onObject(val, false);
-            this.$$onObjectEnd(val, false, os[os.length - 1]);
+            this.$$onObjectEnd(val, undefined, false, os[os.length - 1]);
             this.$$onPropertyEnd(type, name);
             return true;
         }

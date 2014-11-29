@@ -77,12 +77,14 @@ module nullstone.markup.xaml.tests {
                 deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: btn,
+                    key: undefined,
                     isContent: true
                 }, 'oe Button');
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: app,
+                    key: undefined,
                     isContent: true
                 }, 'oe Application');
                 strictEqual(cmds.length, i + 1);

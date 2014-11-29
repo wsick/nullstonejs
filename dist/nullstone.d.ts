@@ -296,7 +296,6 @@ declare module nullstone.markup {
         objectEnd?: events.IObjectEnd;
         contentText?: events.IText;
         name?: events.IName;
-        key?: events.IKey;
         propertyStart?: events.IPropertyStart;
         propertyEnd?: events.IPropertyEnd;
         error?: events.IResumableError;
@@ -354,16 +353,13 @@ declare module nullstone.markup.events {
         (obj: any, isContent: boolean): any;
     }
     interface IObjectEnd {
-        (obj: any, isContent: boolean, prev: any): any;
+        (obj: any, key: any, isContent: boolean, prev: any): any;
     }
     interface IText {
         (text: string): any;
     }
     interface IName {
         (name: string): any;
-    }
-    interface IKey {
-        (key: string): any;
     }
     interface IPropertyStart {
         (ownerType: any, propName: string): any;
@@ -422,7 +418,6 @@ declare module nullstone.markup.xaml {
         private $$onObjectEnd;
         private $$onContentText;
         private $$onName;
-        private $$onKey;
         private $$onPropertyStart;
         private $$onPropertyEnd;
         private $$onError;
@@ -433,6 +428,7 @@ declare module nullstone.markup.xaml {
         private $$objectStack;
         private $$skipnext;
         private $$curel;
+        private $$curkey;
         constructor();
         public on(listener: IMarkupSax<Element>): XamlParser;
         public setNamespaces(defaultXmlns: string, xXmlns: string): XamlParser;

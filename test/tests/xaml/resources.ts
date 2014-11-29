@@ -65,13 +65,9 @@ module nullstone.markup.xaml.tests {
                 }, 'o(c) Test');
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'key',
-                    key: 'Test1'
-                }, 'key Test1');
-                i++;
-                deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: test1,
+                    key: 'Test1',
                     isContent: true
                 }, 'oe Test');
                 //Test2
@@ -97,13 +93,9 @@ module nullstone.markup.xaml.tests {
                 }, 'o(c) Test');
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'key',
-                    key: 'Test2'
-                }, 'key Test2');
-                i++;
-                deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: test2,
+                    key: 'Test2',
                     isContent: true
                 }, 'oe Test');
                 //Test3
@@ -129,13 +121,9 @@ module nullstone.markup.xaml.tests {
                 }, 'o(c) Test');
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'key',
-                    key: 'Test3'
-                }, 'key Test3');
-                i++;
-                deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: test3,
+                    key: 'Test3',
                     isContent: true
                 }, 'oe Test');
                 //End Application.Resources
@@ -143,6 +131,7 @@ module nullstone.markup.xaml.tests {
                 deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: ares,
+                    key: undefined,
                     isContent: false
                 }, 'oe Application.Resources');
                 //End Application
@@ -150,6 +139,7 @@ module nullstone.markup.xaml.tests {
                 deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: app,
+                    key: undefined,
                     isContent: true
                 }, 'oe Application');
                 strictEqual(cmds.length, i + 1);

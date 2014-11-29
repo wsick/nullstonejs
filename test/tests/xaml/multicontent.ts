@@ -80,6 +80,7 @@ module nullstone.markup.xaml.tests {
                 deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: brd,
+                    key: undefined,
                     isContent: true
                 }, 'oe Border');
 
@@ -108,6 +109,7 @@ module nullstone.markup.xaml.tests {
                 deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: brd,
+                    key: undefined,
                     isContent: true
                 });
 
@@ -136,6 +138,7 @@ module nullstone.markup.xaml.tests {
                 deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: brd,
+                    key: undefined,
                     isContent: true
                 });
 
@@ -144,6 +147,7 @@ module nullstone.markup.xaml.tests {
                 deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: grid,
+                    key: undefined,
                     isContent: true
                 });
 
@@ -152,6 +156,7 @@ module nullstone.markup.xaml.tests {
                 deepEqual(cmds[i], {
                     cmd: 'oe',
                     obj: app,
+                    key: undefined,
                     isContent: true
                 });
                 strictEqual(cmds.length, i + 1);
