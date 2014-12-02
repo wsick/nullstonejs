@@ -978,6 +978,9 @@ var nullstone;
             resolvePrefix: function (prefix) {
                 return "";
             },
+            getObjects: function () {
+                return [];
+            },
             walkUpObjects: function () {
                 return nullstone.IEnumerator_.empty;
             }
@@ -1481,6 +1484,10 @@ var nullstone;
 
                 XamlParser.prototype.skipBranch = function () {
                     this.$$skipnext = true;
+                };
+
+                XamlParser.prototype.getObjects = function () {
+                    return this.$$objectStack.slice(0);
                 };
 
                 XamlParser.prototype.walkUpObjects = function () {

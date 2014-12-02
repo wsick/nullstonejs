@@ -96,6 +96,10 @@ module nullstone.markup.xaml {
             this.$$skipnext = true;
         }
 
+        getObjects (): any[] {
+            return this.$$objectStack.slice(0);
+        }
+
         walkUpObjects (): IEnumerator<any> {
             var os = this.$$objectStack;
             var i = os.length;
