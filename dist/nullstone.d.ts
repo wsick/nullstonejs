@@ -390,6 +390,7 @@ declare module nullstone.markup.xaml {
         private $$parseXExt(ctx, os, name, val);
         private $$parseKeyValue(ctx, os);
         private $$finishKeyValue(acc, key, val, os);
+        private $$parseSingleQuoted(ctx);
         private $$ensure();
         public onResolveType(cb?: events.IResolveType): XamlExtensionParser;
         public onResolveObject(cb?: events.IResolveObject): XamlExtensionParser;

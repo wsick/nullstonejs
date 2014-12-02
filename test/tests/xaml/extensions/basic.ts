@@ -74,4 +74,11 @@ module nullstone.markup.xaml.extensions.tests {
         expected.Other = "3";
         deepEqual(val, expected);
     });
+
+    QUnit.test("Single-quote escaped", () => {
+        var val = parser.parse("{Random Other='} a\\'s'}", mock.resolver(), []);
+        var expected = new Random();
+        expected.Other = "} a's";
+        deepEqual(val, expected);
+    });
 }

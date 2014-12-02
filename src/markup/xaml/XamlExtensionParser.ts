@@ -129,7 +129,8 @@ module nullstone.markup.xaml {
             ctx.acc = "";
             var key = "";
             var val: any = undefined;
-            for (; ctx.i < text.length; ctx.i++) {
+            var len = text.length;
+            for (; ctx.i < len; ctx.i++) {
                 var cur = text[ctx.i];
                 if (cur === "\\") {
                     ctx.i++;
@@ -153,10 +154,16 @@ module nullstone.markup.xaml {
                     ctx.i++;
                     this.$$finishKeyValue(ctx.acc, key, val, os);
                     return true;
+                } else if (key && !ctx.acc && cur === "'") {
+                    ctx.i++;
+                    this.$$parseSingleQuoted(ctx);
+                    val = ctx.acc;
+                    ctx.acc = "";
                 } else {
                     ctx.acc += cur;
                 }
             }
+            throw new Error("Unterminated string constant.");
         }
 
         private $$finishKeyValue (acc: string, key: string, val: any, os: any[]) {
@@ -172,6 +179,22 @@ module nullstone.markup.xaml {
                 co.init && co.init(val);
             } else {
                 co[key] = val;
+            }
+        }
+
+        private $$parseSingleQuoted (ctx: IParseContext) {
+            var text = ctx.text;
+            var len = text.length;
+            for (; ctx.i < len; ctx.i++) {
+                var cur = text[ctx.i];
+                if (cur === "\\") {
+                    ctx.i++;
+                    ctx.acc += text[ctx.i];
+                } else if (cur === "'") {
+                    return;
+                } else {
+                    ctx.acc += cur;
+                }
             }
         }
 
