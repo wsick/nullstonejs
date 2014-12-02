@@ -283,7 +283,6 @@ declare module nullstone.markup {
         parse(root: T): any;
         skipBranch(): any;
         resolvePrefix(prefix: string): string;
-        getObjects(): any[];
         walkUpObjects(): IEnumerator<any>;
     }
     var NO_PARSER: IMarkupParser<any>;
@@ -439,7 +438,6 @@ declare module nullstone.markup.xaml {
         public setExtensionParser(parser: IMarkupExtensionParser): XamlParser;
         public parse(el: Element): XamlParser;
         public skipBranch(): void;
-        public getObjects(): any[];
         public walkUpObjects(): IEnumerator<any>;
         public resolvePrefix(prefix: string): string;
         private $$handleElement(el, isContent);

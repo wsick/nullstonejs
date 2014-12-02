@@ -6,7 +6,6 @@ module nullstone.markup {
         parse(root: T);
         skipBranch();
         resolvePrefix (prefix: string): string;
-        getObjects (): any[];
         walkUpObjects (): IEnumerator<any>;
     }
     export var NO_PARSER: IMarkupParser<any> = {
@@ -25,9 +24,6 @@ module nullstone.markup {
         },
         resolvePrefix (prefix: string): string {
             return "";
-        },
-        getObjects (): any[] {
-            return [];
         },
         walkUpObjects (): IEnumerator<any> {
             return IEnumerator_.empty;
