@@ -387,7 +387,9 @@ declare module nullstone.markup.xaml {
         private $$doParse(ctx, os);
         private $$parseName(ctx);
         private $$startExtension(ctx, os);
-        private $$parseXExt(ctx, os, name, val);
+        private $$parseXNull(ctx);
+        private $$parseXType(ctx);
+        private $$parseXStatic(ctx);
         private $$parseKeyValue(ctx, os);
         private $$finishKeyValue(acc, key, val, os);
         private $$parseSingleQuoted(ctx);

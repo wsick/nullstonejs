@@ -18,6 +18,7 @@ module nullstone.markup.xaml.extensions.tests {
     class Random implements IMarkupExtension {
         Foo: number;
         Other: string;
+        Some: any;
 
         init (val: string) {
         }
@@ -79,6 +80,13 @@ module nullstone.markup.xaml.extensions.tests {
         var val = parser.parse("{Random Other='} a\\'s'}", mock.resolver(), []);
         var expected = new Random();
         expected.Other = "} a's";
+        deepEqual(val, expected);
+    });
+
+    QUnit.test("Nested xtype", () => {
+        var val = parser.parse("{Random Some={x:Type Random}}", mock.resolver(), []);
+        var expected = new Random();
+        expected.Some = Random;
         deepEqual(val, expected);
     });
 }

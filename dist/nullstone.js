@@ -1164,8 +1164,7 @@ var nullstone;
                 XamlExtensionParser.prototype.$$doParse = function (ctx, os) {
                     if (!this.$$parseName(ctx))
                         return undefined;
-                    if (!this.$$startExtension(ctx, os))
-                        return undefined;
+                    this.$$startExtension(ctx, os);
 
                     while (ctx.i < ctx.text.length) {
                         if (!this.$$parseKeyValue(ctx, os))
@@ -1202,38 +1201,58 @@ var nullstone;
                     var name = (ind < 0) ? full : full.substr(ind + 1);
                     var uri = prefix ? ctx.resolver.lookupNamespaceURI(prefix) : xaml.DEFAULT_XMLNS;
 
+                    var obj;
                     if (uri === this.$$xXmlns) {
-                        var val = ctx.text.substr(ctx.i, ctx.text.length - ctx.i - 1);
-                        ctx.i = ctx.text.length;
-                        return this.$$parseXExt(ctx, os, name, val);
+                        if (name === "Null")
+                            obj = this.$$parseXNull(ctx);
+                        else if (name === "Type")
+                            obj = this.$$parseXType(ctx);
+                        else if (name === "Static")
+                            obj = this.$$parseXStatic(ctx);
+                        else
+                            throw new Error("Unknown markup extension. [" + prefix + ":" + name + "]");
+                    } else {
+                        var ort = this.$$onResolveType(uri, name);
+                        obj = this.$$onResolveObject(ort.type);
                     }
-
-                    var ort = this.$$onResolveType(uri, name);
-                    var obj = this.$$onResolveObject(ort.type);
                     os.push(obj);
-                    return true;
                 };
 
-                XamlExtensionParser.prototype.$$parseXExt = function (ctx, os, name, val) {
-                    if (name === "Null") {
-                        os.push(null);
-                        return true;
+                XamlExtensionParser.prototype.$$parseXNull = function (ctx) {
+                    var ind = ctx.text.indexOf("}", ctx.i);
+                    if (ind < ctx.i)
+                        throw new Error("Unterminated string constant.");
+                    ctx.i = ind;
+                    return null;
+                };
+
+                XamlExtensionParser.prototype.$$parseXType = function (ctx) {
+                    var end = ctx.text.indexOf("}", ctx.i);
+                    if (end < ctx.i)
+                        throw new Error("Unterminated string constant.");
+                    var val = ctx.text.substr(ctx.i, end - ctx.i);
+                    ctx.i = end;
+
+                    var ind = val.indexOf(":");
+                    var prefix = (ind < 0) ? null : val.substr(0, ind);
+                    var name = (ind < 0) ? val : val.substr(ind + 1);
+                    var uri = ctx.resolver.lookupNamespaceURI(prefix);
+                    var ort = this.$$onResolveType(uri, name);
+                    return ort.type;
+                };
+
+                XamlExtensionParser.prototype.$$parseXStatic = function (ctx) {
+                    var text = ctx.text;
+                    var len = text.length;
+                    var start = ctx.i;
+                    for (; ctx.i < len; ctx.i++) {
+                        if (text[ctx.i] === "}" && text[ctx.i - 1] !== "\\")
+                            break;
                     }
-                    if (name === "Type") {
-                        var ind = val.indexOf(":");
-                        var prefix = (ind < 0) ? null : val.substr(0, ind);
-                        var name = (ind < 0) ? val : val.substr(ind + 1);
-                        var uri = ctx.resolver.lookupNamespaceURI(prefix);
-                        var ort = this.$$onResolveType(uri, name);
-                        os.push(ort.type);
-                        return true;
-                    }
-                    if (name === "Static") {
-                        var func = new Function("return (" + val + ");");
-                        os.push(func());
-                        return true;
-                    }
-                    return true;
+                    var val = text.substr(start, ctx.i - start);
+
+                    var func = new Function("return (" + val + ");");
+                    return func();
                 };
 
                 XamlExtensionParser.prototype.$$parseKeyValue = function (ctx, os) {
