@@ -1607,7 +1607,8 @@ var nullstone;
                 XamlParser.prototype.$$tryHandlePrimitive = function (el, oresolve, isContent) {
                     if (!oresolve.isPrimitive)
                         return false;
-                    var obj = this.$$onResolvePrimitive(oresolve.type, el.textContent);
+                    var text = el.textContent;
+                    var obj = this.$$onResolvePrimitive(oresolve.type, text ? text.trim() : "");
                     this.$$onObject(obj, isContent);
                     this.$$curkey = undefined;
                     this.$$processAttributes(el);
