@@ -133,9 +133,10 @@ module nullstone.markup.xaml {
             }
 
             var obj = this.$$onResolveObject(ort.type);
-            os.push(obj);
-
-            this.$$onObject(obj, isContent);
+            if (obj !== undefined) {
+                os.push(obj);
+                this.$$onObject(obj, isContent);
+            }
 
             // NOTE: Handle resources before attributes and child elements
             var resEl = findResourcesElement(el, xmlns, name);
@@ -175,8 +176,10 @@ module nullstone.markup.xaml {
             // NOTE: Handle tag close
             //  </[ns:]Type.Name>
             //  </[ns:]Type>
-            os.pop();
-            this.$$onObjectEnd(obj, key, isContent, os[os.length - 1]);
+            if (obj !== undefined) {
+                os.pop();
+                this.$$onObjectEnd(obj, key, isContent, os[os.length - 1]);
+            }
             this.$$curel = old;
         }
 

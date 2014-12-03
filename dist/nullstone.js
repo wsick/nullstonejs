@@ -1517,9 +1517,10 @@ var nullstone;
                     }
 
                     var obj = this.$$onResolveObject(ort.type);
-                    os.push(obj);
-
-                    this.$$onObject(obj, isContent);
+                    if (obj !== undefined) {
+                        os.push(obj);
+                        this.$$onObject(obj, isContent);
+                    }
 
                     var resEl = findResourcesElement(el, xmlns, name);
                     if (resEl)
@@ -1553,8 +1554,10 @@ var nullstone;
                             this.$$onContentText(text);
                     }
 
-                    os.pop();
-                    this.$$onObjectEnd(obj, key, isContent, os[os.length - 1]);
+                    if (obj !== undefined) {
+                        os.pop();
+                        this.$$onObjectEnd(obj, key, isContent, os[os.length - 1]);
+                    }
                     this.$$curel = old;
                 };
 
