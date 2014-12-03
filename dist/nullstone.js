@@ -961,6 +961,39 @@ var nullstone;
 var nullstone;
 (function (nullstone) {
     (function (markup) {
+        function finishMarkupExtension(me, prefixResolver, resolver, os) {
+            if (!me)
+                return me;
+            if (typeof me.resolveTypeFields === "function") {
+                me.resolveTypeFields(function (full) {
+                    return parseType(full, prefixResolver, resolver);
+                });
+            }
+            if (typeof me.transmute === "function") {
+                return me.transmute(os);
+            }
+            return me;
+        }
+        markup.finishMarkupExtension = finishMarkupExtension;
+
+        function parseType(full, prefixResolver, resolver) {
+            var prefix = null;
+            var name = full;
+            var ind = name.indexOf(":");
+            if (ind > -1) {
+                prefix = name.substr(0, ind);
+                name = name.substr(ind + 1);
+            }
+            var uri = prefixResolver.lookupNamespaceURI(prefix);
+            var ort = resolver(uri, name);
+            return ort.type;
+        }
+    })(nullstone.markup || (nullstone.markup = {}));
+    var markup = nullstone.markup;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    (function (markup) {
         markup.NO_PARSER = {
             on: function (listener) {
                 return markup.NO_PARSER;
@@ -1155,9 +1188,7 @@ var nullstone;
                     var obj = this.$$doParse(ctx, os);
                     if (ctx.error)
                         this.$$onError(ctx.error);
-                    if (obj && typeof obj.transmute === "function") {
-                        obj = obj.transmute(os);
-                    }
+                    obj = markup.finishMarkupExtension(obj, resolver, this.$$onResolveType, os);
                     return obj;
                 };
 
@@ -1279,11 +1310,11 @@ var nullstone;
                             key = ctx.acc.trim();
                             ctx.acc = "";
                         } else if (cur === "}") {
-                            this.$$finishKeyValue(ctx.acc, key, val, os);
+                            this.$$finishKeyValue(ctx, key, val, os);
                             return true;
                         } else if (cur === ",") {
                             ctx.i++;
-                            this.$$finishKeyValue(ctx.acc, key, val, os);
+                            this.$$finishKeyValue(ctx, key, val, os);
                             return true;
                         } else if (key && !ctx.acc && cur === "'") {
                             ctx.i++;
@@ -1297,14 +1328,13 @@ var nullstone;
                     throw new Error("Unterminated string constant.");
                 };
 
-                XamlExtensionParser.prototype.$$finishKeyValue = function (acc, key, val, os) {
+                XamlExtensionParser.prototype.$$finishKeyValue = function (ctx, key, val, os) {
                     if (val === undefined) {
-                        if (!(val = acc.trim()))
+                        if (!(val = ctx.acc.trim()))
                             return;
                     }
-                    if (typeof val.transmute === "function") {
-                        val = val.transmute(os);
-                    }
+
+                    val = markup.finishMarkupExtension(val, ctx.resolver, this.$$onResolveType, os);
                     var co = os[os.length - 1];
                     if (!key) {
                         co.init && co.init(val);

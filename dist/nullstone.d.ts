@@ -259,8 +259,10 @@ declare module nullstone {
 declare module nullstone.markup {
     interface IMarkupExtension {
         init(val: string): any;
+        resolveTypeFields? (resolver: (full: string) => any): any;
         transmute? (os: any[]): any;
     }
+    function finishMarkupExtension(me: IMarkupExtension, prefixResolver: INsPrefixResolver, resolver: events.IResolveType, os: any[]): any;
 }
 declare module nullstone.markup {
     interface INsPrefixResolver {
@@ -391,7 +393,7 @@ declare module nullstone.markup.xaml {
         private $$parseXType(ctx);
         private $$parseXStatic(ctx);
         private $$parseKeyValue(ctx, os);
-        private $$finishKeyValue(acc, key, val, os);
+        private $$finishKeyValue(ctx, key, val, os);
         private $$parseSingleQuoted(ctx);
         private $$ensure();
         public onResolveType(cb?: events.IResolveType): XamlExtensionParser;

@@ -19,8 +19,14 @@ module nullstone.markup.xaml.extensions.tests {
         Foo: number;
         Other: string;
         Some: any;
+        Impl: any;
 
         init (val: string) {
+        }
+
+        resolveTypeFields (resolver: (full: string) => any) {
+            if (typeof this.Impl === "string")
+                this.Impl = resolver(this.Impl);
         }
     }
 
@@ -87,6 +93,13 @@ module nullstone.markup.xaml.extensions.tests {
         var val = parser.parse("{Random Some={x:Type Random}}", mock.resolver(), []);
         var expected = new Random();
         expected.Some = Random;
+        deepEqual(val, expected);
+    });
+
+    QUnit.test("Resolve implicit type", () => {
+        var val = parser.parse("{Random Impl=Random}", mock.resolver(), []);
+        var expected = new Random();
+        expected.Impl = Random;
         deepEqual(val, expected);
     });
 }

@@ -43,9 +43,7 @@ module nullstone.markup.xaml {
             var obj = this.$$doParse(ctx, os);
             if (ctx.error)
                 this.$$onError(ctx.error);
-            if (obj && typeof obj.transmute === "function") {
-                obj = (<IMarkupExtension>obj).transmute(os);
-            }
+            obj = finishMarkupExtension(obj, resolver, this.$$onResolveType, os);
             return obj;
         }
 
@@ -167,11 +165,11 @@ module nullstone.markup.xaml {
                     key = ctx.acc.trim();
                     ctx.acc = "";
                 } else if (cur === "}") {
-                    this.$$finishKeyValue(ctx.acc, key, val, os);
+                    this.$$finishKeyValue(ctx, key, val, os);
                     return true;
                 } else if (cur === ",") {
                     ctx.i++;
-                    this.$$finishKeyValue(ctx.acc, key, val, os);
+                    this.$$finishKeyValue(ctx, key, val, os);
                     return true;
                 } else if (key && !ctx.acc && cur === "'") {
                     ctx.i++;
@@ -185,14 +183,13 @@ module nullstone.markup.xaml {
             throw new Error("Unterminated string constant.");
         }
 
-        private $$finishKeyValue (acc: string, key: string, val: any, os: any[]) {
+        private $$finishKeyValue (ctx: IParseContext, key: string, val: any, os: any[]) {
             if (val === undefined) {
-                if (!(val = acc.trim()))
+                if (!(val = ctx.acc.trim()))
                     return;
             }
-            if (typeof val.transmute === "function") {
-                val = (<IMarkupExtension>val).transmute(os);
-            }
+
+            val = finishMarkupExtension(val, ctx.resolver, this.$$onResolveType, os);
             var co = os[os.length - 1];
             if (!key) {
                 co.init && co.init(val);
