@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.2.0';
+    nullstone.version = '0.2.1';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -265,7 +265,7 @@ var nullstone;
         }
         Object.defineProperty(Library.prototype, "sourcePath", {
             get: function () {
-                return this.$$sourcePath || 'lib/' + this.uri + '/dist/' + this.uri;
+                return this.$$sourcePath || 'lib/' + this.name + '/dist/' + this.name;
             },
             set: function (value) {
                 if (value.substr(value.length - 3) === '.js')

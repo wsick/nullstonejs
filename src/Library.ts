@@ -26,7 +26,7 @@ module nullstone {
         exports: string;
 
         get sourcePath (): string {
-            return this.$$sourcePath || 'lib/' + this.uri + '/dist/' + this.uri;
+            return this.$$sourcePath || 'lib/' + this.name + '/dist/' + this.name;
         }
 
         set sourcePath (value: string) {

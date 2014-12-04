@@ -1,3 +1,3 @@
 module nullstone {
-    export var version = '0.2.0';
+    export var version = '0.2.1';
 }
