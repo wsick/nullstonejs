@@ -98,6 +98,7 @@ declare module nullstone {
         uri: Uri;
         sourcePath: string;
         exports: string;
+        deps: string[];
         rootModule: any;
         loadAsync(): async.IAsyncRequest<Library>;
         resolveType(moduleName: string, name: string, oresolve: IOutType): boolean;
