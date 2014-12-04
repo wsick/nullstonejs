@@ -24,6 +24,7 @@ module nullstone {
         name: string;
         uri: Uri;
         exports: string;
+        deps: string[];
 
         get sourcePath (): string {
             return this.$$sourcePath || 'lib/' + this.name + '/dist/' + this.name;
@@ -74,7 +75,8 @@ module nullstone {
             var srcPath = this.sourcePath;
             co.paths[this.name] = srcPath;
             co.shim[this.name] = {
-                exports: this.exports
+                exports: this.exports,
+                deps: this.deps
             };
             co.map['*'][srcPath] = this.name;
             require.config(co);

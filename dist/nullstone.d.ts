@@ -114,6 +114,7 @@ declare module nullstone {
         public name: string;
         public uri: Uri;
         public exports: string;
+        public deps: string[];
         public sourcePath : string;
         constructor(name: string);
         public rootModule : any;

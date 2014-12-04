@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.2.1';
+    nullstone.version = '0.2.2';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -312,7 +312,8 @@ var nullstone;
             var srcPath = this.sourcePath;
             co.paths[this.name] = srcPath;
             co.shim[this.name] = {
-                exports: this.exports
+                exports: this.exports,
+                deps: this.deps
             };
             co.map['*'][srcPath] = this.name;
             require.config(co);
