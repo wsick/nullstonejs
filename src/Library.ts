@@ -108,8 +108,7 @@ module nullstone {
             var type = oresolve.type;
             if (type === undefined)
                 return false;
-            if (!type.$$uri)
-                type.$$uri = this.uri.toString();
+            setTypeUri(type, this.uri);
             return true;
         }
 
@@ -119,7 +118,7 @@ module nullstone {
             name = name || getTypeName(type);
             if (!name)
                 throw new Error("No type name found.");
-            type.$$uri = this.uri.toString();
+            setTypeUri(type, this.uri);
             this.$$types[name] = type;
             return this;
         }
@@ -130,7 +129,7 @@ module nullstone {
             name = name || getTypeName(type);
             if (!name)
                 throw new Error("No type name found.");
-            type.$$uri = this.uri.toString();
+            setTypeUri(type, this.uri);
             this.$$primtypes[name] = type;
             return this;
         }
@@ -141,5 +140,11 @@ module nullstone {
             enu.name = name;
             return this;
         }
+    }
+
+    function setTypeUri (type: any, uri: Uri) {
+        if (type.$$uri)
+            return;
+        Object.defineProperty(type, "$$uri", {value: uri.toString(), enumerable: false});
     }
 }

@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.2.2';
+    nullstone.version = '0.2.3';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -342,8 +342,7 @@ var nullstone;
             var type = oresolve.type;
             if (type === undefined)
                 return false;
-            if (!type.$$uri)
-                type.$$uri = this.uri.toString();
+            setTypeUri(type, this.uri);
             return true;
         };
 
@@ -353,7 +352,7 @@ var nullstone;
             name = name || nullstone.getTypeName(type);
             if (!name)
                 throw new Error("No type name found.");
-            type.$$uri = this.uri.toString();
+            setTypeUri(type, this.uri);
             this.$$types[name] = type;
             return this;
         };
@@ -364,7 +363,7 @@ var nullstone;
             name = name || nullstone.getTypeName(type);
             if (!name)
                 throw new Error("No type name found.");
-            type.$$uri = this.uri.toString();
+            setTypeUri(type, this.uri);
             this.$$primtypes[name] = type;
             return this;
         };
@@ -378,6 +377,12 @@ var nullstone;
         return Library;
     })();
     nullstone.Library = Library;
+
+    function setTypeUri(type, uri) {
+        if (type.$$uri)
+            return;
+        Object.defineProperty(type, "$$uri", { value: uri.toString(), enumerable: false });
+    }
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
