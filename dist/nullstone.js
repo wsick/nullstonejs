@@ -1077,9 +1077,9 @@ var nullstone;
                 return _markup.NO_PARSER;
             };
 
-            Markup.prototype.resolve = function (typemgr) {
+            Markup.prototype.resolve = function (typemgr, customCollector) {
                 var resolver = new _markup.MarkupDependencyResolver(typemgr, this.createParser());
-                resolver.collect(this.root);
+                resolver.collect(this.root, customCollector);
                 return resolver.resolve();
             };
 
@@ -1119,22 +1119,41 @@ var nullstone;
                 this.$$names = [];
                 this.$$resolving = [];
             }
-            MarkupDependencyResolver.prototype.collect = function (root) {
+            MarkupDependencyResolver.prototype.collect = function (root, customCollector) {
                 var _this = this;
                 var blank = {};
                 var oresolve = {
                     isPrimitive: false,
                     type: Object
                 };
-                this.parser.on({
+                var last = {
+                    uri: "",
+                    name: "",
+                    obj: undefined
+                };
+                var parse = {
                     resolveType: function (uri, name) {
                         _this.add(uri, name);
+                        last.uri = uri;
+                        last.name = name;
                         return oresolve;
                     },
                     resolveObject: function (type) {
                         return blank;
+                    },
+                    objectEnd: function (obj, isContent, prev) {
+                        last.obj = obj;
+                    },
+                    propertyEnd: function (ownerType, propName) {
                     }
-                }).parse(root);
+                };
+                if (customCollector) {
+                    parse.propertyEnd = function (ownerType, propName) {
+                        customCollector(last.uri, last.name, propName, last.obj);
+                    };
+                }
+
+                this.parser.on(parse).parse(root);
             };
 
             MarkupDependencyResolver.prototype.add = function (uri, name) {

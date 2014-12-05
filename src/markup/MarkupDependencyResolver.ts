@@ -1,7 +1,10 @@
 module nullstone.markup {
+    export interface ICustomCollector {
+        (ownerUri: string, ownerName: string, propName: string, val: any);
+    }
     export interface IMarkupDependencyResolver<T> {
         add(uri: string, name: string): boolean;
-        collect(root: T);
+        collect(root: T, customCollector?: ICustomCollector);
         resolve(): async.IAsyncRequest<any>;
     }
     export class MarkupDependencyResolver<T> implements IMarkupDependencyResolver<T> {
@@ -12,28 +15,44 @@ module nullstone.markup {
         constructor (public typeManager: ITypeManager, public parser: IMarkupParser<T>) {
         }
 
-        collect (root: T) {
+        collect (root: T, customCollector?: ICustomCollector) {
             //TODO: We need to collect
             //  ResourceDictionary.Source
-            //  DataTemplate.DataType
-            //  ControlTemplate.TargetType
-            //  Style.TargetType
             //  Application.ThemeName
             var blank = {};
             var oresolve: IOutType = {
                 isPrimitive: false,
                 type: Object
             };
+            var last = {
+                uri: "",
+                name: "",
+                obj: undefined
+            };
+            var parse = {
+                resolveType: (uri, name) => {
+                    this.add(uri, name);
+                    last.uri = uri;
+                    last.name = name;
+                    return oresolve;
+                },
+                resolveObject: (type)=> {
+                    return blank;
+                },
+                objectEnd: (obj, isContent, prev) => {
+                    last.obj = obj;
+                },
+                propertyEnd: (ownerType, propName) => {
+                }
+            };
+            if (customCollector) {
+                parse.propertyEnd = (ownerType, propName) => {
+                    customCollector(last.uri, last.name, propName, last.obj);
+                };
+            }
+
             this.parser
-                .on({
-                    resolveType: (uri, name) => {
-                        this.add(uri, name);
-                        return oresolve;
-                    },
-                    resolveObject: (type) => {
-                        return blank;
-                    }
-                })
+                .on(parse)
                 .parse(root);
         }
 
