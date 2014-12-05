@@ -32,6 +32,8 @@ module nullstone.markup.xaml {
         }
 
         parse (value: string, resolver: INsPrefixResolver, os: any[]): any {
+            if (!isAlpha(value[1]))
+                return value;
             this.$$ensure();
             var ctx: IParseContext = {
                 text: value,
@@ -147,12 +149,18 @@ module nullstone.markup.xaml {
             var key = "";
             var val: any = undefined;
             var len = text.length;
+            var nonalpha = false;
             for (; ctx.i < len; ctx.i++) {
                 var cur = text[ctx.i];
                 if (cur === "\\") {
                     ctx.i++;
                     ctx.acc += text[ctx.i];
                 } else if (cur === "{") {
+                    if (nonalpha || !isAlpha(text[ctx.i + 1])) {
+                        ctx.acc += cur;
+                        nonalpha = true;
+                        continue;
+                    }
                     if (!key) {
                         ctx.error = "A sub extension must be set to a key.";
                         return false;
@@ -165,6 +173,10 @@ module nullstone.markup.xaml {
                     key = ctx.acc.trim();
                     ctx.acc = "";
                 } else if (cur === "}") {
+                    if (nonalpha) {
+                        nonalpha = false;
+                        ctx.acc += cur;
+                    }
                     this.$$finishKeyValue(ctx, key, val, os);
                     return true;
                 } else if (cur === ",") {
@@ -244,5 +256,12 @@ module nullstone.markup.xaml {
             });
             return this;
         }
+    }
+
+    function isAlpha (c: string): boolean {
+        if (!c)
+            return false;
+        var code = c[0].toUpperCase().charCodeAt(0);
+        return code >= 65 && code <= 90;
     }
 }

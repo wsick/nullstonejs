@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.2.5';
+    nullstone.version = '0.2.6';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -1210,6 +1210,8 @@ var nullstone;
                 };
 
                 XamlExtensionParser.prototype.parse = function (value, resolver, os) {
+                    if (!isAlpha(value[1]))
+                        return value;
                     this.$$ensure();
                     var ctx = {
                         text: value,
@@ -1325,12 +1327,18 @@ var nullstone;
                     var key = "";
                     var val = undefined;
                     var len = text.length;
+                    var nonalpha = false;
                     for (; ctx.i < len; ctx.i++) {
                         var cur = text[ctx.i];
                         if (cur === "\\") {
                             ctx.i++;
                             ctx.acc += text[ctx.i];
                         } else if (cur === "{") {
+                            if (nonalpha || !isAlpha(text[ctx.i + 1])) {
+                                ctx.acc += cur;
+                                nonalpha = true;
+                                continue;
+                            }
                             if (!key) {
                                 ctx.error = "A sub extension must be set to a key.";
                                 return false;
@@ -1343,6 +1351,10 @@ var nullstone;
                             key = ctx.acc.trim();
                             ctx.acc = "";
                         } else if (cur === "}") {
+                            if (nonalpha) {
+                                nonalpha = false;
+                                ctx.acc += cur;
+                            }
                             this.$$finishKeyValue(ctx, key, val, os);
                             return true;
                         } else if (cur === ",") {
@@ -1429,6 +1441,13 @@ var nullstone;
                 return XamlExtensionParser;
             })();
             xaml.XamlExtensionParser = XamlExtensionParser;
+
+            function isAlpha(c) {
+                if (!c)
+                    return false;
+                var code = c[0].toUpperCase().charCodeAt(0);
+                return code >= 65 && code <= 90;
+            }
         })(markup.xaml || (markup.xaml = {}));
         var xaml = markup.xaml;
     })(nullstone.markup || (nullstone.markup = {}));

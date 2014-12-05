@@ -102,4 +102,19 @@ module nullstone.markup.xaml.extensions.tests {
         expected.Impl = Random;
         deepEqual(val, expected);
     });
+
+    QUnit.test("No parse non-alpha extension", () => {
+        var val = parser.parse("{0}", mock.resolver(), []);
+        deepEqual(val, "{0}");
+
+        val = parser.parse("{0:d}", mock.resolver(), []);
+        deepEqual(val, "{0:d}");
+    });
+
+    QUnit.test("Nested non-alpha extension", () => {
+        var val = parser.parse("{Random Other={0:d}}", mock.resolver(), []);
+        var expected = new Random();
+        expected.Other = "{0:d}";
+        deepEqual(val, expected);
+    });
 }
