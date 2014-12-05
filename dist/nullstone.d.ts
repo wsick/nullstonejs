@@ -59,6 +59,7 @@ declare module nullstone {
     interface IEnumerableDeclaration<T> extends IInterfaceDeclaration<T> {
         empty: IEnumerable<T>;
         fromArray(arr: T[]): IEnumerable<T>;
+        toArray(en: IEnumerable<T>): T[];
     }
     var IEnumerable_: IEnumerableDeclaration<any>;
 }

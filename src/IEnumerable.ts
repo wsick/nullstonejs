@@ -5,6 +5,7 @@ module nullstone {
     export interface IEnumerableDeclaration<T> extends IInterfaceDeclaration<T> {
         empty: IEnumerable<T>;
         fromArray(arr: T[]): IEnumerable<T>;
+        toArray(en: IEnumerable<T>): T[];
     }
     export var IEnumerable_ = <IEnumerableDeclaration<any>>new Interface("IEnumerable");
     IEnumerable_.is = (o: any): boolean => {
@@ -25,4 +26,12 @@ module nullstone {
             }
         };
     };
+
+    IEnumerable_.toArray = function<T>(en: IEnumerable<T>): T[] {
+        var a: T[] = [];
+        for (var e = en.getEnumerator(); e.moveNext();) {
+            a.push(e.current);
+        }
+        return a;
+    }
 }

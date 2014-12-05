@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.2.4';
+    nullstone.version = '0.2.5';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -150,6 +150,14 @@ var nullstone;
                 return nullstone.IEnumerator_.fromArray(this.$$arr, isReverse);
             }
         };
+    };
+
+    nullstone.IEnumerable_.toArray = function (en) {
+        var a = [];
+        for (var e = en.getEnumerator(); e.moveNext();) {
+            a.push(e.current);
+        }
+        return a;
     };
 })(nullstone || (nullstone = {}));
 var nullstone;
