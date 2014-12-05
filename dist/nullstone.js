@@ -453,13 +453,13 @@ var nullstone;
 (function (nullstone) {
     var Memoizer = (function () {
         function Memoizer(creator) {
-            this.$$cache = [];
+            this.$$cache = {};
             this.$$creator = creator;
         }
         Memoizer.prototype.memoize = function (key) {
             var obj = this.$$cache[key];
             if (!obj)
-                obj = this.$$creator(key);
+                this.$$cache[key] = obj = this.$$creator(key);
             return obj;
         };
         return Memoizer;

@@ -1,7 +1,7 @@
 module nullstone {
     export class Memoizer<T> {
         private $$creator: (key: string) => T;
-        private $$cache: any[] = [];
+        private $$cache: any = {};
 
         constructor (creator: (key: string) => T) {
             this.$$creator = creator;
@@ -10,7 +10,7 @@ module nullstone {
         memoize (key: string): T {
             var obj = this.$$cache[key];
             if (!obj)
-                obj = this.$$creator(key);
+                this.$$cache[key] = obj = this.$$creator(key);
             return obj;
         }
     }
