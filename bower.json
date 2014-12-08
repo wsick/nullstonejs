@@ -8,7 +8,6 @@
     "stress",
     "test",
     "typings",
-    "bower.json",
     "package.json",
     "Gruntfile.js"
   ],
