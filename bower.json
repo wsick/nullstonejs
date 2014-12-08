@@ -6,8 +6,11 @@
     "node_modules",
     "build",
     "src",
+    "stress",
     "test",
     "typings",
+    "bower.json",
+    "package.json",
     "Gruntfile.js"
   ],
   "devDependencies": {
