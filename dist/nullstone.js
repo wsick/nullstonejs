@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.2.7';
+    nullstone.version = '0.2.8';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
