@@ -303,6 +303,8 @@ declare module nullstone.markup {
         name?: events.IName;
         propertyStart?: events.IPropertyStart;
         propertyEnd?: events.IPropertyEnd;
+        attributeStart?: events.IAttributeStart;
+        attributeEnd?: events.IAttributeEnd;
         error?: events.IResumableError;
         end?: () => any;
     }
@@ -375,6 +377,12 @@ declare module nullstone.markup.events {
     interface IPropertyEnd {
         (ownerType: any, propName: string): any;
     }
+    interface IAttributeStart {
+        (ownerType: any, attrName: string): any;
+    }
+    interface IAttributeEnd {
+        (ownerType: any, attrName: string, obj: any): any;
+    }
     interface IResumableError {
         (e: Error): boolean;
     }
@@ -431,6 +439,8 @@ declare module nullstone.markup.xaml {
         private $$onName;
         private $$onPropertyStart;
         private $$onPropertyEnd;
+        private $$onAttributeStart;
+        private $$onAttributeEnd;
         private $$onError;
         private $$onEnd;
         private $$extension;

@@ -16,6 +16,8 @@ module nullstone.markup.xaml {
         private $$onName: events.IName;
         private $$onPropertyStart: events.IPropertyStart;
         private $$onPropertyEnd: events.IPropertyEnd;
+        private $$onAttributeStart: events.IAttributeStart;
+        private $$onAttributeEnd: events.IAttributeEnd;
         private $$onError: events.IError;
         private $$onEnd: () => any = null;
 
@@ -49,6 +51,8 @@ module nullstone.markup.xaml {
             this.$$onName = listener.name;
             this.$$onPropertyStart = listener.propertyStart;
             this.$$onPropertyEnd = listener.propertyEnd;
+            this.$$onAttributeStart = listener.attributeStart;
+            this.$$onAttributeEnd = listener.attributeEnd;
             this.$$onError = listener.error;
             this.$$onEnd = listener.end;
 
@@ -288,12 +292,9 @@ module nullstone.markup.xaml {
                 type = ort.type;
                 name = name.substr(ind + 1);
             }
-            var os = this.$$objectStack;
-            this.$$onPropertyStart(type, name);
+            this.$$onAttributeStart(type, name);
             var val = this.$$getAttrValue(value, attr);
-            this.$$onObject(val, false);
-            this.$$onObjectEnd(val, undefined, false, os[os.length - 1]);
-            this.$$onPropertyEnd(type, name);
+            this.$$onAttributeEnd(type, name, val);
             return true;
         }
 

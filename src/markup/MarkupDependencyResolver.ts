@@ -43,11 +43,16 @@ module nullstone.markup {
                     last.obj = obj;
                 },
                 propertyEnd: (ownerType, propName) => {
+                },
+                attributeEnd: (ownerType, attrName, obj) => {
                 }
             };
             if (customCollector) {
                 parse.propertyEnd = (ownerType, propName) => {
                     customCollector(last.uri, last.name, propName, last.obj);
+                };
+                parse.attributeEnd = (ownerType, attrName, obj) => {
+                    customCollector(last.uri, last.name, attrName, obj);
                 };
             }
 

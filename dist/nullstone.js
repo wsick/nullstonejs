@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.2.7';
+    nullstone.version = '0.3.0';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -1063,6 +1063,10 @@ var nullstone;
                 }),
                 propertyEnd: listener.propertyEnd || (function (ownerType, propName) {
                 }),
+                attributeStart: listener.attributeStart || (function (ownerType, attrName) {
+                }),
+                attributeEnd: listener.attributeEnd || (function (ownerType, attrName, obj) {
+                }),
                 error: listener.error || (function (e) {
                     return true;
                 }),
@@ -1153,11 +1157,16 @@ var nullstone;
                         last.obj = obj;
                     },
                     propertyEnd: function (ownerType, propName) {
+                    },
+                    attributeEnd: function (ownerType, attrName, obj) {
                     }
                 };
                 if (customCollector) {
                     parse.propertyEnd = function (ownerType, propName) {
                         customCollector(last.uri, last.name, propName, last.obj);
+                    };
+                    parse.attributeEnd = function (ownerType, attrName, obj) {
+                        customCollector(last.uri, last.name, attrName, obj);
                     };
                 }
 
@@ -1525,6 +1534,8 @@ var nullstone;
                     this.$$onName = listener.name;
                     this.$$onPropertyStart = listener.propertyStart;
                     this.$$onPropertyEnd = listener.propertyEnd;
+                    this.$$onAttributeStart = listener.attributeStart;
+                    this.$$onAttributeEnd = listener.attributeEnd;
                     this.$$onError = listener.error;
                     this.$$onEnd = listener.end;
 
@@ -1743,12 +1754,9 @@ var nullstone;
                         type = ort.type;
                         name = name.substr(ind + 1);
                     }
-                    var os = this.$$objectStack;
-                    this.$$onPropertyStart(type, name);
+                    this.$$onAttributeStart(type, name);
                     var val = this.$$getAttrValue(value, attr);
-                    this.$$onObject(val, false);
-                    this.$$onObjectEnd(val, undefined, false, os[os.length - 1]);
-                    this.$$onPropertyEnd(type, name);
+                    this.$$onAttributeEnd(type, name, val);
                     return true;
                 };
 

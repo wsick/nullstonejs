@@ -114,6 +114,21 @@ module nullstone.markup.xaml.tests {
                             propName: propName
                         });
                     },
+                    attributeStart: (ownerType, attrName) => {
+                        cmds.push({
+                            cmd: 'as',
+                            ownerType: ownerType,
+                            attrName: attrName
+                        });
+                    },
+                    attributeEnd: (ownerType, attrName, obj) => {
+                        cmds.push({
+                            cmd: 'ae',
+                            ownerType: ownerType,
+                            attrName: attrName,
+                            obj: obj
+                        });
+                    },
                     end: () => {
                         cb(cmds);
                     }

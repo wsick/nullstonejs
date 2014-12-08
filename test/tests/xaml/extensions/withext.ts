@@ -49,10 +49,10 @@ module nullstone.markup.xaml.tests.extensions {
                 }, 'o(c) Grid');
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'ps',
+                    cmd: 'as',
                     ownerType: null,
-                    propName: 'Tag'
-                }, 'ps Tag');
+                    attrName: 'Tag'
+                }, 'as Tag');
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'rt',
@@ -62,23 +62,11 @@ module nullstone.markup.xaml.tests.extensions {
                 }, 'rt Grid');
                 i++;
                 deepEqual(cmds[i], {
-                    cmd: 'o',
-                    obj: cmds[i - 1].type,
-                    isContent: false
-                }, 'o Grid');
-                i++;
-                deepEqual(cmds[i], {
-                    cmd: 'oe',
-                    obj: cmds[i - 2].type,
-                    key: undefined,
-                    isContent: false
-                }, 'oe Grid');
-                i++;
-                deepEqual(cmds[i], {
-                    cmd: 'pe',
+                    cmd: 'ae',
                     ownerType: null,
-                    propName: 'Tag'
-                }, 'pe Tag');
+                    attrName: 'Tag',
+                    obj: cmds[i].obj
+                }, 'ae Tag');
                 i++;
                 deepEqual(cmds[i], {
                     cmd: 'oe',
