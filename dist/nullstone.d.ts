@@ -35,22 +35,28 @@ declare module nullstone {
         name: string;
         is(o: any): boolean;
         as(o: any): T;
+        mark(type: any): IInterfaceDeclaration<T>;
     }
     class Interface<T> implements IInterfaceDeclaration<T> {
         public name: string;
         constructor(name: string);
         public is(o: any): boolean;
         public as(o: any): T;
+        public mark(type: any): Interface<T>;
     }
 }
 declare module nullstone {
-    interface ICollection<T> {
+    interface ICollection<T> extends IEnumerable<T> {
+        Count: number;
         GetValueAt(index: number): T;
         SetValueAt(index: number, value: T): any;
         Insert(index: number, value: T): any;
         Add(value: T): any;
+        Remove(value: T): any;
+        RemoveAt(index: number): any;
+        Clear(): any;
     }
-    var ICollection_: Interface<{}>;
+    var ICollection_: Interface<ICollection<any>>;
 }
 declare module nullstone {
     interface IEnumerable<T> {

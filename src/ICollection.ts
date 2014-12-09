@@ -1,16 +1,15 @@
 /// <reference path="Interface" />
 
 module nullstone {
-    export interface ICollection<T> {
+    export interface ICollection<T> extends IEnumerable<T> {
+        Count: number;
         GetValueAt(index: number): T;
         SetValueAt(index: number, value: T);
         Insert(index: number, value: T);
         Add(value: T);
+        Remove(value: T);
+        RemoveAt(index: number);
+        Clear();
     }
-    export var ICollection_ = new Interface("ICollection");
-    ICollection_.is = function (o: any): boolean {
-        if (!o)
-            return false;
-        return typeof o.GetValueAt === "function" && typeof o.SetValueAt === "function";
-    };
+    export var ICollection_ = new Interface<ICollection<any>>("ICollection");
 }

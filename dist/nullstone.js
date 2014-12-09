@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.3.0';
+    nullstone.version = '0.3.1';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -117,6 +117,11 @@ var nullstone;
                 return undefined;
             return o;
         };
+
+        Interface.prototype.mark = function (type) {
+            nullstone.addTypeInterfaces(type, this);
+            return this;
+        };
         return Interface;
     })();
     nullstone.Interface = Interface;
@@ -124,11 +129,6 @@ var nullstone;
 var nullstone;
 (function (nullstone) {
     nullstone.ICollection_ = new nullstone.Interface("ICollection");
-    nullstone.ICollection_.is = function (o) {
-        if (!o)
-            return false;
-        return typeof o.GetValueAt === "function" && typeof o.SetValueAt === "function";
-    };
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {

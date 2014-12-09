@@ -3,6 +3,7 @@ module nullstone {
         name: string;
         is(o: any): boolean;
         as(o: any): T;
+        mark(type: any): IInterfaceDeclaration<T>;
     }
     export class Interface<T> implements IInterfaceDeclaration<T> {
         name: string;
@@ -28,6 +29,11 @@ module nullstone {
             if (!this.is(o))
                 return undefined;
             return <T>o;
+        }
+
+        mark (type: any): Interface<T> {
+            addTypeInterfaces(type, this);
+            return this;
         }
     }
 }
