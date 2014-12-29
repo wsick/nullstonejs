@@ -1,5 +1,6 @@
 module nullstone {
     export interface IPropertyInfo {
+        name: string;
         getValue(obj: any): any;
         setValue(obj: any, value: any);
     }
@@ -7,6 +8,8 @@ module nullstone {
     export class PropertyInfo implements IPropertyInfo {
         private $$getFunc: () => any;
         private $$setFunc: (value: any) => any;
+
+        name: string;
 
         getValue (obj: any): any {
             if (this.$$getFunc)
@@ -31,6 +34,7 @@ module nullstone {
             var propDesc = getPropertyDescriptor(o, name);
             if (propDesc) {
                 var pi = new PropertyInfo();
+                pi.name = name;
                 pi.$$getFunc = propDesc.get;
                 if (!pi.$$getFunc)
                     pi.$$getFunc = function () {
@@ -46,6 +50,7 @@ module nullstone {
 
             var type = isType ? typeOrObj : typeOrObj.constructor;
             var pi = new PropertyInfo();
+            pi.name = name;
             pi.$$getFunc = type.prototype["Get" + name];
             pi.$$setFunc = type.prototype["Set" + name];
             return pi;

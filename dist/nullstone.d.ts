@@ -168,12 +168,14 @@ declare module nullstone {
 }
 declare module nullstone {
     interface IPropertyInfo {
+        name: string;
         getValue(obj: any): any;
         setValue(obj: any, value: any): any;
     }
     class PropertyInfo implements IPropertyInfo {
         private $$getFunc;
         private $$setFunc;
+        public name: string;
         public getValue(obj: any): any;
         public setValue(obj: any, value: any): any;
         static find(typeOrObj: any, name: string): IPropertyInfo;

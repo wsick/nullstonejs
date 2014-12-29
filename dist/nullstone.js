@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.3.1';
+    nullstone.version = '0.3.2';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -525,6 +525,7 @@ var nullstone;
             var propDesc = nullstone.getPropertyDescriptor(o, name);
             if (propDesc) {
                 var pi = new PropertyInfo();
+                pi.name = name;
                 pi.$$getFunc = propDesc.get;
                 if (!pi.$$getFunc)
                     pi.$$getFunc = function () {
@@ -540,6 +541,7 @@ var nullstone;
 
             var type = isType ? typeOrObj : typeOrObj.constructor;
             var pi = new PropertyInfo();
+            pi.name = name;
             pi.$$getFunc = type.prototype["Get" + name];
             pi.$$setFunc = type.prototype["Set" + name];
             return pi;
