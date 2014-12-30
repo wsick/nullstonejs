@@ -52,7 +52,7 @@ declare module nullstone {
         SetValueAt(index: number, value: T): any;
         Insert(index: number, value: T): any;
         Add(value: T): any;
-        Remove(value: T): any;
+        Remove(value: T): boolean;
         RemoveAt(index: number): any;
         Clear(): any;
     }

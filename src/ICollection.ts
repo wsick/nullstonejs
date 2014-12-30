@@ -7,7 +7,7 @@ module nullstone {
         SetValueAt(index: number, value: T);
         Insert(index: number, value: T);
         Add(value: T);
-        Remove(value: T);
+        Remove(value: T): boolean;
         RemoveAt(index: number);
         Clear();
     }
