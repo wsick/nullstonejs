@@ -3,6 +3,7 @@ module nullstone {
         name: string;
         uri: Uri;
         sourcePath: string;
+        useMin: boolean;
         exports: string;
         deps: string[];
         rootModule: any;
@@ -26,14 +27,20 @@ module nullstone {
         uri: Uri;
         exports: string;
         deps: string[];
+        useMin: boolean;
 
         get sourcePath (): string {
-            return this.$$sourcePath || 'lib/' + this.name + '/dist/' + this.name;
+            var base = this.$$sourcePath || 'lib/' + this.name + '/dist/' + this.name;
+            if (!this.useMin)
+                return base;
+            return base + ".min";
         }
 
         set sourcePath (value: string) {
             if (value.substr(value.length - 3) === '.js')
                 value = value.substr(0, value.length - 3);
+            if (this.useMin && value.substr(value.length - 4) === ".min")
+                value = value.substr(0, value.length - 4);
             this.$$sourcePath = value;
         }
 

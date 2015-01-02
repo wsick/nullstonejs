@@ -104,6 +104,7 @@ declare module nullstone {
         name: string;
         uri: Uri;
         sourcePath: string;
+        useMin: boolean;
         exports: string;
         deps: string[];
         rootModule: any;
@@ -123,6 +124,7 @@ declare module nullstone {
         public uri: Uri;
         public exports: string;
         public deps: string[];
+        public useMin: boolean;
         public sourcePath : string;
         constructor(name: string);
         public rootModule : any;
