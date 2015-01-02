@@ -123,19 +123,6 @@ module.exports = function (grunt) {
         qunit: {
             all: ['<%= dirs.test.root %>/*.html']
         },
-        uglify: {
-            options: {
-                sourceMap: function (path) {
-                    return path.replace(/(.*).min.js/, "$1.js.map");
-                },
-                sourceMapIn: 'dist/<%= meta.name %>.js.map',
-                sourceMapIncludeSources: true
-            },
-            dist: {
-                src: ['dist/<%= meta.name %>.js'],
-                dest: 'dist/<%= meta.name %>.min.js'
-            }
-        },
         connect: {
             stress: {
                 options: {
@@ -190,6 +177,19 @@ module.exports = function (grunt) {
                 src: './build/_VersionTemplate._ts',
                 dest: './src/_Version.ts'
             }
+        },
+        uglify: {
+            options: {
+                sourceMap: function (path) {
+                    return path.replace(/(.*).min.js/, "$1.js.map");
+                },
+                sourceMapIn: 'dist/<%= meta.name %>.js.map',
+                sourceMapIncludeSources: true
+            },
+            dist: {
+                src: ['dist/<%= meta.name %>.js'],
+                dest: 'dist/<%= meta.name %>.min.js'
+            }
         }
     });
 
@@ -199,7 +199,7 @@ module.exports = function (grunt) {
     setup(grunt);
     version(grunt);
     grunt.registerTask('lib:reset', ['clean', 'setup', 'symlink:test', 'symlink:stress']);
-    grunt.registerTask('dist:upbuild', ['version:bump', 'version:apply', 'typescript:build']);
-    grunt.registerTask('dist:upminor', ['version:bump:minor', 'version:apply', 'typescript:build']);
-    grunt.registerTask('dist:upmajor', ['version:bump:major', 'version:apply', 'typescript:build']);
+    grunt.registerTask('dist:upbuild', ['version:bump', 'version:apply', 'typescript:build', 'uglify:dist']);
+    grunt.registerTask('dist:upminor', ['version:bump:minor', 'version:apply', 'typescript:build', 'uglify:dist']);
+    grunt.registerTask('dist:upmajor', ['version:bump:major', 'version:apply', 'typescript:build', 'uglify:dist']);
 };
