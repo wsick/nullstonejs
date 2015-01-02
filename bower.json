@@ -1,6 +1,7 @@
 {
   "name": "nullstone",
-  "version": "0.3.4",
+  "version": "0.3.5",
+  "main": "dist/nullstone.js",
   "ignore": [
     "**/.*",
     "node_modules",
