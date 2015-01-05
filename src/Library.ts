@@ -68,7 +68,7 @@ module nullstone {
                     this.$$module = rootModule;
                     this.$$loaded = true;
                     resolve(this);
-                }, reject);
+                }, (err) => reject(new LibraryLoadError(this, err)));
             });
         }
 

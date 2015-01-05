@@ -5,7 +5,7 @@ module nullstone {
             return async.create((resolve, reject) => {
                 (<Function>require)([reqUri], (rootModule) => {
                     resolve(rootModule);
-                }, reject);
+                }, (err) => reject(new DirLoadError(reqUri, err)));
             });
         }
 

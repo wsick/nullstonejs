@@ -69,7 +69,7 @@ module nullstone.async {
                 anyerrors = anyerrors || err !== undefined;
                 finished++;
                 if (finished >= count)
-                    anyerrors ? reject(errors) : resolve(resolves);
+                    anyerrors ? reject(new AggregateError(errors)) : resolve(resolves);
             }
 
             for (var i = 0; i < count; i++) {

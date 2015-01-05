@@ -269,6 +269,27 @@ declare module nullstone.async {
 declare module nullstone {
     function equals(val1: any, val2: any): boolean;
 }
+declare module nullstone {
+    class AggregateError {
+        public errors: any[];
+        constructor(errors: any[]);
+        public flatten(): any[];
+    }
+}
+declare module nullstone {
+    class DirLoadError {
+        public path: string;
+        public error: any;
+        constructor(path: string, error: any);
+    }
+}
+declare module nullstone {
+    class LibraryLoadError {
+        public library: Library;
+        public error: Error;
+        constructor(library: Library, error: Error);
+    }
+}
 declare module nullstone.markup {
     interface IMarkupExtension {
         init(val: string): any;

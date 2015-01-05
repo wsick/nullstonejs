@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.3.5';
+    nullstone.version = '0.3.6';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -12,7 +12,9 @@ var nullstone;
             return nullstone.async.create(function (resolve, reject) {
                 require([reqUri], function (rootModule) {
                     resolve(rootModule);
-                }, reject);
+                }, function (err) {
+                    return reject(new nullstone.DirLoadError(reqUri, err));
+                });
             });
         };
 
@@ -310,7 +312,9 @@ var nullstone;
                     _this.$$module = rootModule;
                     _this.$$loaded = true;
                     resolve(_this);
-                }, reject);
+                }, function (err) {
+                    return reject(new nullstone.LibraryLoadError(_this, err));
+                });
             });
         };
 
@@ -950,7 +954,7 @@ var nullstone;
                     anyerrors = anyerrors || err !== undefined;
                     finished++;
                     if (finished >= count)
-                        anyerrors ? reject(errors) : resolve(resolves);
+                        anyerrors ? reject(new nullstone.AggregateError(errors)) : resolve(resolves);
                 }
 
                 for (var i = 0; i < count; i++) {
@@ -978,6 +982,55 @@ var nullstone;
         return !!val1.equals && val1.equals(val2);
     }
     nullstone.equals = equals;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    var AggregateError = (function () {
+        function AggregateError(errors) {
+            this.errors = errors.filter(function (e) {
+                return !!e;
+            });
+            Object.freeze(this);
+        }
+        AggregateError.prototype.flatten = function () {
+            var flat = [];
+            for (var i = 0, errs = this.errors; i < errs.length; i++) {
+                var err = errs[i];
+                if (err instanceof AggregateError) {
+                    flat = flat.concat(err.flatten());
+                } else {
+                    flat.push(err);
+                }
+            }
+            return flat;
+        };
+        return AggregateError;
+    })();
+    nullstone.AggregateError = AggregateError;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    var DirLoadError = (function () {
+        function DirLoadError(path, error) {
+            this.path = path;
+            this.error = error;
+            Object.freeze(this);
+        }
+        return DirLoadError;
+    })();
+    nullstone.DirLoadError = DirLoadError;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    var LibraryLoadError = (function () {
+        function LibraryLoadError(library, error) {
+            this.library = library;
+            this.error = error;
+            Object.freeze(this);
+        }
+        return LibraryLoadError;
+    })();
+    nullstone.LibraryLoadError = LibraryLoadError;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
