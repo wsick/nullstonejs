@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.3.6';
+    nullstone.version = '0.3.7';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -992,18 +992,22 @@ var nullstone;
             });
             Object.freeze(this);
         }
-        AggregateError.prototype.flatten = function () {
-            var flat = [];
-            for (var i = 0, errs = this.errors; i < errs.length; i++) {
-                var err = errs[i];
-                if (err instanceof AggregateError) {
-                    flat = flat.concat(err.flatten());
-                } else {
-                    flat.push(err);
+        Object.defineProperty(AggregateError.prototype, "flat", {
+            get: function () {
+                var flat = [];
+                for (var i = 0, errs = this.errors; i < errs.length; i++) {
+                    var err = errs[i];
+                    if (err instanceof AggregateError) {
+                        flat = flat.concat(err.flat);
+                    } else {
+                        flat.push(err);
+                    }
                 }
-            }
-            return flat;
-        };
+                return flat;
+            },
+            enumerable: true,
+            configurable: true
+        });
         return AggregateError;
     })();
     nullstone.AggregateError = AggregateError;

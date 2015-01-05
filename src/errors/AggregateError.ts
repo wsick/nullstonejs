@@ -7,12 +7,12 @@ module nullstone {
             Object.freeze(this);
         }
 
-        flatten (): any[] {
+        get flat (): any[] {
             var flat: any[] = [];
             for (var i = 0, errs = this.errors; i < errs.length; i++) {
                 var err = errs[i];
                 if (err instanceof AggregateError) {
-                    flat = flat.concat((<AggregateError>err).flatten());
+                    flat = flat.concat((<AggregateError>err).flat);
                 } else {
                     flat.push(err);
                 }

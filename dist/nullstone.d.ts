@@ -273,7 +273,7 @@ declare module nullstone {
     class AggregateError {
         public errors: any[];
         constructor(errors: any[]);
-        public flatten(): any[];
+        public flat : any[];
     }
 }
 declare module nullstone {
