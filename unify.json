@@ -1,0 +1,10 @@
+{
+  "name": "nullstone",
+  "client": "fayde.json",
+  "type": "lib",
+  "dist": "dist/nullstone.js",
+  "library": {
+    "type": "export",
+    "exports": "nullstone"
+  }
+}
