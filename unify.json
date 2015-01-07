@@ -6,5 +6,6 @@
   "library": {
     "type": "export",
     "exports": "nullstone"
-  }
+  },
+  "typings": ["dist/nullstone.d.ts"]
 }
