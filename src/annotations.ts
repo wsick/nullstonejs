@@ -12,7 +12,7 @@ module nullstone {
         if (!ann)
             anns[name] = ann = [];
         if (forbidMultiple && ann.length > 0)
-            throw new Error("Only 1 '" + name + "' annotation allowed per type [" + (<any>type).constructor.name + "].");
+            throw new Error("Only 1 '" + name + "' annotation allowed per type [" + getTypeName(type) + "].");
         ann.push(value);
     }
 

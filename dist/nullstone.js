@@ -853,7 +853,7 @@ var nullstone;
         if (!ann)
             anns[name] = ann = [];
         if (forbidMultiple && ann.length > 0)
-            throw new Error("Only 1 '" + name + "' annotation allowed per type [" + type.constructor.name + "].");
+            throw new Error("Only 1 '" + name + "' annotation allowed per type [" + nullstone.getTypeName(type) + "].");
         ann.push(value);
     }
     nullstone.Annotation = Annotation;
