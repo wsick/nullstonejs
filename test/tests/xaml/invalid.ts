@@ -12,7 +12,7 @@ module nullstone.markup.xaml.tests.invalid {
                         errored = true;
                         return true;
                     }, end: () => {
-                        ok(errored);
+                        ok(errored, "Should be invalid XML.");
                     }
                 })
                 .parse(doc.documentElement);

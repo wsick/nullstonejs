@@ -1,9 +1,11 @@
 var gulp = require('gulp'),
+    merge = require('merge2'),
     ts = require('gulp-typescript'),
-    sourcemaps = require('gulp-sourcemaps');
+    sourcemaps = require('gulp-sourcemaps'),
+    qunit = require('gulp-qunit');
 
 module.exports = function () {
-    gulp.task('test', ['default'], function () {
+    gulp.task('build-test', function () {
         var result = gulp.src([
             'typings/*.d.ts',
             'test/**/*.ts',
@@ -20,5 +22,10 @@ module.exports = function () {
         return result.js
             .pipe(sourcemaps.write())
             .pipe(gulp.dest('test/.build'));
+    });
+
+    gulp.task('test', ['default', 'build-test'], function () {
+        return gulp.src('test/tests.html')
+            .pipe(qunit());
     });
 };
