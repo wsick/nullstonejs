@@ -30,6 +30,8 @@
     "grunt-open": "^0.2.3",
     "grunt-typescript": "~0.6.1",
     "gulp": "^3.8.11",
+    "gulp-connect": "^2.2.0",
+    "gulp-open": "^0.3.2",
     "gulp-qunit": "^1.2.1",
     "gulp-sourcemaps": "^1.5.1",
     "gulp-typescript": "^2.6.0"
