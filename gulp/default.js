@@ -1,29 +1,24 @@
 var gulp = require('gulp'),
-    merge = require('merge2'),
     ts = require('gulp-typescript'),
-    sourcemaps = require('gulp-sourcemaps');
+    sourcemaps = require('gulp-sourcemaps'),
+    srcs = [
+        'typings/*.d.ts',
+        'src/_Version.ts',
+        'src/*.ts',
+        'src/**/*.ts'
+    ];
 
 module.exports = function () {
     gulp.task('default', function () {
-        var result = gulp.src([
-            'typings/*.d.ts',
-            'src/_Version.ts',
-            'src/*.ts',
-            'src/**/*.ts'
-        ])
+        gulp.src(srcs)
             .pipe(sourcemaps.init())
             .pipe(ts({
                 declarationFiles: true,
                 target: 'ES5',
                 out: 'nullstone.js',
                 removeComments: true
-            }));
-
-        return merge([
-            result.dts.pipe(gulp.dest('dist')),
-            result.js
-                .pipe(sourcemaps.write())
-                .pipe(gulp.dest('dist'))
-        ]);
+            }))
+            .js.pipe(sourcemaps.write())
+            .pipe(gulp.dest('dist'));
     });
 };

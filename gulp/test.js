@@ -6,7 +6,7 @@ var gulp = require('gulp'),
 
 module.exports = function () {
     gulp.task('build-test', function () {
-        var result = gulp.src([
+        gulp.src([
             'typings/*.d.ts',
             'test/**/*.ts',
             '!test/lib/**/*.ts',
@@ -17,10 +17,8 @@ module.exports = function () {
                 declarationFiles: false,
                 target: 'ES5',
                 removeComments: false
-            }));
-
-        return result.js
-            .pipe(sourcemaps.write())
+            }))
+            .js.pipe(sourcemaps.write())
             .pipe(gulp.dest('test/.build'));
     });
 
