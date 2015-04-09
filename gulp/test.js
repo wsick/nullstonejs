@@ -1,5 +1,4 @@
 var gulp = require('gulp'),
-    merge = require('merge2'),
     ts = require('gulp-typescript'),
     sourcemaps = require('gulp-sourcemaps'),
     qunit = require('gulp-qunit');
