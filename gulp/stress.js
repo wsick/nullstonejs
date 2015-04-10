@@ -4,7 +4,7 @@ var gulp = require('gulp'),
     connect = require('gulp-connect'),
     open = require('gulp-open');
 
-module.exports = function () {
+module.exports = function (meta) {
     var tsProject = ts.createProject({
         declarationFiles: false,
         target: 'ES5',

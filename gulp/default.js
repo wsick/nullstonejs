@@ -8,11 +8,11 @@ var gulp = require('gulp'),
         'src/**/*.ts'
     ];
 
-module.exports = function () {
+module.exports = function (meta) {
     var tsProject = ts.createProject({
         declarationFiles: true,
         target: 'ES5',
-        out: 'nullstone.js',
+        out: meta.name + '.js',
         removeComments: true
     });
 

@@ -3,7 +3,7 @@ var gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps'),
     qunit = require('gulp-qunit');
 
-module.exports = function () {
+module.exports = function (meta) {
     var tsProject = ts.createProject({
         declarationFiles: false,
         target: 'ES5',
