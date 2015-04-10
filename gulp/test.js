@@ -4,7 +4,13 @@ var gulp = require('gulp'),
     qunit = require('gulp-qunit');
 
 module.exports = function () {
-    gulp.task('build-test', function () {
+    var tsProject = ts.createProject({
+        declarationFiles: false,
+        target: 'ES5',
+        removeComments: false
+    });
+
+    gulp.task('test-build', function () {
         return gulp.src([
             'typings/*.d.ts',
             'test/**/*.ts',
@@ -12,17 +18,18 @@ module.exports = function () {
             'dist/nullstone.d.ts'
         ])
             .pipe(sourcemaps.init())
-            .pipe(ts({
-                declarationFiles: false,
-                target: 'ES5',
-                removeComments: false
-            }))
+            .pipe(ts(tsProject))
             .js.pipe(sourcemaps.write())
             .pipe(gulp.dest('test/.build'));
     });
 
-    gulp.task('test', ['default', 'build-test'], function () {
+    gulp.task('test-run', function () {
         return gulp.src('test/tests.html')
             .pipe(qunit());
+    });
+
+    gulp.task('test', ['test-build', 'test-run'], function () {
+        gulp.watch(['test/**/*.ts', '!test/lib/**/*.ts'], ['test-build']);
+        gulp.watch(['dist/*', 'test/.build/**/*.js'], ['test-run']);
     });
 };

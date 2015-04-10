@@ -9,15 +9,17 @@ var gulp = require('gulp'),
     ];
 
 module.exports = function () {
+    var tsProject = ts.createProject({
+        declarationFiles: true,
+        target: 'ES5',
+        out: 'nullstone.js',
+        removeComments: true
+    });
+
     gulp.task('default', function () {
         gulp.src(srcs)
             .pipe(sourcemaps.init())
-            .pipe(ts({
-                declarationFiles: true,
-                target: 'ES5',
-                out: 'nullstone.js',
-                removeComments: true
-            }))
+            .pipe(ts(tsProject))
             .js.pipe(sourcemaps.write())
             .pipe(gulp.dest('dist'));
     });
