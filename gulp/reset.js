@@ -1,14 +1,9 @@
 var gulp = require('gulp'),
     symlink = require('gulp-symlink'),
-    merge = require('merge2'),
+    runSequence = require('run-sequence').use(gulp),
+    bower = require('gulp-bower'),
     path = require('path'),
-    testlinks = [
-        {src: './lib/qunit', dest: 'qunit'},
-        {src: './lib/requirejs', dest: 'requirejs'},
-        {src: './lib/requirejs-text', dest: 'requirejs-text'},
-        {src: './dist', dest: '{name}/dist'},
-        {src: './src', dest: '{name}/src'}
-    ],
+    glob = require('glob'),
     stresslinks = [
         {src: './lib/requirejs', dest: 'requirejs'},
         {src: './lib/requirejs-text', dest: 'requirejs-text'},
@@ -17,34 +12,40 @@ var gulp = require('gulp'),
     ];
 
 module.exports = function (meta) {
-    gulp.task('reset', function () {
-        return merge([
-            symlinkTestLibs(),
-            symlinkStressLibs()
-        ]);
+    gulp.task('update-libs', function () {
+        return bower()
+            .pipe(gulp.dest('lib'));
     });
 
-    function symlinkTestLibs() {
-        var srcs = testlinks.map(function (link) {
-            return link.src;
+    gulp.task('symlink-testlibs', function () {
+        var srcs = glob.sync("lib/*");
+        var dests = srcs.map(function (src) {
+            return path.join('test', 'lib', path.basename(src));
         });
-        var dests = testlinks.map(function (link) {
-            return path.join('test', 'lib', link.dest.replace('{name}', 'nullstone'));
-        });
+        srcs.push('./dist');
+        dests.push(path.join('test', 'lib', meta.name, 'dist'));
 
-        return gulp.src(srcs)
-            .pipe(symlink.relative(dests, {force: true}));
-    }
+        srcs.push('./src');
+        dests.push(path.join('test', 'lib', meta.name, 'src'));
 
-    function symlinkStressLibs() {
-        var srcs = stresslinks.map(function (link) {
-            return link.src;
-        });
-        var dests = stresslinks.map(function (link) {
-            return path.join('stress', 'lib', link.dest.replace('{name}', 'nullstone'));
-        });
+        return gulp.src(srcs).pipe(symlink.relative(dests, {force: true}));
+    });
 
-        return gulp.src(srcs)
-            .pipe(symlink.relative(dests, {force: true}));
-    }
+    gulp.task('symlink-stresslibs', function () {
+        var srcs = glob.sync("lib/*", {ignore: "lib/qunit"});
+        var dests = srcs.map(function (src) {
+            return path.join('stress', 'lib', path.basename(src));
+        });
+        srcs.push('./dist');
+        dests.push(path.join('stress', 'lib', meta.name, 'dist'));
+
+        srcs.push('./src');
+        dests.push(path.join('stress', 'lib', meta.name, 'src'));
+
+        return gulp.src(srcs).pipe(symlink.relative(dests, {force: true}));
+    });
+
+    gulp.task('reset', function () {
+        return runSequence('update-libs', 'symlink-testlibs', 'symlink-stresslibs');
+    });
 };
