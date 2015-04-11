@@ -1,22 +1,7 @@
-var gulp = require('gulp'),
-    bump = require('gulp-bump');
+var gulp = require('gulp');
 
 module.exports = function (meta) {
-    gulp.task('bump', function () {
-        gulp.src(['./bower.json', './package.json'])
-            .pipe(bump())
-            .pipe(gulp.dest('./'));
-    });
-
-    gulp.task('bump-minor', function () {
-        gulp.src(['./bower.json', './package.json'])
-            .pipe(bump({type:'minor'}))
-            .pipe(gulp.dest('./'));
-    });
-
-    gulp.task('bump-major', function () {
-        gulp.src(['./bower.json', './package.json'])
-            .pipe(bump({type:'major'}))
-            .pipe(gulp.dest('./'));
-    });
+    gulp.task('dist', ['bump', 'default']);
+    gulp.task('dist-minor', ['bump-minor', 'default']);
+    gulp.task('dist-major', ['bump-major', 'default']);
 };

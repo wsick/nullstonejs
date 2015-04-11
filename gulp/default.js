@@ -1,6 +1,9 @@
 var gulp = require('gulp'),
     ts = require('gulp-typescript'),
     sourcemaps = require('gulp-sourcemaps'),
+    uglify = require('gulp-uglify'),
+    rename = require('gulp-rename'),
+    merge = require('merge2'),
     srcs = [
         'typings/*.d.ts',
         'src/_version.ts',
@@ -17,10 +20,18 @@ module.exports = function (meta) {
     });
 
     gulp.task('default', function () {
-        gulp.src(srcs)
+        var tsr = gulp.src(srcs)
             .pipe(sourcemaps.init())
-            .pipe(ts(tsProject))
-            .js.pipe(sourcemaps.write())
-            .pipe(gulp.dest('dist'));
+            .pipe(ts(tsProject));
+
+        return merge([
+            tsr.dts.pipe(gulp.dest('dist')),
+            tsr.js.pipe(sourcemaps.write())
+                .pipe(gulp.dest('dist'))
+                .pipe(uglify())
+                .pipe(sourcemaps.write())
+                .pipe(rename('nullstone.min.js'))
+                .pipe(gulp.dest('dist'))
+        ]);
     });
 };
