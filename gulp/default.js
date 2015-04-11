@@ -3,7 +3,7 @@ var gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps'),
     srcs = [
         'typings/*.d.ts',
-        'src/_Version.ts',
+        'src/_version.ts',
         'src/*.ts',
         'src/**/*.ts'
     ];
