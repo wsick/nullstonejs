@@ -35,7 +35,9 @@
     "gulp-open": "^0.3.2",
     "gulp-qunit": "^1.2.1",
     "gulp-sourcemaps": "^1.5.1",
+    "gulp-symlink": "^2.1.0",
     "gulp-typescript": "^2.6.0",
+    "merge2": "^0.3.3",
     "version-ts": "^0.1.1"
   }
 }
