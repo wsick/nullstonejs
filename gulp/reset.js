@@ -3,13 +3,7 @@ var gulp = require('gulp'),
     runSequence = require('run-sequence').use(gulp),
     bower = require('gulp-bower'),
     path = require('path'),
-    glob = require('glob'),
-    stresslinks = [
-        {src: './lib/requirejs', dest: 'requirejs'},
-        {src: './lib/requirejs-text', dest: 'requirejs-text'},
-        {src: './dist', dest: '{name}/dist'},
-        {src: './src', dest: '{name}/src'}
-    ];
+    glob = require('glob');
 
 module.exports = function (meta) {
     gulp.task('update-libs', function () {
