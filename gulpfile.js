@@ -1,6 +1,12 @@
 var fs = require('fs'),
     meta = {
-        name: 'nullstone'
+        name: 'nullstone',
+        buildfiles: [
+            'typings/*.d.ts',
+            'src/_version.ts',
+            'src/*.ts',
+            'src/**/*.ts'
+        ]
     };
 
 fs.readdirSync('./gulp')

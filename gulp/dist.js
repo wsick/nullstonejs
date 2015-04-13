@@ -3,13 +3,7 @@ var gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps'),
     uglify = require('gulp-uglify'),
     rename = require('gulp-rename'),
-    merge = require('merge2'),
-    srcs = [
-        'typings/*.d.ts',
-        'src/_version.ts',
-        'src/*.ts',
-        'src/**/*.ts'
-    ];
+    merge = require('merge2');
 
 module.exports = function (meta) {
     gulp.task('dist-build', function () {
@@ -21,7 +15,7 @@ module.exports = function (meta) {
             sourceRoot: '../src'
         });
 
-        var tsr = gulp.src(srcs)
+        var tsr = gulp.src(meta.buildfiles)
             .pipe(sourcemaps.init())
             .pipe(ts(tsProject));
 

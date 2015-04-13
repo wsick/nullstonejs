@@ -1,12 +1,6 @@
 var gulp = require('gulp'),
     ts = require('gulp-typescript'),
-    sourcemaps = require('gulp-sourcemaps'),
-    srcs = [
-        'typings/*.d.ts',
-        'src/_version.ts',
-        'src/*.ts',
-        'src/**/*.ts'
-    ];
+    sourcemaps = require('gulp-sourcemaps');
 
 module.exports = function (meta) {
     var tsProject = ts.createProject({
@@ -17,7 +11,7 @@ module.exports = function (meta) {
     });
 
     gulp.task('default', function () {
-        return gulp.src(srcs)
+        return gulp.src(meta.buildfiles)
             .pipe(sourcemaps.init())
             .pipe(ts(tsProject))
             .pipe(sourcemaps.write('./'))
