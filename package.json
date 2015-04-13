@@ -19,17 +19,7 @@
     "url": "https://github.com/BSick7/nullstone/issues"
   },
   "devDependencies": {
-    "connect-livereload": "^0.4.0",
     "glob": "^5.0.5",
-    "grunt": "~0.4.4",
-    "grunt-contrib-clean": "^0.6.0",
-    "grunt-contrib-connect": "^0.8.0",
-    "grunt-contrib-qunit": "~0.5.0",
-    "grunt-contrib-symlink": "^0.3.0",
-    "grunt-contrib-uglify": "^0.4.0",
-    "grunt-contrib-watch": "^0.6.1",
-    "grunt-open": "^0.2.3",
-    "grunt-typescript": "~0.6.1",
     "gulp": "^3.8.11",
     "gulp-bower": "0.0.10",
     "gulp-bump": "^0.3.0",
