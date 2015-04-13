@@ -1,4 +1,5 @@
 var gulp = require('gulp'),
+    clean = require('gulp-clean'),
     symlink = require('gulp-symlink'),
     runSequence = require('run-sequence').use(gulp),
     bower = require('gulp-bower'),
@@ -6,6 +7,11 @@ var gulp = require('gulp'),
     glob = require('glob');
 
 module.exports = function (meta) {
+    gulp.task('clean', function () {
+        return gulp.src(['./lib', './test/lib', './stress/lib'], {read: false})
+            .pipe(clean());
+    });
+
     gulp.task('update-libs', function () {
         return bower()
             .pipe(gulp.dest('lib'));
@@ -40,6 +46,6 @@ module.exports = function (meta) {
     });
 
     gulp.task('reset', function () {
-        return runSequence('update-libs', 'symlink-testlibs', 'symlink-stresslibs');
+        return runSequence('clean', 'update-libs', 'symlink-testlibs', 'symlink-stresslibs');
     });
 };
