@@ -29,7 +29,7 @@ module.exports = function (meta) {
             tsr.dts.pipe(gulp.dest('dist')),
             tsr.js
                 .pipe(uglify())
-                .pipe(rename('nullstone.min.js'))
+                .pipe(rename(meta.name + '.min.js'))
                 .pipe(sourcemaps.write('./'))
                 .pipe(gulp.dest('dist'))
         ]);

@@ -15,7 +15,7 @@ module.exports = function (meta) {
             'typings/*.d.ts',
             'test/**/*.ts',
             '!test/lib/**/*.ts',
-            'dist/nullstone.d.ts'
+            'dist/' + meta.name + '.d.ts'
         ])
             .pipe(sourcemaps.init())
             .pipe(ts(tsProject))
