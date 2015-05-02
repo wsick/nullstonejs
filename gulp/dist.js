@@ -3,7 +3,8 @@ var gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps'),
     uglify = require('gulp-uglify'),
     rename = require('gulp-rename'),
-    merge = require('merge2');
+    merge = require('merge2'),
+    runSequence = require('run-sequence');
 
 module.exports = function (meta) {
     gulp.task('dist-build', function () {
@@ -29,7 +30,13 @@ module.exports = function (meta) {
         ]);
     });
 
-    gulp.task('dist', ['bump', 'dist-build']);
-    gulp.task('dist-minor', ['bump-minor', 'dist-build']);
-    gulp.task('dist-major', ['bump-major', 'dist-build']);
+    gulp.task('dist', function (callback) {
+        runSequence('bump', ['default', 'dist-build'], callback);
+    });
+    gulp.task('dist-minor', function (callback) {
+        runSequence('bump-minor', ['default', 'dist-build'], callback);
+    });
+    gulp.task('dist-major', function (callback) {
+        runSequence('bump-major', ['default', 'dist-build'], callback);
+    });
 };
