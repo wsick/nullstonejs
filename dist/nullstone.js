@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.3.10';
+    nullstone.version = '0.3.11';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -12,13 +12,10 @@ var nullstone;
             return nullstone.async.create(function (resolve, reject) {
                 require([reqUri], function (rootModule) {
                     resolve(rootModule);
-                }, function (err) {
-                    return reject(new nullstone.DirLoadError(reqUri, err));
-                });
+                }, function (err) { return reject(new nullstone.DirLoadError(reqUri, err)); });
             });
         };
-
-        DirResolver.prototype.resolveType = function (moduleName, name, oresolve) {
+        DirResolver.prototype.resolveType = function (moduleName, name, /* out */ oresolve) {
             oresolve.isPrimitive = false;
             oresolve.type = require(moduleName + '/' + name);
             return oresolve.type !== undefined;
@@ -59,12 +56,10 @@ var nullstone;
             enumerable: true,
             configurable: true
         });
-
         Event.prototype.on = function (callback, scope) {
             this.$$callbacks.push(callback);
             this.$$scopes.push(scope);
         };
-
         Event.prototype.off = function (callback, scope) {
             var cbs = this.$$callbacks;
             var scopes = this.$$scopes;
@@ -78,18 +73,14 @@ var nullstone;
                 search--;
             }
         };
-
         Event.prototype.raise = function (sender, args) {
             for (var i = 0, cbs = this.$$callbacks.slice(0), scopes = this.$$scopes.slice(0), len = cbs.length; i < len; i++) {
                 cbs[i].call(scopes[i], sender, args);
             }
         };
-
         Event.prototype.raiseAsync = function (sender, args) {
             var _this = this;
-            window.setTimeout(function () {
-                return _this.raise(sender, args);
-            }, 1);
+            window.setTimeout(function () { return _this.raise(sender, args); }, 1);
         };
         return Event;
     })();
@@ -113,13 +104,11 @@ var nullstone;
             }
             return false;
         };
-
         Interface.prototype.as = function (o) {
             if (!this.is(o))
                 return undefined;
             return o;
         };
-
         Interface.prototype.mark = function (type) {
             nullstone.addTypeInterfaces(type, this);
             return this;
@@ -128,6 +117,7 @@ var nullstone;
     })();
     nullstone.Interface = Interface;
 })(nullstone || (nullstone = {}));
+/// <reference path="Interface" />
 var nullstone;
 (function (nullstone) {
     nullstone.ICollection_ = new nullstone.Interface("ICollection");
@@ -138,13 +128,11 @@ var nullstone;
     nullstone.IEnumerable_.is = function (o) {
         return o && o.getEnumerator && typeof o.getEnumerator === "function";
     };
-
     nullstone.IEnumerable_.empty = {
         getEnumerator: function (isReverse) {
             return nullstone.IEnumerator_.empty;
         }
     };
-
     nullstone.IEnumerable_.fromArray = function (arr) {
         return {
             $$arr: arr,
@@ -153,7 +141,6 @@ var nullstone;
             }
         };
     };
-
     nullstone.IEnumerable_.toArray = function (en) {
         var a = [];
         for (var e = en.getEnumerator(); e.moveNext();) {
@@ -165,14 +152,12 @@ var nullstone;
 var nullstone;
 (function (nullstone) {
     nullstone.IEnumerator_ = new nullstone.Interface("IEnumerator");
-
     nullstone.IEnumerator_.empty = {
         current: undefined,
         moveNext: function () {
             return false;
         }
     };
-
     nullstone.IEnumerator_.fromArray = function (arr, isReverse) {
         var len = arr.length;
         var e = { moveNext: undefined, current: undefined };
@@ -188,7 +173,8 @@ var nullstone;
                 e.current = arr[index];
                 return true;
             };
-        } else {
+        }
+        else {
             index = -1;
             e.moveNext = function () {
                 index++;
@@ -210,28 +196,25 @@ var nullstone;
         }
         Object.defineProperty(IndexedPropertyInfo.prototype, "propertyType", {
             get: function () {
+                //NotImplemented
                 return undefined;
             },
             enumerable: true,
             configurable: true
         });
-
         IndexedPropertyInfo.prototype.getValue = function (ro, index) {
             if (this.GetFunc)
                 return this.GetFunc.call(ro, index);
         };
-
         IndexedPropertyInfo.prototype.setValue = function (ro, index, value) {
             if (this.SetFunc)
                 this.SetFunc.call(ro, index, value);
         };
-
         IndexedPropertyInfo.find = function (typeOrObj) {
             var o = typeOrObj;
             var isType = typeOrObj instanceof Function;
             if (isType)
                 o = new typeOrObj();
-
             if (o instanceof Array) {
                 var pi = new IndexedPropertyInfo();
                 pi.GetFunc = function (index) {
@@ -290,8 +273,6 @@ var nullstone;
             enumerable: true,
             configurable: true
         });
-
-
         Object.defineProperty(Library.prototype, "rootModule", {
             get: function () {
                 return this.$$module = this.$$module || require(this.sourcePath);
@@ -299,9 +280,9 @@ var nullstone;
             enumerable: true,
             configurable: true
         });
-
         Library.prototype.loadAsync = function () {
             var _this = this;
+            //NOTE: If using http library scheme and a custom source path was not set, we assume the library is preloaded
             if (!this.$$sourcePath && this.uri.scheme === "http")
                 this.$$loaded = true;
             if (this.$$loaded)
@@ -312,12 +293,9 @@ var nullstone;
                     _this.$$module = rootModule;
                     _this.$$loaded = true;
                     resolve(_this);
-                }, function (err) {
-                    return reject(new nullstone.LibraryLoadError(_this, err));
-                });
+                }, function (err) { return reject(new nullstone.LibraryLoadError(_this, err)); });
             });
         };
-
         Library.prototype.$configModule = function () {
             var co = {
                 paths: {},
@@ -335,16 +313,16 @@ var nullstone;
             co.map['*'][srcPath] = this.name;
             require.config(co);
         };
-
-        Library.prototype.resolveType = function (moduleName, name, oresolve) {
+        Library.prototype.resolveType = function (moduleName, name, /* out */ oresolve) {
             if (!moduleName) {
+                //Library URI: http://.../
                 oresolve.isPrimitive = true;
                 if ((oresolve.type = this.$$primtypes[name]) !== undefined)
                     return true;
                 oresolve.isPrimitive = false;
                 return (oresolve.type = this.$$types[name]) !== undefined;
             }
-
+            //Library URI: lib://.../
             var curModule = this.rootModule;
             oresolve.isPrimitive = false;
             oresolve.type = undefined;
@@ -362,7 +340,6 @@ var nullstone;
             setTypeUri(type, this.uri);
             return true;
         };
-
         Library.prototype.add = function (type, name) {
             if (!type)
                 throw new Error("A type must be specified when registering '" + name + "'`.");
@@ -373,7 +350,6 @@ var nullstone;
             this.$$types[name] = type;
             return this;
         };
-
         Library.prototype.addPrimitive = function (type, name) {
             if (!type)
                 throw new Error("A type must be specified when registering '" + name + "'`.");
@@ -384,7 +360,6 @@ var nullstone;
             this.$$primtypes[name] = type;
             return this;
         };
-
         Library.prototype.addEnum = function (enu, name) {
             this.addPrimitive(enu, name);
             Object.defineProperty(enu, "$$enum", { value: true, writable: false });
@@ -394,7 +369,6 @@ var nullstone;
         return Library;
     })();
     nullstone.Library = Library;
-
     function setTypeUri(type, uri) {
         if (type.$$uri)
             return;
@@ -403,6 +377,11 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
+    //NOTE:
+    //  Library Uri syntax
+    //      http://...
+    //      lib://<library>[/<namespace>]
+    //      <dir>
     var LibraryResolver = (function () {
         function LibraryResolver() {
             this.$$libs = {};
@@ -412,7 +391,6 @@ var nullstone;
         LibraryResolver.prototype.createLibrary = function (uri) {
             return new nullstone.Library(uri);
         };
-
         LibraryResolver.prototype.loadTypeAsync = function (uri, name) {
             var lib = this.resolve(uri);
             if (!lib)
@@ -427,13 +405,11 @@ var nullstone;
                 }, reject);
             });
         };
-
         LibraryResolver.prototype.resolve = function (uri) {
             var libUri = new nullstone.Uri(uri);
             var scheme = libUri.scheme;
             if (!scheme)
                 return null;
-
             var libName = (scheme === "lib") ? libUri.host : uri;
             var lib = this.$$libs[libName];
             if (!lib) {
@@ -442,13 +418,11 @@ var nullstone;
             }
             return lib;
         };
-
-        LibraryResolver.prototype.resolveType = function (uri, name, oresolve) {
+        LibraryResolver.prototype.resolveType = function (uri, name, /* out */ oresolve) {
             var libUri = new nullstone.Uri(uri);
             var scheme = libUri.scheme;
             if (!scheme)
                 return this.dirResolver.resolveType(uri, name, oresolve);
-
             var libName = (scheme === "lib") ? libUri.host : uri;
             var modName = (scheme === "lib") ? libUri.absolutePath : "";
             var lib = this.$$libs[libName];
@@ -458,7 +432,6 @@ var nullstone;
             }
             return lib.resolveType(modName, name, oresolve);
         };
-
         LibraryResolver.prototype.$$onLibraryCreated = function (lib) {
             this.libraryCreated.raise(this, Object.freeze({ library: lib }));
         };
@@ -495,7 +468,6 @@ var nullstone;
         return Object.getOwnPropertyDescriptor(obj, name);
     }
     nullstone.getPropertyDescriptor = getPropertyDescriptor;
-
     function hasProperty(obj, name) {
         if (!obj)
             return false;
@@ -515,21 +487,17 @@ var nullstone;
             if (this.$$getFunc)
                 return this.$$getFunc.call(obj);
         };
-
         PropertyInfo.prototype.setValue = function (obj, value) {
             if (this.$$setFunc)
                 return this.$$setFunc.call(obj, value);
         };
-
         PropertyInfo.find = function (typeOrObj, name) {
             var o = typeOrObj;
             var isType = typeOrObj instanceof Function;
             if (isType)
                 o = new typeOrObj();
-
             if (!(o instanceof Object))
                 return null;
-
             var nameClosure = name;
             var propDesc = nullstone.getPropertyDescriptor(o, name);
             if (propDesc) {
@@ -547,7 +515,6 @@ var nullstone;
                     };
                 return pi;
             }
-
             var type = isType ? typeOrObj : typeOrObj.constructor;
             var pi = new PropertyInfo();
             pi.name = name;
@@ -573,7 +540,6 @@ var nullstone;
         return name;
     }
     nullstone.getTypeName = getTypeName;
-
     function getTypeParent(type) {
         if (type === Object)
             return null;
@@ -587,11 +553,10 @@ var nullstone;
         return p;
     }
     nullstone.getTypeParent = getTypeParent;
-
     function addTypeInterfaces(type) {
         var interfaces = [];
-        for (var _i = 0; _i < (arguments.length - 1); _i++) {
-            interfaces[_i] = arguments[_i + 1];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            interfaces[_i - 1] = arguments[_i];
         }
         if (!interfaces)
             return;
@@ -604,7 +569,6 @@ var nullstone;
         Object.defineProperty(type, "$$interfaces", { value: interfaces, writable: false });
     }
     nullstone.addTypeInterfaces = addTypeInterfaces;
-
     function doesInheritFrom(t, type) {
         var temp = t;
         while (temp && temp !== type) {
@@ -622,6 +586,8 @@ var nullstone;
             return null;
         if (typeof val === "boolean")
             return val;
+        if (typeof val === "number")
+            return val !== 0;
         var c = val.toString().toUpperCase();
         return c === "TRUE" ? true : (c === "FALSE" ? false : null);
     };
@@ -635,6 +601,8 @@ var nullstone;
             return 0;
         if (typeof val === "number")
             return val;
+        if (typeof val === "boolean")
+            return val ? 1 : 0;
         return parseFloat(val.toString());
     };
     converters[Date] = function (val) {
@@ -650,7 +618,6 @@ var nullstone;
         val = val.toString();
         return new RegExp(val);
     };
-
     function convertAnyToType(val, type) {
         var converter = converters[type];
         if (converter)
@@ -667,24 +634,22 @@ var nullstone;
         return val;
     }
     nullstone.convertAnyToType = convertAnyToType;
-
     function convertStringToEnum(val, en) {
         if (!val)
             return 0;
         return en[val];
     }
     nullstone.convertStringToEnum = convertStringToEnum;
-
     function registerTypeConverter(type, converter) {
         converters[type] = converter;
     }
     nullstone.registerTypeConverter = registerTypeConverter;
-
     function registerEnumConverter(e, converter) {
         e.Converter = converter;
     }
     nullstone.registerEnumConverter = registerEnumConverter;
 })(nullstone || (nullstone = {}));
+/// <reference path="conversion" />
 var nullstone;
 (function (nullstone) {
     (function (UriKind) {
@@ -698,7 +663,8 @@ var nullstone;
             if (typeof uri === "string") {
                 this.$$originalString = uri;
                 this.$$kind = kind || 0 /* RelativeOrAbsolute */;
-            } else if (uri instanceof Uri) {
+            }
+            else if (uri instanceof Uri) {
                 this.$$originalString = uri.$$originalString;
                 this.$$kind = uri.$$kind;
             }
@@ -710,19 +676,17 @@ var nullstone;
             enumerable: true,
             configurable: true
         });
-
         Object.defineProperty(Uri.prototype, "host", {
             get: function () {
                 var s = this.$$originalString;
                 var ind = Math.max(3, s.indexOf("://") + 3);
                 var end = s.indexOf("/", ind);
-
+                //TODO: Strip port
                 return (end < 0) ? s.substr(ind) : s.substr(ind, end - ind);
             },
             enumerable: true,
             configurable: true
         });
-
         Object.defineProperty(Uri.prototype, "absolutePath", {
             get: function () {
                 var s = this.$$originalString;
@@ -738,7 +702,6 @@ var nullstone;
             enumerable: true,
             configurable: true
         });
-
         Object.defineProperty(Uri.prototype, "scheme", {
             get: function () {
                 var s = this.$$originalString;
@@ -750,7 +713,6 @@ var nullstone;
             enumerable: true,
             configurable: true
         });
-
         Object.defineProperty(Uri.prototype, "fragment", {
             get: function () {
                 var s = this.$$originalString;
@@ -762,7 +724,6 @@ var nullstone;
             enumerable: true,
             configurable: true
         });
-
         Object.defineProperty(Uri.prototype, "originalString", {
             get: function () {
                 return this.$$originalString.toString();
@@ -770,15 +731,12 @@ var nullstone;
             enumerable: true,
             configurable: true
         });
-
         Uri.prototype.toString = function () {
             return this.$$originalString.toString();
         };
-
         Uri.prototype.equals = function (other) {
             return this.$$originalString === other.$$originalString;
         };
-
         Uri.isNullOrEmpty = function (uri) {
             if (uri == null)
                 return true;
@@ -793,6 +751,7 @@ var nullstone;
         return new Uri(val.toString());
     });
 })(nullstone || (nullstone = {}));
+/// <reference path="Uri" />
 var nullstone;
 (function (nullstone) {
     var TypeManager = (function () {
@@ -801,37 +760,31 @@ var nullstone;
             this.xUri = xUri;
             this.libResolver = new nullstone.LibraryResolver();
             this.libResolver.resolve(defaultUri).add(Array, "Array");
-
             this.libResolver.resolve(xUri).addPrimitive(String, "String").addPrimitive(Number, "Number").addPrimitive(Number, "Double").addPrimitive(Date, "Date").addPrimitive(RegExp, "RegExp").addPrimitive(Boolean, "Boolean").addPrimitive(nullstone.Uri, "Uri");
         }
         TypeManager.prototype.resolveLibrary = function (uri) {
             return this.libResolver.resolve(uri || this.defaultUri);
         };
-
         TypeManager.prototype.loadTypeAsync = function (uri, name) {
             return this.libResolver.loadTypeAsync(uri || this.defaultUri, name);
         };
-
-        TypeManager.prototype.resolveType = function (uri, name, oresolve) {
+        TypeManager.prototype.resolveType = function (uri, name, /* out */ oresolve) {
             oresolve.isPrimitive = false;
             oresolve.type = undefined;
             return this.libResolver.resolveType(uri || this.defaultUri, name, oresolve);
         };
-
         TypeManager.prototype.add = function (uri, name, type) {
             var lib = this.libResolver.resolve(uri || this.defaultUri);
             if (lib)
                 lib.add(type, name);
             return this;
         };
-
         TypeManager.prototype.addPrimitive = function (uri, name, type) {
             var lib = this.libResolver.resolve(uri || this.defaultUri);
             if (lib)
                 lib.addPrimitive(type, name);
             return this;
         };
-
         TypeManager.prototype.addEnum = function (uri, name, enu) {
             var lib = this.libResolver.resolve(uri || this.defaultUri);
             if (lib)
@@ -857,7 +810,6 @@ var nullstone;
         ann.push(value);
     }
     nullstone.Annotation = Annotation;
-
     function GetAnnotations(type, name) {
         var at = type;
         var anns = at.$$annotations;
@@ -866,18 +818,16 @@ var nullstone;
         return (anns[name] || []).slice(0);
     }
     nullstone.GetAnnotations = GetAnnotations;
-
     function CreateTypedAnnotation(name) {
         function ta(type) {
             var values = [];
-            for (var _i = 0; _i < (arguments.length - 1); _i++) {
-                values[_i] = arguments[_i + 1];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                values[_i - 1] = arguments[_i];
             }
             for (var i = 0, len = values.length; i < len; i++) {
                 Annotation(type, name, values[i]);
             }
         }
-
         ta.Get = function (type) {
             return GetAnnotations(type, name);
         };
@@ -887,27 +837,22 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
+    var async;
     (function (async) {
         function create(resolution) {
             var onSuccess;
             var onError;
-
             var resolvedResult;
-
             function resolve(result) {
                 resolvedResult = result;
                 onSuccess && onSuccess(result);
             }
-
             var resolvedError;
-
             function reject(error) {
                 resolvedError = error;
                 onError && onError(error);
             }
-
             resolution(resolve, reject);
-
             var req = {
                 then: function (success, errored) {
                     onSuccess = success;
@@ -922,32 +867,27 @@ var nullstone;
             return req;
         }
         async.create = create;
-
         function resolve(obj) {
             return async.create(function (resolve, reject) {
                 resolve(obj);
             });
         }
         async.resolve = resolve;
-
         function reject(err) {
             return async.create(function (resolve, reject) {
                 reject(err);
             });
         }
         async.reject = reject;
-
         function many(arr) {
             if (!arr || arr.length < 1)
                 return resolve([]);
-
             return create(function (resolve, reject) {
                 var resolves = new Array(arr.length);
                 var errors = new Array(arr.length);
                 var finished = 0;
                 var count = arr.length;
                 var anyerrors = false;
-
                 function completeSingle(i, res, err) {
                     resolves[i] = res;
                     errors[i] = err;
@@ -956,22 +896,17 @@ var nullstone;
                     if (finished >= count)
                         anyerrors ? reject(new nullstone.AggregateError(errors)) : resolve(resolves);
                 }
-
                 for (var i = 0; i < count; i++) {
-                    arr[i].then(function (resi) {
-                        return completeSingle(i, resi, undefined);
-                    }, function (erri) {
-                        return completeSingle(i, undefined, erri);
-                    });
+                    arr[i].then(function (resi) { return completeSingle(i, resi, undefined); }, function (erri) { return completeSingle(i, undefined, erri); });
                 }
             });
         }
         async.many = many;
-    })(nullstone.async || (nullstone.async = {}));
-    var async = nullstone.async;
+    })(async = nullstone.async || (nullstone.async = {}));
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
+    //TODO: Check instances in Fayde .Equals
     function equals(val1, val2) {
         if (val1 == null && val2 == null)
             return true;
@@ -987,9 +922,7 @@ var nullstone;
 (function (nullstone) {
     var AggregateError = (function () {
         function AggregateError(errors) {
-            this.errors = errors.filter(function (e) {
-                return !!e;
-            });
+            this.errors = errors.filter(function (e) { return !!e; });
             Object.freeze(this);
         }
         Object.defineProperty(AggregateError.prototype, "flat", {
@@ -999,7 +932,8 @@ var nullstone;
                     var err = errs[i];
                     if (err instanceof AggregateError) {
                         flat = flat.concat(err.flat);
-                    } else {
+                    }
+                    else {
                         flat.push(err);
                     }
                 }
@@ -1038,14 +972,13 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
+    var markup;
     (function (markup) {
         function finishMarkupExtension(me, prefixResolver, resolver, os) {
             if (!me)
                 return me;
             if (typeof me.resolveTypeFields === "function") {
-                me.resolveTypeFields(function (full) {
-                    return parseType(full, prefixResolver, resolver);
-                });
+                me.resolveTypeFields(function (full) { return parseType(full, prefixResolver, resolver); });
             }
             if (typeof me.transmute === "function") {
                 return me.transmute(os);
@@ -1053,7 +986,6 @@ var nullstone;
             return me;
         }
         markup.finishMarkupExtension = finishMarkupExtension;
-
         function parseType(full, prefixResolver, resolver) {
             var prefix = null;
             var name = full;
@@ -1066,11 +998,11 @@ var nullstone;
             var ort = resolver(uri, name);
             return ort.type;
         }
-    })(nullstone.markup || (nullstone.markup = {}));
-    var markup = nullstone.markup;
+    })(markup = nullstone.markup || (nullstone.markup = {}));
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
+    var markup;
     (function (markup) {
         markup.NO_PARSER = {
             on: function (listener) {
@@ -1093,26 +1025,16 @@ var nullstone;
                 return nullstone.IEnumerator_.empty;
             }
         };
-
         var oresolve = {
             isPrimitive: false,
             type: Object
         };
-
         function createMarkupSax(listener) {
             return {
-                resolveType: listener.resolveType || (function (uri, name) {
-                    return oresolve;
-                }),
-                resolveObject: listener.resolveObject || (function (type) {
-                    return new (type)();
-                }),
-                resolvePrimitive: listener.resolvePrimitive || (function (type, text) {
-                    return new (type)(text);
-                }),
-                resolveResources: listener.resolveResources || (function (owner, ownerType) {
-                    return new Object();
-                }),
+                resolveType: listener.resolveType || (function (uri, name) { return oresolve; }),
+                resolveObject: listener.resolveObject || (function (type) { return new (type)(); }),
+                resolvePrimitive: listener.resolvePrimitive || (function (type, text) { return new (type)(text); }),
+                resolveResources: listener.resolveResources || (function (owner, ownerType) { return new Object(); }),
                 branchSkip: listener.branchSkip || (function (root, obj) {
                 }),
                 object: listener.object || (function (obj, isContent) {
@@ -1131,19 +1053,17 @@ var nullstone;
                 }),
                 attributeEnd: listener.attributeEnd || (function (ownerType, attrName, obj) {
                 }),
-                error: listener.error || (function (e) {
-                    return true;
-                }),
+                error: listener.error || (function (e) { return true; }),
                 end: listener.end || (function () {
                 })
             };
         }
         markup.createMarkupSax = createMarkupSax;
-    })(nullstone.markup || (nullstone.markup = {}));
-    var markup = nullstone.markup;
+    })(markup = nullstone.markup || (nullstone.markup = {}));
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
+    var markup;
     (function (_markup) {
         var Markup = (function () {
             function Markup(uri) {
@@ -1152,13 +1072,11 @@ var nullstone;
             Markup.prototype.createParser = function () {
                 return _markup.NO_PARSER;
             };
-
             Markup.prototype.resolve = function (typemgr, customCollector) {
                 var resolver = new _markup.MarkupDependencyResolver(typemgr, this.createParser());
                 resolver.collect(this.root, customCollector);
                 return resolver.resolve();
             };
-
             Markup.prototype.loadAsync = function () {
                 var reqUri = "text!" + this.uri.toString();
                 var md = this;
@@ -1169,11 +1087,9 @@ var nullstone;
                     }, reject);
                 });
             };
-
             Markup.prototype.loadRoot = function (data) {
                 return data;
             };
-
             Markup.prototype.setRoot = function (markup) {
                 this.root = markup;
                 return this;
@@ -1181,11 +1097,11 @@ var nullstone;
             return Markup;
         })();
         _markup.Markup = Markup;
-    })(nullstone.markup || (nullstone.markup = {}));
-    var markup = nullstone.markup;
+    })(markup = nullstone.markup || (nullstone.markup = {}));
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
+    var markup;
     (function (markup) {
         var MarkupDependencyResolver = (function () {
             function MarkupDependencyResolver(typeManager, parser) {
@@ -1197,6 +1113,9 @@ var nullstone;
             }
             MarkupDependencyResolver.prototype.collect = function (root, customCollector) {
                 var _this = this;
+                //TODO: We need to collect
+                //  ResourceDictionary.Source
+                //  Application.ThemeName
                 var blank = {};
                 var oresolve = {
                     isPrimitive: false,
@@ -1233,10 +1152,8 @@ var nullstone;
                         customCollector(last.uri, last.name, attrName, obj);
                     };
                 }
-
                 this.parser.on(parse).parse(root);
             };
-
             MarkupDependencyResolver.prototype.add = function (uri, name) {
                 var uris = this.$$uris;
                 var names = this.$$names;
@@ -1249,7 +1166,6 @@ var nullstone;
                 names.push(name);
                 return true;
             };
-
             MarkupDependencyResolver.prototype.resolve = function () {
                 var as = [];
                 for (var i = 0, uris = this.$$uris, names = this.$$names, tm = this.typeManager, resolving = this.$$resolving; i < uris.length; i++) {
@@ -1263,14 +1179,14 @@ var nullstone;
             return MarkupDependencyResolver;
         })();
         markup.MarkupDependencyResolver = MarkupDependencyResolver;
-    })(nullstone.markup || (nullstone.markup = {}));
-    var markup = nullstone.markup;
+    })(markup = nullstone.markup || (nullstone.markup = {}));
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
+    var markup;
     (function (markup) {
+        var xaml;
         (function (xaml) {
-            
             var XamlExtensionParser = (function () {
                 function XamlExtensionParser() {
                     this.$$defaultXmlns = "http://schemas.wsick.com/fayde";
@@ -1281,7 +1197,6 @@ var nullstone;
                     this.$$xXmlns = xXmlns;
                     return this;
                 };
-
                 XamlExtensionParser.prototype.parse = function (value, resolver, os) {
                     if (!isAlpha(value[1]))
                         return value;
@@ -1299,12 +1214,10 @@ var nullstone;
                     obj = markup.finishMarkupExtension(obj, resolver, this.$$onResolveType, os);
                     return obj;
                 };
-
                 XamlExtensionParser.prototype.$$doParse = function (ctx, os) {
                     if (!this.$$parseName(ctx))
                         return undefined;
                     this.$$startExtension(ctx, os);
-
                     while (ctx.i < ctx.text.length) {
                         if (!this.$$parseKeyValue(ctx, os))
                             break;
@@ -1312,10 +1225,8 @@ var nullstone;
                             break;
                         }
                     }
-
                     return os.pop();
                 };
-
                 XamlExtensionParser.prototype.$$parseName = function (ctx) {
                     var ind = ctx.text.indexOf(" ", ctx.i);
                     if (ind > ctx.i) {
@@ -1332,14 +1243,12 @@ var nullstone;
                     ctx.error = "Missing closing bracket.";
                     return false;
                 };
-
                 XamlExtensionParser.prototype.$$startExtension = function (ctx, os) {
                     var full = ctx.acc;
                     var ind = full.indexOf(":");
                     var prefix = (ind < 0) ? null : full.substr(0, ind);
                     var name = (ind < 0) ? full : full.substr(ind + 1);
                     var uri = prefix ? ctx.resolver.lookupNamespaceURI(prefix) : xaml.DEFAULT_XMLNS;
-
                     var obj;
                     if (uri === this.$$xXmlns) {
                         if (name === "Null")
@@ -1350,13 +1259,13 @@ var nullstone;
                             obj = this.$$parseXStatic(ctx);
                         else
                             throw new Error("Unknown markup extension. [" + prefix + ":" + name + "]");
-                    } else {
+                    }
+                    else {
                         var ort = this.$$onResolveType(uri, name);
                         obj = this.$$onResolveObject(ort.type);
                     }
                     os.push(obj);
                 };
-
                 XamlExtensionParser.prototype.$$parseXNull = function (ctx) {
                     var ind = ctx.text.indexOf("}", ctx.i);
                     if (ind < ctx.i)
@@ -1364,14 +1273,12 @@ var nullstone;
                     ctx.i = ind;
                     return null;
                 };
-
                 XamlExtensionParser.prototype.$$parseXType = function (ctx) {
                     var end = ctx.text.indexOf("}", ctx.i);
                     if (end < ctx.i)
                         throw new Error("Unterminated string constant.");
                     var val = ctx.text.substr(ctx.i, end - ctx.i);
                     ctx.i = end;
-
                     var ind = val.indexOf(":");
                     var prefix = (ind < 0) ? null : val.substr(0, ind);
                     var name = (ind < 0) ? val : val.substr(ind + 1);
@@ -1379,7 +1286,6 @@ var nullstone;
                     var ort = this.$$onResolveType(uri, name);
                     return ort.type;
                 };
-
                 XamlExtensionParser.prototype.$$parseXStatic = function (ctx) {
                     var text = ctx.text;
                     var len = text.length;
@@ -1389,11 +1295,9 @@ var nullstone;
                             break;
                     }
                     var val = text.substr(start, ctx.i - start);
-
                     var func = new Function("return (" + val + ");");
                     return func();
                 };
-
                 XamlExtensionParser.prototype.$$parseKeyValue = function (ctx, os) {
                     var text = ctx.text;
                     ctx.acc = "";
@@ -1406,7 +1310,8 @@ var nullstone;
                         if (cur === "\\") {
                             ctx.i++;
                             ctx.acc += text[ctx.i];
-                        } else if (cur === "{") {
+                        }
+                        else if (cur === "{") {
                             if (nonalpha || !isAlpha(text[ctx.i + 1])) {
                                 ctx.acc += cur;
                                 nonalpha = true;
@@ -1420,47 +1325,50 @@ var nullstone;
                             val = this.$$doParse(ctx, os);
                             if (ctx.error)
                                 return false;
-                        } else if (cur === "=") {
+                        }
+                        else if (cur === "=") {
                             key = ctx.acc.trim();
                             ctx.acc = "";
-                        } else if (cur === "}") {
+                        }
+                        else if (cur === "}") {
                             if (nonalpha) {
                                 nonalpha = false;
                                 ctx.acc += cur;
                             }
                             this.$$finishKeyValue(ctx, key, val, os);
                             return true;
-                        } else if (cur === ",") {
+                        }
+                        else if (cur === ",") {
                             ctx.i++;
                             this.$$finishKeyValue(ctx, key, val, os);
                             return true;
-                        } else if (key && !ctx.acc && cur === "'") {
+                        }
+                        else if (key && !ctx.acc && cur === "'") {
                             ctx.i++;
                             this.$$parseSingleQuoted(ctx);
                             val = ctx.acc;
                             ctx.acc = "";
-                        } else {
+                        }
+                        else {
                             ctx.acc += cur;
                         }
                     }
                     throw new Error("Unterminated string constant.");
                 };
-
                 XamlExtensionParser.prototype.$$finishKeyValue = function (ctx, key, val, os) {
                     if (val === undefined) {
                         if (!(val = ctx.acc.trim()))
                             return;
                     }
-
                     val = markup.finishMarkupExtension(val, ctx.resolver, this.$$onResolveType, os);
                     var co = os[os.length - 1];
                     if (!key) {
                         co.init && co.init(val);
-                    } else {
+                    }
+                    else {
                         co[key] = val;
                     }
                 };
-
                 XamlExtensionParser.prototype.$$parseSingleQuoted = function (ctx) {
                     var text = ctx.text;
                     var len = text.length;
@@ -1469,43 +1377,34 @@ var nullstone;
                         if (cur === "\\") {
                             ctx.i++;
                             ctx.acc += text[ctx.i];
-                        } else if (cur === "'") {
+                        }
+                        else if (cur === "'") {
                             return;
-                        } else {
+                        }
+                        else {
                             ctx.acc += cur;
                         }
                     }
                 };
-
                 XamlExtensionParser.prototype.$$ensure = function () {
                     this.onResolveType(this.$$onResolveType).onResolveObject(this.$$onResolveObject).onError(this.$$onError);
                 };
-
                 XamlExtensionParser.prototype.onResolveType = function (cb) {
                     var oresolve = {
                         isPrimitive: false,
                         type: Object
                     };
-                    this.$$onResolveType = cb || (function (xmlns, name) {
-                        return oresolve;
-                    });
+                    this.$$onResolveType = cb || (function (xmlns, name) { return oresolve; });
                     return this;
                 };
-
                 XamlExtensionParser.prototype.onResolveObject = function (cb) {
-                    this.$$onResolveObject = cb || (function (type) {
-                        return new type();
-                    });
+                    this.$$onResolveObject = cb || (function (type) { return new type(); });
                     return this;
                 };
-
                 XamlExtensionParser.prototype.onResolvePrimitive = function (cb) {
-                    this.$$onResolvePrimitive = cb || (function (type, text) {
-                        return new type(text);
-                    });
+                    this.$$onResolvePrimitive = cb || (function (type, text) { return new type(text); });
                     return this;
                 };
-
                 XamlExtensionParser.prototype.onError = function (cb) {
                     this.$$onError = cb || (function (e) {
                     });
@@ -1514,17 +1413,14 @@ var nullstone;
                 return XamlExtensionParser;
             })();
             xaml.XamlExtensionParser = XamlExtensionParser;
-
             function isAlpha(c) {
                 if (!c)
                     return false;
                 var code = c[0].toUpperCase().charCodeAt(0);
                 return code >= 65 && code <= 90;
             }
-        })(markup.xaml || (markup.xaml = {}));
-        var xaml = markup.xaml;
-    })(nullstone.markup || (nullstone.markup = {}));
-    var markup = nullstone.markup;
+        })(xaml = markup.xaml || (markup.xaml = {}));
+    })(markup = nullstone.markup || (nullstone.markup = {}));
 })(nullstone || (nullstone = {}));
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -1534,13 +1430,12 @@ var __extends = this.__extends || function (d, b) {
 };
 var nullstone;
 (function (nullstone) {
+    var markup;
     (function (markup) {
+        var xaml;
         (function (xaml) {
             var parser = new DOMParser();
-            var xcache = new nullstone.Memoizer(function (key) {
-                return new XamlMarkup(key);
-            });
-
+            var xcache = new nullstone.Memoizer(function (key) { return new XamlMarkup(key); });
             var XamlMarkup = (function (_super) {
                 __extends(XamlMarkup, _super);
                 function XamlMarkup() {
@@ -1549,11 +1444,9 @@ var nullstone;
                 XamlMarkup.create = function (uri) {
                     return xcache.memoize(uri.toString());
                 };
-
                 XamlMarkup.prototype.createParser = function () {
                     return new xaml.XamlParser();
                 };
-
                 XamlMarkup.prototype.loadRoot = function (data) {
                     var doc = parser.parseFromString(data, "text/xml");
                     return doc.documentElement;
@@ -1561,20 +1454,19 @@ var nullstone;
                 return XamlMarkup;
             })(markup.Markup);
             xaml.XamlMarkup = XamlMarkup;
-        })(markup.xaml || (markup.xaml = {}));
-        var xaml = markup.xaml;
-    })(nullstone.markup || (nullstone.markup = {}));
-    var markup = nullstone.markup;
+        })(xaml = markup.xaml || (markup.xaml = {}));
+    })(markup = nullstone.markup || (nullstone.markup = {}));
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
+    var markup;
     (function (markup) {
+        var xaml;
         (function (xaml) {
             xaml.DEFAULT_XMLNS = "http://schemas.wsick.com/fayde";
             xaml.DEFAULT_XMLNS_X = "http://schemas.wsick.com/fayde/x";
             var ERROR_XMLNS = "http://www.w3.org/1999/xhtml";
             var ERROR_NAME = "parsererror";
-
             var XamlParser = (function () {
                 function XamlParser() {
                     this.$$onEnd = null;
@@ -1586,7 +1478,6 @@ var nullstone;
                 }
                 XamlParser.prototype.on = function (listener) {
                     listener = markup.createMarkupSax(listener);
-
                     this.$$onResolveType = listener.resolveType;
                     this.$$onResolveObject = listener.resolveObject;
                     this.$$onResolvePrimitive = listener.resolvePrimitive;
@@ -1602,14 +1493,11 @@ var nullstone;
                     this.$$onAttributeEnd = listener.attributeEnd;
                     this.$$onError = listener.error;
                     this.$$onEnd = listener.end;
-
                     if (this.$$extension) {
                         this.$$extension.onResolveType(this.$$onResolveType).onResolveObject(this.$$onResolveObject).onResolvePrimitive(this.$$onResolvePrimitive);
                     }
-
                     return this;
                 };
-
                 XamlParser.prototype.setNamespaces = function (defaultXmlns, xXmlns) {
                     this.$$defaultXmlns = defaultXmlns;
                     this.$$xXmlns = xXmlns;
@@ -1617,7 +1505,6 @@ var nullstone;
                         this.$$extension.setNamespaces(this.$$defaultXmlns, this.$$xXmlns);
                     return this;
                 };
-
                 XamlParser.prototype.setExtensionParser = function (parser) {
                     this.$$extension = parser;
                     if (parser) {
@@ -1627,7 +1514,6 @@ var nullstone;
                     }
                     return this;
                 };
-
                 XamlParser.prototype.parse = function (el) {
                     if (!this.$$extension)
                         throw new Error("No extension parser exists on parser.");
@@ -1635,11 +1521,9 @@ var nullstone;
                     this.$$destroy();
                     return this;
                 };
-
                 XamlParser.prototype.skipBranch = function () {
                     this.$$skipnext = true;
                 };
-
                 XamlParser.prototype.walkUpObjects = function () {
                     var os = this.$$objectStack;
                     var i = os.length;
@@ -1651,12 +1535,13 @@ var nullstone;
                         }
                     };
                 };
-
                 XamlParser.prototype.resolvePrefix = function (prefix) {
                     return this.$$curel.lookupNamespaceURI(prefix);
                 };
-
                 XamlParser.prototype.$$handleElement = function (el, isContent) {
+                    // NOTE: Handle tag open
+                    //  <[ns:]Type.Name>
+                    //  <[ns:]Type>
                     var old = this.$$curel;
                     this.$$curel = el;
                     var name = el.localName;
@@ -1665,29 +1550,25 @@ var nullstone;
                         this.$$curel = old;
                         return;
                     }
-
                     var os = this.$$objectStack;
                     var ort = this.$$onResolveType(xmlns, name);
                     if (this.$$tryHandlePrimitive(el, ort, isContent)) {
                         this.$$curel = old;
                         return;
                     }
-
                     var obj = this.$$onResolveObject(ort.type);
                     if (obj !== undefined) {
                         os.push(obj);
                         this.$$onObject(obj, isContent);
                     }
-
+                    // NOTE: Handle resources before attributes and child elements
                     var resEl = findResourcesElement(el, xmlns, name);
                     if (resEl)
                         this.$$handleResources(obj, ort.type, resEl);
-
                     this.$$curkey = undefined;
-
+                    // NOTE: Walk attributes
                     this.$$processAttributes(el);
                     var key = this.$$curkey;
-
                     if (this.$$skipnext) {
                         this.$$skipnext = false;
                         os.pop();
@@ -1696,7 +1577,7 @@ var nullstone;
                         this.$$curel = old;
                         return;
                     }
-
+                    // NOTE: Walk Children
                     var child = el.firstElementChild;
                     var hasChildren = !!child;
                     while (child) {
@@ -1704,20 +1585,21 @@ var nullstone;
                             this.$$handleElement(child, true);
                         child = child.nextElementSibling;
                     }
-
+                    // NOTE: If we did not hit a child tag, use text content
                     if (!hasChildren) {
                         var text = el.textContent;
                         if (text && (text = text.trim()))
                             this.$$onContentText(text);
                     }
-
+                    // NOTE: Handle tag close
+                    //  </[ns:]Type.Name>
+                    //  </[ns:]Type>
                     if (obj !== undefined) {
                         os.pop();
                         this.$$onObjectEnd(obj, key, isContent, os[os.length - 1]);
                     }
                     this.$$curel = old;
                 };
-
                 XamlParser.prototype.$$handleResources = function (owner, ownerType, resEl) {
                     var os = this.$$objectStack;
                     var rd = this.$$onResolveResources(owner, ownerType);
@@ -1731,36 +1613,28 @@ var nullstone;
                     os.pop();
                     this.$$onObjectEnd(rd, undefined, false, os[os.length - 1]);
                 };
-
                 XamlParser.prototype.$$tryHandleError = function (el, xmlns, name) {
                     if (xmlns !== ERROR_XMLNS || name !== ERROR_NAME)
                         return false;
                     this.$$onError(new Error(el.textContent));
                     return true;
                 };
-
                 XamlParser.prototype.$$tryHandlePropertyTag = function (el, xmlns, name) {
                     var ind = name.indexOf('.');
                     if (ind < 0)
                         return false;
-
                     var ort = this.$$onResolveType(xmlns, name.substr(0, ind));
                     var type = ort.type;
                     name = name.substr(ind + 1);
-
                     this.$$onPropertyStart(type, name);
-
                     var child = el.firstElementChild;
                     while (child) {
                         this.$$handleElement(child, false);
                         child = child.nextElementSibling;
                     }
-
                     this.$$onPropertyEnd(type, name);
-
                     return true;
                 };
-
                 XamlParser.prototype.$$tryHandlePrimitive = function (el, oresolve, isContent) {
                     if (!oresolve.isPrimitive)
                         return false;
@@ -1774,13 +1648,11 @@ var nullstone;
                     this.$$onObjectEnd(obj, key, isContent, os[os.length - 1]);
                     return true;
                 };
-
                 XamlParser.prototype.$$processAttributes = function (el) {
                     for (var i = 0, attrs = el.attributes, len = attrs.length; i < len; i++) {
                         this.$$processAttribute(attrs[i]);
                     }
                 };
-
                 XamlParser.prototype.$$processAttribute = function (attr) {
                     var prefix = attr.prefix;
                     var name = attr.localName;
@@ -1792,14 +1664,14 @@ var nullstone;
                         return true;
                     return this.$$handleAttribute(uri, name, value, attr);
                 };
-
                 XamlParser.prototype.$$shouldSkipAttr = function (prefix, name) {
                     if (prefix === "xmlns")
                         return true;
                     return (!prefix && name === "xmlns");
                 };
-
                 XamlParser.prototype.$$tryHandleXAttribute = function (uri, name, value) {
+                    //  ... x:Name="..."
+                    //  ... x:Key="..."
                     if (uri !== this.$$xXmlns)
                         return false;
                     if (name === "Name")
@@ -1808,8 +1680,9 @@ var nullstone;
                         this.$$curkey = value;
                     return true;
                 };
-
                 XamlParser.prototype.$$handleAttribute = function (uri, name, value, attr) {
+                    //  ... [ns:]Type.Name="..."
+                    //  ... Name="..."
                     var type = null;
                     var name = name;
                     var ind = name.indexOf('.');
@@ -1823,20 +1696,17 @@ var nullstone;
                     this.$$onAttributeEnd(type, name, val);
                     return true;
                 };
-
                 XamlParser.prototype.$$getAttrValue = function (val, attr) {
                     if (val[0] !== "{")
                         return val;
                     return this.$$extension.parse(val, attr, this.$$objectStack);
                 };
-
                 XamlParser.prototype.$$destroy = function () {
                     this.$$onEnd && this.$$onEnd();
                 };
                 return XamlParser;
             })();
             xaml.XamlParser = XamlParser;
-
             function findResourcesElement(ownerEl, uri, name) {
                 var expected = name + ".Resources";
                 var child = ownerEl.firstElementChild;
@@ -1847,9 +1717,7 @@ var nullstone;
                 }
                 return null;
             }
-        })(markup.xaml || (markup.xaml = {}));
-        var xaml = markup.xaml;
-    })(nullstone.markup || (nullstone.markup = {}));
-    var markup = nullstone.markup;
+        })(xaml = markup.xaml || (markup.xaml = {}));
+    })(markup = nullstone.markup || (nullstone.markup = {}));
 })(nullstone || (nullstone = {}));
 //# sourceMappingURL=nullstone.js.map

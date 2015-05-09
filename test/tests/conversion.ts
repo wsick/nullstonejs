@@ -23,6 +23,14 @@ module nullstone.tests.conversion {
         assert.strictEqual(convertAnyToType("False", Boolean), false);
         assert.strictEqual(convertAnyToType("TRUE", Boolean), true);
         assert.strictEqual(convertAnyToType("FALSE", Boolean), false);
+        assert.strictEqual(convertAnyToType(1, Boolean), true);
+        assert.strictEqual(convertAnyToType(0, Boolean), false);
+        assert.strictEqual(convertAnyToType(2, Boolean), true);
+    });
+
+    QUnit.test("String", (assert) => {
+        assert.strictEqual(convertAnyToType(false, Number), 0);
+        assert.strictEqual(convertAnyToType(true, Number), 1);
     });
 
     QUnit.test("String", (assert) => {
