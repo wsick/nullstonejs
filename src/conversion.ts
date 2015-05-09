@@ -1,13 +1,16 @@
 module nullstone {
     var converters: any = [];
-    converters[Boolean] = function (val: any): boolean {
+    converters[<any>Boolean] = function (val: any): boolean {
         if (val == null)
             return null;
         if (typeof val === "boolean")
             return val;
+    	if (typeof val === "number")
+	        return val !== 0;
         var c = val.toString().toUpperCase();
         return c === "TRUE" ? true : (c === "FALSE" ? false : null);
     };
+
     converters[String] = function (val: any): String {
         if (val == null) return "";
         return val.toString();
@@ -16,6 +19,8 @@ module nullstone {
         if (!val) return 0;
         if (typeof val === "number")
             return val;
+        if (typeof val === "boolean")
+            return val ? 1 : 0;
         return parseFloat(val.toString());
     };
     converters[Date] = function (val: any): Date {
