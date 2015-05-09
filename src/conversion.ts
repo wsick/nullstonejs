@@ -5,17 +5,16 @@ module nullstone {
             return null;
         if (typeof val === "boolean")
             return val;
-    	if (typeof val === "number")
-	        return val !== 0;
+        if (typeof val === "number")
+            return val !== 0;
         var c = val.toString().toUpperCase();
         return c === "TRUE" ? true : (c === "FALSE" ? false : null);
     };
-
-    converters[String] = function (val: any): String {
+    converters[<any>String] = function (val: any): String {
         if (val == null) return "";
         return val.toString();
     };
-    converters[Number] = function (val: any): Number {
+    converters[<any>Number] = function (val: any): Number {
         if (!val) return 0;
         if (typeof val === "number")
             return val;
@@ -23,12 +22,12 @@ module nullstone {
             return val ? 1 : 0;
         return parseFloat(val.toString());
     };
-    converters[Date] = function (val: any): Date {
+    converters[<any>Date] = function (val: any): Date {
         if (val == null)
             return new Date(0);
         return new Date(val.toString());
     };
-    converters[RegExp] = function (val: any): RegExp {
+    converters[<any>RegExp] = function (val: any): RegExp {
         if (val instanceof RegExp)
             return val;
         if (val = null)
@@ -38,7 +37,7 @@ module nullstone {
     };
 
     export function convertAnyToType (val: any, type: Function): any {
-        var converter: (val: any) => any = (<any>converters)[type];
+        var converter: (val: any) => any = (<any>converters)[<any>type];
         if (converter)
             return converter(val);
         if (type instanceof Enum) {
@@ -60,7 +59,7 @@ module nullstone {
     }
 
     export function registerTypeConverter (type: Function, converter: (val: any) => any) {
-        converters[type] = converter;
+        converters[<any>type] = converter;
     }
 
     export function registerEnumConverter (e: any, converter: (val: any) => any) {
