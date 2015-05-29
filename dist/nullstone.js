@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.3.11';
+    nullstone.version = '0.3.12';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -396,7 +396,8 @@ var nullstone;
             if (!lib)
                 return this.dirResolver.loadAsync(uri, name);
             return nullstone.async.create(function (resolve, reject) {
-                lib.loadAsync().then(function (lib) {
+                lib.loadAsync()
+                    .then(function (lib) {
                     var oresolve = { isPrimitive: false, type: undefined };
                     if (lib.resolveType(null, name, oresolve))
                         resolve(oresolve.type);
@@ -662,7 +663,7 @@ var nullstone;
         function Uri(uri, kind) {
             if (typeof uri === "string") {
                 this.$$originalString = uri;
-                this.$$kind = kind || 0 /* RelativeOrAbsolute */;
+                this.$$kind = kind || UriKind.RelativeOrAbsolute;
             }
             else if (uri instanceof Uri) {
                 this.$$originalString = uri.$$originalString;
@@ -759,8 +760,16 @@ var nullstone;
             this.defaultUri = defaultUri;
             this.xUri = xUri;
             this.libResolver = new nullstone.LibraryResolver();
-            this.libResolver.resolve(defaultUri).add(Array, "Array");
-            this.libResolver.resolve(xUri).addPrimitive(String, "String").addPrimitive(Number, "Number").addPrimitive(Number, "Double").addPrimitive(Date, "Date").addPrimitive(RegExp, "RegExp").addPrimitive(Boolean, "Boolean").addPrimitive(nullstone.Uri, "Uri");
+            this.libResolver.resolve(defaultUri)
+                .add(Array, "Array");
+            this.libResolver.resolve(xUri)
+                .addPrimitive(String, "String")
+                .addPrimitive(Number, "Number")
+                .addPrimitive(Number, "Double")
+                .addPrimitive(Date, "Date")
+                .addPrimitive(RegExp, "RegExp")
+                .addPrimitive(Boolean, "Boolean")
+                .addPrimitive(nullstone.Uri, "Uri");
         }
         TypeManager.prototype.resolveLibrary = function (uri) {
             return this.libResolver.resolve(uri || this.defaultUri);
@@ -1064,16 +1073,16 @@ var nullstone;
 var nullstone;
 (function (nullstone) {
     var markup;
-    (function (_markup) {
+    (function (markup_1) {
         var Markup = (function () {
             function Markup(uri) {
                 this.uri = new nullstone.Uri(uri);
             }
             Markup.prototype.createParser = function () {
-                return _markup.NO_PARSER;
+                return markup_1.NO_PARSER;
             };
             Markup.prototype.resolve = function (typemgr, customCollector) {
-                var resolver = new _markup.MarkupDependencyResolver(typemgr, this.createParser());
+                var resolver = new markup_1.MarkupDependencyResolver(typemgr, this.createParser());
                 resolver.collect(this.root, customCollector);
                 return resolver.resolve();
             };
@@ -1096,7 +1105,7 @@ var nullstone;
             };
             return Markup;
         })();
-        _markup.Markup = Markup;
+        markup_1.Markup = Markup;
     })(markup = nullstone.markup || (nullstone.markup = {}));
 })(nullstone || (nullstone = {}));
 var nullstone;
@@ -1152,7 +1161,9 @@ var nullstone;
                         customCollector(last.uri, last.name, attrName, obj);
                     };
                 }
-                this.parser.on(parse).parse(root);
+                this.parser
+                    .on(parse)
+                    .parse(root);
             };
             MarkupDependencyResolver.prototype.add = function (uri, name) {
                 var uris = this.$$uris;
@@ -1387,7 +1398,9 @@ var nullstone;
                     }
                 };
                 XamlExtensionParser.prototype.$$ensure = function () {
-                    this.onResolveType(this.$$onResolveType).onResolveObject(this.$$onResolveObject).onError(this.$$onError);
+                    this.onResolveType(this.$$onResolveType)
+                        .onResolveObject(this.$$onResolveObject)
+                        .onError(this.$$onError);
                 };
                 XamlExtensionParser.prototype.onResolveType = function (cb) {
                     var oresolve = {
@@ -1474,7 +1487,9 @@ var nullstone;
                     this.$$skipnext = false;
                     this.$$curel = null;
                     this.$$curkey = undefined;
-                    this.setExtensionParser(new xaml.XamlExtensionParser()).setNamespaces(xaml.DEFAULT_XMLNS, xaml.DEFAULT_XMLNS_X).on({});
+                    this.setExtensionParser(new xaml.XamlExtensionParser())
+                        .setNamespaces(xaml.DEFAULT_XMLNS, xaml.DEFAULT_XMLNS_X)
+                        .on({});
                 }
                 XamlParser.prototype.on = function (listener) {
                     listener = markup.createMarkupSax(listener);
@@ -1494,7 +1509,10 @@ var nullstone;
                     this.$$onError = listener.error;
                     this.$$onEnd = listener.end;
                     if (this.$$extension) {
-                        this.$$extension.onResolveType(this.$$onResolveType).onResolveObject(this.$$onResolveObject).onResolvePrimitive(this.$$onResolvePrimitive);
+                        this.$$extension
+                            .onResolveType(this.$$onResolveType)
+                            .onResolveObject(this.$$onResolveObject)
+                            .onResolvePrimitive(this.$$onResolvePrimitive);
                     }
                     return this;
                 };
@@ -1508,7 +1526,11 @@ var nullstone;
                 XamlParser.prototype.setExtensionParser = function (parser) {
                     this.$$extension = parser;
                     if (parser) {
-                        parser.setNamespaces(this.$$defaultXmlns, this.$$xXmlns).onResolveType(this.$$onResolveType).onResolveObject(this.$$onResolveObject).onResolvePrimitive(this.$$onResolvePrimitive).onError(function (e) {
+                        parser.setNamespaces(this.$$defaultXmlns, this.$$xXmlns)
+                            .onResolveType(this.$$onResolveType)
+                            .onResolveObject(this.$$onResolveObject)
+                            .onResolvePrimitive(this.$$onResolvePrimitive)
+                            .onError(function (e) {
                             throw e;
                         });
                     }
