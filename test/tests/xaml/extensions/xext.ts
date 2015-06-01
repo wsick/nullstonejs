@@ -1,5 +1,5 @@
 module nullstone.markup.xaml.extensions.tests {
-    QUnit.module('Markup:XAML Extension (xmlns:x)');
+    QUnit.module('xaml.extensions.xext');
 
     var parser = new XamlExtensionParser()
         .onResolveType((xmlns, name) => {

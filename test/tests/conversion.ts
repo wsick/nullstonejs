@@ -1,5 +1,5 @@
 module nullstone.tests.conversion {
-    QUnit.module("Conversion");
+    QUnit.module("conversion");
 
     enum TestEnum {
         Option1,

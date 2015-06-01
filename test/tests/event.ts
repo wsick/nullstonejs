@@ -1,5 +1,5 @@
 module nullstone.tests.event {
-    QUnit.module("Event");
+    QUnit.module("event");
 
     var mock = {
         listener: function () {

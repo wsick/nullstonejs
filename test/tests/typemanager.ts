@@ -1,5 +1,5 @@
 module nullstone.tests.typemanager {
-    QUnit.module("Type Manager");
+    QUnit.module("typemanager");
 
     var DEFAULT_XMLNS = "http://schemas.wsick.com/nullstone";
     var X_XMLNS = "http://schemas.wsick.com/nullstone/x";
