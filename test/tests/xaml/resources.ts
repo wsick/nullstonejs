@@ -1,5 +1,5 @@
 module nullstone.markup.xaml.tests {
-    QUnit.module('Markup:XAML');
+    QUnit.module('xaml.resources');
 
     QUnit.asyncTest("Resources", () => {
         getDoc("docs/resources.xml", (doc) => {

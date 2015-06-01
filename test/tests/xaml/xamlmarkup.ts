@@ -1,5 +1,5 @@
 module nullstone.markup.xaml.tests {
-    QUnit.module("Xaml");
+    QUnit.module("xaml.xamlmarkup");
 
     var DEFAULT_XMLNS = "http://schemas.wsick.com/nullstone";
     var X_XMLNS = "http://schemas.wsick.com/nullstone/x";

@@ -1,5 +1,5 @@
 module nullstone.markup.xaml.tests {
-    QUnit.module('Markup:XAML');
+    QUnit.module('xaml.multicontent');
 
     QUnit.asyncTest("MultiContent", () => {
         getDoc("docs/multicontent.xml", (doc) => {

@@ -1,6 +1,6 @@
 module nullstone.markup.xaml.tests.invalid {
     /*
-    QUnit.module('Markup:XAML');
+    QUnit.module('xaml.invalid');
 
     QUnit.asyncTest("Invalid XML", () => {
         getDoc("docs/invalid.xml", (doc) => {

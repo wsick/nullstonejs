@@ -1,5 +1,5 @@
 module nullstone.markup.xaml.tests {
-    QUnit.module('Markup:XAML');
+    QUnit.module('xaml.skipel');
 
     QUnit.asyncTest("Skip Next Element", () => {
         getDoc("docs/skipel.xml", (doc) => {
