@@ -93,7 +93,7 @@ module nullstone.tests.typemanager {
     });
 
     QUnit.asyncTest("Load amd class", () => {
-        typemgr.loadTypeAsync("mock", "amdclass")
+        typemgr.loadTypeAsync("mock", "AmdClass")
             .then(cls => {
                 QUnit.start();
                 strictEqual((<any>cls).name, "AmdClass");
