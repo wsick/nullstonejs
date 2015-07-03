@@ -66,6 +66,10 @@ module nullstone {
             return this.$$originalString.toString();
         }
 
+        get isAbsoluteUri(): boolean {
+            return !!this.scheme && !!this.host
+        }
+
         toString (): string {
             return this.$$originalString.toString();
         }

@@ -212,6 +212,7 @@ declare module nullstone {
         scheme: string;
         fragment: string;
         originalString: string;
+        isAbsoluteUri: boolean;
         toString(): string;
         equals(other: Uri): boolean;
         static isNullOrEmpty(uri: Uri): boolean;

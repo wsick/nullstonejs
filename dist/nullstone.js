@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.3.12';
+    nullstone.version = '0.3.13';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -728,6 +728,13 @@ var nullstone;
         Object.defineProperty(Uri.prototype, "originalString", {
             get: function () {
                 return this.$$originalString.toString();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Uri.prototype, "isAbsoluteUri", {
+            get: function () {
+                return !!this.scheme && !!this.host;
             },
             enumerable: true,
             configurable: true
