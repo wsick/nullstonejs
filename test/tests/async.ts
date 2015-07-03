@@ -1,5 +1,5 @@
 module nullstone.tests.async {
-    QUnit.module("Async");
+    QUnit.module("async");
 
     QUnit.test("Resolve", (assert) => {
         nullstone.async.create((resolve, reject) => {

@@ -1,5 +1,5 @@
 module nullstone.markup.xaml.tests {
-    QUnit.module('Markup:XAML');
+    QUnit.module('xaml.basic');
 
     QUnit.asyncTest("No callbacks - Graceful", () => {
         getDoc("docs/basic.xml", (doc) => {

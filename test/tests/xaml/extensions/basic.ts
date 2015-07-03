@@ -1,5 +1,5 @@
 module nullstone.markup.xaml.extensions.tests {
-    QUnit.module('Markup:XAML Extension (basic)');
+    QUnit.module('xaml.extensions.basic');
 
     class StaticResource implements IMarkupExtension {
         ResourceKey: string;

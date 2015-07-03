@@ -1,5 +1,5 @@
 module nullstone.tests.uri {
-    QUnit.module("Uri");
+    QUnit.module("uri");
 
     QUnit.test("ctor", (assert) => {
         var uri1 = new Uri("http://test1/path/to");
