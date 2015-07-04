@@ -660,14 +660,28 @@ var nullstone;
     })(nullstone.UriKind || (nullstone.UriKind = {}));
     var UriKind = nullstone.UriKind;
     var Uri = (function () {
-        function Uri(uri, kind) {
+        function Uri(uri, kindOrRel) {
             if (typeof uri === "string") {
                 this.$$originalString = uri;
-                this.$$kind = kind || UriKind.RelativeOrAbsolute;
+                this.$$kind = kindOrRel || UriKind.RelativeOrAbsolute;
             }
             else if (uri instanceof Uri) {
-                this.$$originalString = uri.$$originalString;
-                this.$$kind = uri.$$kind;
+                if (typeof kindOrRel === "string") {
+                    if (uri.kind === UriKind.Relative)
+                        throw new Error("Base Uri cannot be relative when creating new relative Uri.");
+                    this.$$originalString = createRelative(uri, kindOrRel);
+                    this.$$kind = UriKind.RelativeOrAbsolute;
+                }
+                else if (kindOrRel instanceof Uri) {
+                    if (uri.kind === UriKind.Relative)
+                        throw new Error("Base Uri cannot be relative when creating new relative Uri.");
+                    this.$$originalString = createRelative(uri, kindOrRel.originalString);
+                    this.$$kind = UriKind.RelativeOrAbsolute;
+                }
+                else {
+                    this.$$originalString = uri.$$originalString;
+                    this.$$kind = uri.$$kind;
+                }
             }
         }
         Object.defineProperty(Uri.prototype, "kind", {
@@ -761,6 +775,26 @@ var nullstone;
             val = "";
         return new Uri(val.toString());
     });
+    function createRelative(baseUri, relative) {
+        var rel = "";
+        if (typeof relative === "string") {
+            rel = relative;
+        }
+        else if (relative instanceof Uri) {
+            rel = relative.originalString;
+        }
+        var base = baseUri.scheme + "://" + baseUri.host;
+        if (rel[0] === "/") {
+            rel = rel.substr(1);
+            base += "/";
+        }
+        else {
+            base += baseUri.absolutePath;
+        }
+        if (base[base.length - 1] !== "/")
+            base = base.substr(0, base.lastIndexOf("/") + 1);
+        return base + rel;
+    }
 })(nullstone || (nullstone = {}));
 /// <reference path="Uri" />
 var nullstone;

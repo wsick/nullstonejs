@@ -206,6 +206,8 @@ declare module nullstone {
         private $$kind;
         constructor(uri: Uri);
         constructor(uri: string, kind?: UriKind);
+        constructor(baseUri: Uri, relativeUri: string);
+        constructor(baseUri: Uri, relativeUri: Uri);
         kind: UriKind;
         host: string;
         absolutePath: string;

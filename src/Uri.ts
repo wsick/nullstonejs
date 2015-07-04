@@ -12,13 +12,27 @@ module nullstone {
 
         constructor (uri: Uri);
         constructor (uri: string, kind?: UriKind);
-        constructor (uri?: any, kind?: UriKind) {
+        constructor (baseUri: Uri, relativeUri: string);
+        constructor (baseUri: Uri, relativeUri: Uri);
+        constructor (uri: string|Uri, kindOrRel?: UriKind|Uri|string) {
             if (typeof uri === "string") {
                 this.$$originalString = uri;
-                this.$$kind = kind || UriKind.RelativeOrAbsolute;
+                this.$$kind = (<UriKind>kindOrRel) || UriKind.RelativeOrAbsolute;
             } else if (uri instanceof Uri) {
-                this.$$originalString = (<Uri>uri).$$originalString;
-                this.$$kind = (<Uri>uri).$$kind;
+                if (typeof kindOrRel === "string") {
+                    if (uri.kind === UriKind.Relative)
+                        throw new Error("Base Uri cannot be relative when creating new relative Uri.");
+                    this.$$originalString = createRelative(uri, kindOrRel);
+                    this.$$kind = UriKind.RelativeOrAbsolute;
+                } else if (kindOrRel instanceof Uri) {
+                    if (uri.kind === UriKind.Relative)
+                        throw new Error("Base Uri cannot be relative when creating new relative Uri.");
+                    this.$$originalString = createRelative(uri, kindOrRel.originalString);
+                    this.$$kind = UriKind.RelativeOrAbsolute;
+                } else {
+                    this.$$originalString = (<Uri>uri).$$originalString;
+                    this.$$kind = (<Uri>uri).$$kind;
+                }
             }
         }
 
@@ -92,4 +106,25 @@ module nullstone {
             val = "";
         return new Uri(val.toString());
     });
+
+    function createRelative (baseUri: Uri, relative: Uri|string): string {
+        var rel: string = "";
+        if (typeof relative === "string") {
+            rel = relative;
+        } else if (relative instanceof Uri) {
+            rel = relative.originalString;
+        }
+
+        var base = baseUri.scheme + "://" + baseUri.host;
+        if (rel[0] === "/") {
+            rel = rel.substr(1);
+            base += "/";
+        } else {
+            base += baseUri.absolutePath;
+        }
+        if (base[base.length - 1] !== "/")
+            base = base.substr(0, base.lastIndexOf("/") + 1);
+
+        return base + rel;
+    }
 }
