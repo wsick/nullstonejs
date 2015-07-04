@@ -36,6 +36,9 @@ module nullstone {
 
         get absolutePath (): string {
             var s = this.$$originalString;
+            var fstart = s.indexOf("#");
+            if (fstart > -1)
+                s = s.substr(0, fstart);
             var ind = Math.max(3, s.indexOf("://") + 3);
             var start = s.indexOf("/", ind);
             if (start < 0 || start < ind)

@@ -13,22 +13,6 @@ module nullstone.tests.uri {
         assert.strictEqual(uri2.kind, uri1.kind);
     });
 
-    QUnit.test("ctor (relative)", (assert) => {
-        var uri1 = new Uri("http://test1/path/to");
-
-        var uri2 = new Uri(uri1, "/page1");
-        assert.strictEqual(uri2.originalString, "http://test1/page1");
-
-        var uri3 = new Uri(uri1, "page1");
-        assert.strictEqual(uri3.originalString, "http://test1/path/page1");
-
-        var uri4 = new Uri(uri1, new Uri("/page1"));
-        assert.strictEqual(uri4.originalString, "http://test1/page1");
-
-        var uri5 = new Uri(uri1, new Uri("page1"));
-        assert.strictEqual(uri5.originalString, "http://test1/path/page1");
-    });
-
     QUnit.test("Scheme", (assert) => {
         var uri = new Uri("http://some.com/path?query=true");
         assert.strictEqual(uri.scheme, "http");
