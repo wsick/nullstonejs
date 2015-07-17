@@ -212,7 +212,7 @@ declare module nullstone {
         constructor(baseUri: Uri, relativeUri: string);
         constructor(baseUri: Uri, relativeUri: Uri);
         kind: UriKind;
-        hostAndPort: string;
+        authority: string;
         host: string;
         port: number;
         absolutePath: string;

@@ -40,7 +40,7 @@ module nullstone {
             return this.$$kind;
         }
 
-        get hostAndPort (): string {
+        get authority (): string {
             var s = this.$$originalString;
             var ind = Math.max(3, s.indexOf("://") + 3);
             var end = s.indexOf("/", ind);
@@ -58,13 +58,13 @@ module nullstone {
         }
 
         get host (): string {
-            var all = this.hostAndPort;
+            var all = this.authority;
             var pindex = all.indexOf(":");
             return pindex > 0 ? all.substr(0, pindex) : all;
         }
 
         get port (): number {
-            var all = this.hostAndPort;
+            var all = this.authority;
             var pindex = all.indexOf(":");
             var port = pindex > 0 && pindex < all.length ? all.substr(pindex + 1) : "";
             if (!port)

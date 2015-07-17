@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.3.16';
+    nullstone.version = '0.3.17';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -702,7 +702,7 @@ var nullstone;
             enumerable: true,
             configurable: true
         });
-        Object.defineProperty(Uri.prototype, "hostAndPort", {
+        Object.defineProperty(Uri.prototype, "authority", {
             get: function () {
                 var s = this.$$originalString;
                 var ind = Math.max(3, s.indexOf("://") + 3);
@@ -721,7 +721,7 @@ var nullstone;
         });
         Object.defineProperty(Uri.prototype, "host", {
             get: function () {
-                var all = this.hostAndPort;
+                var all = this.authority;
                 var pindex = all.indexOf(":");
                 return pindex > 0 ? all.substr(0, pindex) : all;
             },
@@ -730,7 +730,7 @@ var nullstone;
         });
         Object.defineProperty(Uri.prototype, "port", {
             get: function () {
-                var all = this.hostAndPort;
+                var all = this.authority;
                 var pindex = all.indexOf(":");
                 var port = pindex > 0 && pindex < all.length ? all.substr(pindex + 1) : "";
                 if (!port)
