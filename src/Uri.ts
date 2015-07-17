@@ -40,12 +40,36 @@ module nullstone {
             return this.$$kind;
         }
 
-        get host (): string {
+        get hostAndPort (): string {
             var s = this.$$originalString;
             var ind = Math.max(3, s.indexOf("://") + 3);
             var end = s.indexOf("/", ind);
-            //TODO: Strip port
-            return (end < 0) ? s.substr(ind) : s.substr(ind, end - ind);
+            s = (end < 0) ? s.substr(ind) : s.substr(ind, end - ind);
+            var rind = s.indexOf("$");
+            var find = s.indexOf("#");
+            var qind = s.indexOf("?");
+            var trimind = Math.min(
+                rind > -1 ? rind : Number.POSITIVE_INFINITY,
+                find > -1 ? find : Number.POSITIVE_INFINITY,
+                qind > -1 ? qind : Number.POSITIVE_INFINITY);
+            if (isFinite(trimind))
+                s = s.substr(0, trimind);
+            return s;
+        }
+
+        get host (): string {
+            var all = this.hostAndPort;
+            var pindex = all.indexOf(":");
+            return pindex > 0 ? all.substr(0, pindex) : all;
+        }
+
+        get port (): number {
+            var all = this.hostAndPort;
+            var pindex = all.indexOf(":");
+            var port = pindex > 0 && pindex < all.length ? all.substr(pindex + 1) : "";
+            if (!port)
+                return getDefaultPort(this.scheme);
+            return parseInt(port) || 0;
         }
 
         get absolutePath (): string {
@@ -53,6 +77,9 @@ module nullstone {
             var fstart = s.indexOf("#");
             if (fstart > -1)
                 s = s.substr(0, fstart);
+            var rstart = s.indexOf("$");
+            if (rstart > -1)
+                s = s.substr(0, rstart);
             var ind = Math.max(3, s.indexOf("://") + 3);
             var start = s.indexOf("/", ind);
             if (start < 0 || start < ind)
@@ -73,8 +100,25 @@ module nullstone {
 
         get fragment (): string {
             var s = this.$$originalString;
+            var rind = s.indexOf("$");
             var ind = s.indexOf("#");
+            if (rind > -1 && rind < ind)
+                s = s.substr(0, rind);
             if (ind < 0)
+                return "";
+            return s.substr(ind);
+        }
+
+        get resource (): string {
+            var s = this.$$originalString;
+            var ind = s.indexOf("$");
+            if (ind < 0)
+                return "";
+            var find = s.indexOf("#");
+            if (find > -1 && ind > find)
+                return "";
+            var qind = s.indexOf("?");
+            if (qind > -1 && ind > qind)
                 return "";
             return s.substr(ind);
         }
@@ -83,7 +127,7 @@ module nullstone {
             return this.$$originalString.toString();
         }
 
-        get isAbsoluteUri(): boolean {
+        get isAbsoluteUri (): boolean {
             return !!this.scheme && !!this.host
         }
 
@@ -126,5 +170,16 @@ module nullstone {
             base = base.substr(0, base.lastIndexOf("/") + 1);
 
         return base + rel;
+    }
+
+    function getDefaultPort (scheme: string): number {
+        switch (scheme) {
+            case "http":
+                return 80;
+            case "https":
+                return 443;
+            default:
+                return 0;
+        }
     }
 }
