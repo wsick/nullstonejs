@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.3.15';
+    nullstone.version = '0.3.16';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -247,6 +247,7 @@ var nullstone;
         function Library(name) {
             this.$$module = null;
             this.$$sourcePath = null;
+            this.$$basePath = null;
             this.$$primtypes = {};
             this.$$types = {};
             this.$$loaded = false;
@@ -269,6 +270,16 @@ var nullstone;
                 if (this.useMin && value.substr(value.length - 4) === ".min")
                     value = value.substr(0, value.length - 4);
                 this.$$sourcePath = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Library.prototype, "basePath", {
+            get: function () {
+                return this.$$basePath || ("lib/" + this.name);
+            },
+            set: function (value) {
+                this.$$basePath = value;
             },
             enumerable: true,
             configurable: true

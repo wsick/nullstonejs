@@ -17,6 +17,7 @@ module nullstone {
     export class Library implements ILibrary {
         private $$module: any = null;
         private $$sourcePath: string = null;
+        private $$basePath: string = null;
 
         private $$primtypes: any = {};
         private $$types: any = {};
@@ -42,6 +43,14 @@ module nullstone {
             if (this.useMin && value.substr(value.length - 4) === ".min")
                 value = value.substr(0, value.length - 4);
             this.$$sourcePath = value;
+        }
+
+        get basePath (): string {
+            return this.$$basePath || ("lib/" + this.name);
+        }
+
+        set basePath (value: string) {
+            this.$$basePath = value;
         }
 
         constructor (name: string) {

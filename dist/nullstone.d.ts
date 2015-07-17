@@ -117,6 +117,7 @@ declare module nullstone {
     class Library implements ILibrary {
         private $$module;
         private $$sourcePath;
+        private $$basePath;
         private $$primtypes;
         private $$types;
         private $$loaded;
@@ -126,6 +127,7 @@ declare module nullstone {
         deps: string[];
         useMin: boolean;
         sourcePath: string;
+        basePath: string;
         constructor(name: string);
         rootModule: any;
         loadAsync(): async.IAsyncRequest<Library>;
