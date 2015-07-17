@@ -3,6 +3,7 @@ module nullstone {
         name: string;
         uri: Uri;
         sourcePath: string;
+        basePath: string;
         useMin: boolean;
         exports: string;
         deps: string[];
