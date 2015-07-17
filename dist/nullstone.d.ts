@@ -209,10 +209,13 @@ declare module nullstone {
         constructor(baseUri: Uri, relativeUri: string);
         constructor(baseUri: Uri, relativeUri: Uri);
         kind: UriKind;
+        hostAndPort: string;
         host: string;
+        port: number;
         absolutePath: string;
         scheme: string;
         fragment: string;
+        resource: string;
         originalString: string;
         isAbsoluteUri: boolean;
         toString(): string;
