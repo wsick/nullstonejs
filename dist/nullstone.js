@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.3.17';
+    nullstone.version = '0.3.18';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -81,6 +81,18 @@ var nullstone;
         Event.prototype.raiseAsync = function (sender, args) {
             var _this = this;
             window.setTimeout(function () { return _this.raise(sender, args); }, 1);
+        };
+        Event.prototype.subscribe = function (observer) {
+            var _this = this;
+            var handler;
+            if (observer instanceof Function)
+                handler = function (sender, args) { return observer(args); };
+            else
+                handler = function (sender, args) { return observer.onNext(args); };
+            this.on(handler, observer);
+            return {
+                dispose: function () { return _this.off(handler, observer); }
+            };
         };
         return Event;
     })();
@@ -187,6 +199,21 @@ var nullstone;
             };
         }
         return e;
+    };
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    nullstone.IDisposable_ = new nullstone.Interface("IDisposable");
+    nullstone.IObservable_ = new nullstone.Interface("IObservable");
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    nullstone.IObserver_ = new nullstone.Interface("IObserver");
+    nullstone.IObserver_.is = function (o) {
+        return o
+            && typeof o.onNext === "function"
+            && typeof o.onCompleted === "function"
+            && typeof o.onNext === "function";
     };
 })(nullstone || (nullstone = {}));
 var nullstone;

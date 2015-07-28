@@ -20,7 +20,10 @@ declare module nullstone {
     interface IEventCallback<T extends IEventArgs> {
         (sender: any, args: T): any;
     }
-    class Event<T extends IEventArgs> {
+    interface IObserverFunc<T> extends Function {
+        (value: T): any;
+    }
+    class Event<T extends IEventArgs> implements IObservable<T> {
         private $$callbacks;
         private $$scopes;
         has: boolean;
@@ -28,6 +31,7 @@ declare module nullstone {
         off(callback: IEventCallback<T>, scope: any): void;
         raise(sender: any, args: T): void;
         raiseAsync(sender: any, args: T): void;
+        subscribe(observer: IObserver<T> | IObserverFunc<T>): IDisposable;
     }
 }
 declare module nullstone {
@@ -79,6 +83,24 @@ declare module nullstone {
         fromArray(arr: T[], isReverse?: boolean): IEnumerator<T>;
     }
     var IEnumerator_: IEnumeratorDeclaration<any>;
+}
+declare module nullstone {
+    interface IDisposable {
+        dispose(): any;
+    }
+    var IDisposable_: Interface<IDisposable>;
+    interface IObservable<T> {
+        subscribe(observer: IObserver<T>): IDisposable;
+    }
+    var IObservable_: Interface<IObservable<any>>;
+}
+declare module nullstone {
+    interface IObserver<T> {
+        onCompleted(): any;
+        onError(err: Error): any;
+        onNext(value: T): any;
+    }
+    var IObserver_: Interface<IObserver<any>>;
 }
 declare module nullstone {
     interface ITypeResolver {
