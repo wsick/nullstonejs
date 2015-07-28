@@ -4,8 +4,11 @@ module nullstone {
     export interface IEventCallback<T extends IEventArgs> {
         (sender: any, args: T);
     }
+    export interface IObserverFunc<T> extends Function {
+        (value: T): any;
+    }
 
-    export class Event<T extends IEventArgs> {
+    export class Event<T extends IEventArgs> implements IObservable<T> {
         private $$callbacks: IEventCallback<T>[] = [];
         private $$scopes: any[] = [];
 
@@ -40,6 +43,18 @@ module nullstone {
 
         raiseAsync (sender: any, args: T) {
             window.setTimeout(() => this.raise(sender, args), 1);
+        }
+
+        subscribe (observer: IObserver<T>|IObserverFunc<T>): IDisposable {
+            var handler: IEventCallback<T>;
+            if (observer instanceof Function)
+                handler = (sender, args: T) => observer(args);
+            else
+                handler = (sender, args: T) => (<IObserver<T>>observer).onNext(args);
+            this.on(handler, observer);
+            return <IDisposable>{
+                dispose: () => this.off(handler, observer)
+            };
         }
     }
 }
