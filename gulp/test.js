@@ -1,7 +1,8 @@
 var gulp = require('gulp'),
     ts = require('gulp-typescript'),
     sourcemaps = require('gulp-sourcemaps'),
-    qunit = require('gulp-qunit');
+    qunit = require('gulp-qunit'),
+    sequence = require('run-sequence');
 
 module.exports = function (meta) {
     var tsProject = ts.createProject({
@@ -28,8 +29,12 @@ module.exports = function (meta) {
             .pipe(qunit());
     });
 
-    gulp.task('test', ['test-build', 'test-run'], function () {
+    gulp.task('test-watch', ['test'], function () {
         gulp.watch(['test/**/*.ts', '!test/lib/**/*.ts'], ['test-build']);
         gulp.watch(['dist/*', 'test/.build/**/*.js'], ['test-run']);
+    });
+
+    gulp.task('test', function (cb) {
+        sequence('test-build', 'test-run', cb);
     });
 };
