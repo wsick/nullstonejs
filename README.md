@@ -14,7 +14,9 @@ $ npm install -g bower
 $ npm install -g fayde-unify
 ```
 
-## Set up development environment
+## Development
+
+### Setup
 
 ```
 $ git clone git@github.com:wsick/nullstone.git
@@ -23,13 +25,13 @@ $ npm install
 $ gulp reset # cleans bower libs, bower installs, then symlinks to test and stress bootstrappers
 ```
 
-## Running tests
+### Unit Tests
 
 ```
 $ gulp test
 ```
 
-## Running stress tests
+### Stress Tests
 Launches default browser with runnable stress tests.
 ```
 $ gulp stress
