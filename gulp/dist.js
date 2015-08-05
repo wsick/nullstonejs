@@ -12,8 +12,7 @@ module.exports = function (meta) {
             declarationFiles: true,
             target: 'ES5',
             out: meta.name + '.js',
-            removeComments: true,
-            sourceRoot: '../src'
+            removeComments: true
         });
 
         var tsr = gulp.src(meta.buildfiles)

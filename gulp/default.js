@@ -6,8 +6,7 @@ module.exports = function (meta) {
     var tsProject = ts.createProject({
         target: 'ES5',
         out: meta.name + '.js',
-        removeComments: true,
-        sourceRoot: '../src'
+        removeComments: true
     });
 
     gulp.task('default', function () {
