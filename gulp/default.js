@@ -3,16 +3,14 @@ var gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps');
 
 module.exports = function (meta) {
-    var tsProject = ts.createProject({
-        target: 'ES5',
-        out: meta.name + '.js',
-        removeComments: true
-    });
-
     gulp.task('default', function () {
         return gulp.src(meta.buildfiles)
             .pipe(sourcemaps.init())
-            .pipe(ts(tsProject))
+            .pipe(ts({
+                target: 'ES5',
+                out: meta.name + '.js',
+                removeComments: true
+            }))
             .pipe(sourcemaps.write('./'))
             .pipe(gulp.dest('dist'));
     });

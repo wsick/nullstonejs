@@ -5,13 +5,6 @@ var gulp = require('gulp'),
     open = require('gulp-open');
 
 module.exports = function (meta) {
-    var tsProject = ts.createProject({
-        declarationFiles: false,
-        target: 'ES5',
-        module: 'amd',
-        removeComments: false
-    });
-
     gulp.task('stress-build', function () {
         return gulp.src([
             'typings/*.d.ts',
@@ -20,7 +13,12 @@ module.exports = function (meta) {
             'dist/' + meta.name + '.d.ts'
         ])
             .pipe(sourcemaps.init())
-            .pipe(ts(tsProject))
+            .pipe(ts({
+                target: 'ES5',
+                module: 'amd',
+                outDir: 'stress/.build/',
+                pathFilter: {'stress': ''}
+            }))
             .js.pipe(sourcemaps.write())
             .pipe(gulp.dest('stress/.build'))
             .pipe(connect.reload());

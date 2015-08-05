@@ -2,15 +2,9 @@ var gulp = require('gulp'),
     ts = require('gulp-typescript'),
     sourcemaps = require('gulp-sourcemaps'),
     qunit = require('gulp-qunit'),
-    sequence = require('run-sequence');
+    runSequence = require('run-sequence').use(gulp);
 
 module.exports = function (meta) {
-    var tsProject = ts.createProject({
-        declarationFiles: false,
-        target: 'ES5',
-        removeComments: false
-    });
-
     gulp.task('test-build', function () {
         return gulp.src([
             'typings/*.d.ts',
@@ -19,7 +13,11 @@ module.exports = function (meta) {
             'dist/' + meta.name + '.d.ts'
         ])
             .pipe(sourcemaps.init())
-            .pipe(ts(tsProject))
+            .pipe(ts({
+                target: 'ES5',
+                declaration: true,
+                pathFilter: {'test/tests': 'tests'}
+            }))
             .js.pipe(sourcemaps.write())
             .pipe(gulp.dest('test/.build'));
     });
@@ -34,7 +32,7 @@ module.exports = function (meta) {
         gulp.watch(['dist/*', 'test/.build/**/*.js'], ['test-run']);
     });
 
-    gulp.task('test', function (cb) {
-        sequence('test-build', 'test-run', cb);
+    gulp.task('test', function () {
+        return runSequence('test-build', 'test-run');
     });
 };
