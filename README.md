@@ -6,7 +6,7 @@ nullstone
 
 Javascript application core library
 
-Development
+Contributing
 =======
 
 ### Prerequisites
