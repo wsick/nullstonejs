@@ -2,11 +2,9 @@ language: node_js
 node_js:
   - "0.10"
 before_install:
-  - npm install -g gulp
   - npm install -g bower
   - npm install -g fayde-unify
 install:
   - npm install
-  - bower install
-before_script: gulp symlink-testlibs
+before_script: gulp reset
 script: gulp test
