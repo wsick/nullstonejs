@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.3.18';
+    nullstone.version = '0.3.19';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -15,7 +15,7 @@ var nullstone;
                 }, function (err) { return reject(new nullstone.DirLoadError(reqUri, err)); });
             });
         };
-        DirResolver.prototype.resolveType = function (moduleName, name, /* out */ oresolve) {
+        DirResolver.prototype.resolveType = function (moduleName, name, oresolve) {
             oresolve.isPrimitive = false;
             oresolve.type = require(moduleName + '/' + name);
             return oresolve.type !== undefined;
@@ -223,7 +223,6 @@ var nullstone;
         }
         Object.defineProperty(IndexedPropertyInfo.prototype, "propertyType", {
             get: function () {
-                //NotImplemented
                 return undefined;
             },
             enumerable: true,
@@ -320,7 +319,6 @@ var nullstone;
         });
         Library.prototype.loadAsync = function () {
             var _this = this;
-            //NOTE: If using http library scheme and a custom source path was not set, we assume the library is preloaded
             if (!this.$$sourcePath && this.uri.scheme === "http")
                 this.$$loaded = true;
             if (this.$$loaded)
@@ -351,16 +349,14 @@ var nullstone;
             co.map['*'][srcPath] = this.name;
             require.config(co);
         };
-        Library.prototype.resolveType = function (moduleName, name, /* out */ oresolve) {
+        Library.prototype.resolveType = function (moduleName, name, oresolve) {
             if (!moduleName) {
-                //Library URI: http://.../
                 oresolve.isPrimitive = true;
                 if ((oresolve.type = this.$$primtypes[name]) !== undefined)
                     return true;
                 oresolve.isPrimitive = false;
                 return (oresolve.type = this.$$types[name]) !== undefined;
             }
-            //Library URI: lib://.../
             var curModule = this.rootModule;
             oresolve.isPrimitive = false;
             oresolve.type = undefined;
@@ -415,11 +411,6 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
-    //NOTE:
-    //  Library Uri syntax
-    //      http://...
-    //      lib://<library>[/<namespace>]
-    //      <dir>
     var LibraryResolver = (function () {
         function LibraryResolver() {
             this.$$libs = {};
@@ -457,7 +448,7 @@ var nullstone;
             }
             return lib;
         };
-        LibraryResolver.prototype.resolveType = function (uri, name, /* out */ oresolve) {
+        LibraryResolver.prototype.resolveType = function (uri, name, oresolve) {
             var libUri = new nullstone.Uri(uri);
             var scheme = libUri.scheme;
             if (!scheme)
@@ -919,7 +910,7 @@ var nullstone;
         TypeManager.prototype.loadTypeAsync = function (uri, name) {
             return this.libResolver.loadTypeAsync(uri || this.defaultUri, name);
         };
-        TypeManager.prototype.resolveType = function (uri, name, /* out */ oresolve) {
+        TypeManager.prototype.resolveType = function (uri, name, oresolve) {
             oresolve.isPrimitive = false;
             oresolve.type = undefined;
             return this.libResolver.resolveType(uri || this.defaultUri, name, oresolve);
@@ -1057,7 +1048,6 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
-    //TODO: Check instances in Fayde .Equals
     function equals(val1, val2) {
         if (val1 == null && val2 == null)
             return true;
@@ -1264,9 +1254,6 @@ var nullstone;
             }
             MarkupDependencyResolver.prototype.collect = function (root, customCollector) {
                 var _this = this;
-                //TODO: We need to collect
-                //  ResourceDictionary.Source
-                //  Application.ThemeName
                 var blank = {};
                 var oresolve = {
                     isPrimitive: false,
@@ -1577,7 +1564,7 @@ var nullstone;
         })(xaml = markup.xaml || (markup.xaml = {}));
     })(markup = nullstone.markup || (nullstone.markup = {}));
 })(nullstone || (nullstone = {}));
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -1703,9 +1690,6 @@ var nullstone;
                     return this.$$curel.lookupNamespaceURI(prefix);
                 };
                 XamlParser.prototype.$$handleElement = function (el, isContent) {
-                    // NOTE: Handle tag open
-                    //  <[ns:]Type.Name>
-                    //  <[ns:]Type>
                     var old = this.$$curel;
                     this.$$curel = el;
                     var name = el.localName;
@@ -1725,12 +1709,10 @@ var nullstone;
                         os.push(obj);
                         this.$$onObject(obj, isContent);
                     }
-                    // NOTE: Handle resources before attributes and child elements
                     var resEl = findResourcesElement(el, xmlns, name);
                     if (resEl)
                         this.$$handleResources(obj, ort.type, resEl);
                     this.$$curkey = undefined;
-                    // NOTE: Walk attributes
                     this.$$processAttributes(el);
                     var key = this.$$curkey;
                     if (this.$$skipnext) {
@@ -1741,7 +1723,6 @@ var nullstone;
                         this.$$curel = old;
                         return;
                     }
-                    // NOTE: Walk Children
                     var child = el.firstElementChild;
                     var hasChildren = !!child;
                     while (child) {
@@ -1749,15 +1730,11 @@ var nullstone;
                             this.$$handleElement(child, true);
                         child = child.nextElementSibling;
                     }
-                    // NOTE: If we did not hit a child tag, use text content
                     if (!hasChildren) {
                         var text = el.textContent;
                         if (text && (text = text.trim()))
                             this.$$onContentText(text);
                     }
-                    // NOTE: Handle tag close
-                    //  </[ns:]Type.Name>
-                    //  </[ns:]Type>
                     if (obj !== undefined) {
                         os.pop();
                         this.$$onObjectEnd(obj, key, isContent, os[os.length - 1]);
@@ -1834,8 +1811,6 @@ var nullstone;
                     return (!prefix && name === "xmlns");
                 };
                 XamlParser.prototype.$$tryHandleXAttribute = function (uri, name, value) {
-                    //  ... x:Name="..."
-                    //  ... x:Key="..."
                     if (uri !== this.$$xXmlns)
                         return false;
                     if (name === "Name")
@@ -1884,4 +1859,5 @@ var nullstone;
         })(xaml = markup.xaml || (markup.xaml = {}));
     })(markup = nullstone.markup || (nullstone.markup = {}));
 })(nullstone || (nullstone = {}));
+
 //# sourceMappingURL=nullstone.js.map
