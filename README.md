@@ -6,15 +6,16 @@ nullstone
 
 Javascript application core library
 
-## Prerequisites
+Development
+=======
+
+### Prerequisites
 
 ```
 $ npm install -g gulp
 $ npm install -g bower
 $ npm install -g fayde-unify
 ```
-
-## Development
 
 ### Setup
 
