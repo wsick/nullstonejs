@@ -2,7 +2,7 @@ var fs = require('fs'),
     meta = {
         name: 'nullstone',
         buildfiles: [
-            'typings/*.d.ts',
+            'typings/tsd.d.ts',
             'src/_version.ts',
             'src/*.ts',
             'src/**/*.ts'
