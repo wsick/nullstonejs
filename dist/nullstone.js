@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.3.19';
+    nullstone.version = '0.3.20';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -306,6 +306,13 @@ var nullstone;
             },
             set: function (value) {
                 this.$$basePath = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Library.prototype, "isLoaded", {
+            get: function () {
+                return !!this.$$loaded;
             },
             enumerable: true,
             configurable: true

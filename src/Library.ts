@@ -8,6 +8,7 @@ module nullstone {
         exports: string;
         deps: string[];
         rootModule: any;
+        isLoaded: boolean;
         loadAsync (): async.IAsyncRequest<Library>;
         resolveType (moduleName: string, name: string, /* out */oresolve: IOutType): boolean;
 
@@ -52,6 +53,10 @@ module nullstone {
 
         set basePath (value: string) {
             this.$$basePath = value;
+        }
+
+        get isLoaded (): boolean {
+            return !!this.$$loaded;
         }
 
         constructor (name: string) {
