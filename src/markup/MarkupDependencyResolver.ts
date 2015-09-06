@@ -13,12 +13,12 @@ module nullstone.markup {
     export class MarkupDependencyResolver<T> implements IMarkupDependencyResolver<T> {
         private $$uris: string[] = [];
         private $$names: string[] = [];
-        private $$resolving: string[] = [];
+        private $$fulls: string[] = [];
 
-        constructor (public typeManager: ITypeManager, public parser: IMarkupParser<T>) {
+        constructor(public typeManager: ITypeManager, public parser: IMarkupParser<T>) {
         }
 
-        collect (root: T, customCollector?: ICustomCollector, customExcluder?: ICustomExcluder) {
+        collect(root: T, customCollector?: ICustomCollector, customExcluder?: ICustomExcluder) {
             //TODO: We need to collect
             //  ResourceDictionary.Source
             //  Application.ThemeName
@@ -65,26 +65,31 @@ module nullstone.markup {
                 .parse(root);
         }
 
-        add (uri: string, name: string): boolean {
+        add(uri: string, name: string): boolean {
             var uris = this.$$uris;
             var names = this.$$names;
-            var ind = uris.indexOf(uri);
-            if (ind > -1 && names[ind] === name)
-                return false;
-            if (this.$$resolving.indexOf(uri + "/" + name) > -1)
-                return false;
+
+            if (this.typeManager.resolveLibrary(uri) == null) {
+                //Hit directory resolution
+                var full = uri + "/" + name;
+                if (this.$$fulls.indexOf(full) > -1)
+                    return false;
+                this.$$fulls.push(full);
+            } else {
+                //Hit library
+                if (uris.indexOf(uri) > -1)
+                    return false;
+            }
+
             uris.push(uri);
             names.push(name);
             return true;
         }
 
-        resolve (): async.IAsyncRequest<any> {
+        resolve(): async.IAsyncRequest<any> {
             var as: async.IAsyncRequest<any>[] = [];
-            for (var i = 0, uris = this.$$uris, names = this.$$names, tm = this.typeManager, resolving = this.$$resolving; i < uris.length; i++) {
-                var uri = uris[i];
-                var name = names[i];
-                resolving.push(uri + "/" + name);
-                as.push(tm.loadTypeAsync(uri, name));
+            for (var i = 0, uris = this.$$uris, names = this.$$names, tm = this.typeManager; i < uris.length; i++) {
+                as.push(tm.loadTypeAsync(uris[i], names[i]));
             }
             return async.many(as);
         }

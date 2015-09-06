@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.3.21';
+    nullstone.version = '0.3.22';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -1257,7 +1257,7 @@ var nullstone;
                 this.parser = parser;
                 this.$$uris = [];
                 this.$$names = [];
-                this.$$resolving = [];
+                this.$$fulls = [];
             }
             MarkupDependencyResolver.prototype.collect = function (root, customCollector, customExcluder) {
                 var _this = this;
@@ -1305,22 +1305,24 @@ var nullstone;
             MarkupDependencyResolver.prototype.add = function (uri, name) {
                 var uris = this.$$uris;
                 var names = this.$$names;
-                var ind = uris.indexOf(uri);
-                if (ind > -1 && names[ind] === name)
-                    return false;
-                if (this.$$resolving.indexOf(uri + "/" + name) > -1)
-                    return false;
+                if (this.typeManager.resolveLibrary(uri) == null) {
+                    var full = uri + "/" + name;
+                    if (this.$$fulls.indexOf(full) > -1)
+                        return false;
+                    this.$$fulls.push(full);
+                }
+                else {
+                    if (uris.indexOf(uri) > -1)
+                        return false;
+                }
                 uris.push(uri);
                 names.push(name);
                 return true;
             };
             MarkupDependencyResolver.prototype.resolve = function () {
                 var as = [];
-                for (var i = 0, uris = this.$$uris, names = this.$$names, tm = this.typeManager, resolving = this.$$resolving; i < uris.length; i++) {
-                    var uri = uris[i];
-                    var name = names[i];
-                    resolving.push(uri + "/" + name);
-                    as.push(tm.loadTypeAsync(uri, name));
+                for (var i = 0, uris = this.$$uris, names = this.$$names, tm = this.typeManager; i < uris.length; i++) {
+                    as.push(tm.loadTypeAsync(uris[i], names[i]));
                 }
                 return nullstone.async.many(as);
             };

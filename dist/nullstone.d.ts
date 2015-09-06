@@ -403,7 +403,7 @@ declare module nullstone.markup {
         parser: IMarkupParser<T>;
         private $$uris;
         private $$names;
-        private $$resolving;
+        private $$fulls;
         constructor(typeManager: ITypeManager, parser: IMarkupParser<T>);
         collect(root: T, customCollector?: ICustomCollector, customExcluder?: ICustomExcluder): void;
         add(uri: string, name: string): boolean;
