@@ -11,9 +11,9 @@ module nullstone.markup {
             return NO_PARSER;
         }
 
-        resolve (typemgr: ITypeManager, customCollector?: ICustomCollector): async.IAsyncRequest<any> {
+        resolve (typemgr: ITypeManager, customCollector?: ICustomCollector, customExcluder?: ICustomExcluder): async.IAsyncRequest<any> {
             var resolver = new MarkupDependencyResolver<T>(typemgr, this.createParser());
-            resolver.collect(this.root, customCollector);
+            resolver.collect(this.root, customCollector, customExcluder);
             return resolver.resolve();
         }
 

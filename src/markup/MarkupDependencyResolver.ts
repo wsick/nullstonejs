@@ -2,9 +2,12 @@ module nullstone.markup {
     export interface ICustomCollector {
         (ownerUri: string, ownerName: string, propName: string, val: any);
     }
+    export interface ICustomExcluder {
+        (uri: string, name: string): boolean;
+    }
     export interface IMarkupDependencyResolver<T> {
         add(uri: string, name: string): boolean;
-        collect(root: T, customCollector?: ICustomCollector);
+        collect(root: T, customCollector?: ICustomCollector, customExcluder?: ICustomExcluder);
         resolve(): async.IAsyncRequest<any>;
     }
     export class MarkupDependencyResolver<T> implements IMarkupDependencyResolver<T> {
@@ -15,7 +18,7 @@ module nullstone.markup {
         constructor (public typeManager: ITypeManager, public parser: IMarkupParser<T>) {
         }
 
-        collect (root: T, customCollector?: ICustomCollector) {
+        collect (root: T, customCollector?: ICustomCollector, customExcluder?: ICustomExcluder) {
             //TODO: We need to collect
             //  ResourceDictionary.Source
             //  Application.ThemeName
@@ -31,12 +34,13 @@ module nullstone.markup {
             };
             var parse = {
                 resolveType: (uri, name) => {
-                    this.add(uri, name);
+                    if (!customExcluder || !customExcluder(uri, name))
+                        this.add(uri, name);
                     last.uri = uri;
                     last.name = name;
                     return oresolve;
                 },
-                resolveObject: (type)=> {
+                resolveObject: (type) => {
                     return blank;
                 },
                 objectEnd: (obj, isContent, prev) => {

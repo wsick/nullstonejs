@@ -380,7 +380,7 @@ declare module nullstone.markup {
         root: T;
         constructor(uri: string);
         createParser(): IMarkupParser<T>;
-        resolve(typemgr: ITypeManager, customCollector?: ICustomCollector): async.IAsyncRequest<any>;
+        resolve(typemgr: ITypeManager, customCollector?: ICustomCollector, customExcluder?: ICustomExcluder): async.IAsyncRequest<any>;
         loadAsync(): async.IAsyncRequest<Markup<T>>;
         loadRoot(data: string): T;
         setRoot(markup: T): Markup<T>;
@@ -390,9 +390,12 @@ declare module nullstone.markup {
     interface ICustomCollector {
         (ownerUri: string, ownerName: string, propName: string, val: any): any;
     }
+    interface ICustomExcluder {
+        (uri: string, name: string): boolean;
+    }
     interface IMarkupDependencyResolver<T> {
         add(uri: string, name: string): boolean;
-        collect(root: T, customCollector?: ICustomCollector): any;
+        collect(root: T, customCollector?: ICustomCollector, customExcluder?: ICustomExcluder): any;
         resolve(): async.IAsyncRequest<any>;
     }
     class MarkupDependencyResolver<T> implements IMarkupDependencyResolver<T> {
@@ -402,7 +405,7 @@ declare module nullstone.markup {
         private $$names;
         private $$resolving;
         constructor(typeManager: ITypeManager, parser: IMarkupParser<T>);
-        collect(root: T, customCollector?: ICustomCollector): void;
+        collect(root: T, customCollector?: ICustomCollector, customExcluder?: ICustomExcluder): void;
         add(uri: string, name: string): boolean;
         resolve(): async.IAsyncRequest<any>;
     }

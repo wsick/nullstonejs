@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.3.20';
+    nullstone.version = '0.3.21';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -1220,9 +1220,9 @@ var nullstone;
             Markup.prototype.createParser = function () {
                 return markup_1.NO_PARSER;
             };
-            Markup.prototype.resolve = function (typemgr, customCollector) {
+            Markup.prototype.resolve = function (typemgr, customCollector, customExcluder) {
                 var resolver = new markup_1.MarkupDependencyResolver(typemgr, this.createParser());
-                resolver.collect(this.root, customCollector);
+                resolver.collect(this.root, customCollector, customExcluder);
                 return resolver.resolve();
             };
             Markup.prototype.loadAsync = function () {
@@ -1259,7 +1259,7 @@ var nullstone;
                 this.$$names = [];
                 this.$$resolving = [];
             }
-            MarkupDependencyResolver.prototype.collect = function (root, customCollector) {
+            MarkupDependencyResolver.prototype.collect = function (root, customCollector, customExcluder) {
                 var _this = this;
                 var blank = {};
                 var oresolve = {
@@ -1273,7 +1273,8 @@ var nullstone;
                 };
                 var parse = {
                     resolveType: function (uri, name) {
-                        _this.add(uri, name);
+                        if (!customExcluder || !customExcluder(uri, name))
+                            _this.add(uri, name);
                         last.uri = uri;
                         last.name = name;
                         return oresolve;
