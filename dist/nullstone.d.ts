@@ -270,6 +270,7 @@ declare module nullstone {
         xUri: string;
         libResolver: ILibraryResolver;
         constructor(defaultUri: string, xUri: string);
+        createLibResolver(): ILibraryResolver;
         resolveLibrary(uri: string): ILibrary;
         loadTypeAsync(uri: string, name: string): async.IAsyncRequest<any>;
         resolveType(uri: string, name: string, oresolve: IOutType): boolean;
@@ -378,7 +379,9 @@ declare module nullstone.markup {
     class Markup<T> {
         uri: Uri;
         root: T;
+        private $$isLoaded;
         constructor(uri: string);
+        isLoaded: boolean;
         createParser(): IMarkupParser<T>;
         resolve(typemgr: ITypeManager, customCollector?: ICustomCollector, customExcluder?: ICustomExcluder): async.IAsyncRequest<any>;
         loadAsync(): async.IAsyncRequest<Markup<T>>;

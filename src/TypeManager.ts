@@ -17,9 +17,11 @@ module nullstone {
         addEnum (uri: string, name: string, enu: any): ITypeManager;
     }
     export class TypeManager implements ITypeManager {
-        libResolver: ILibraryResolver = new LibraryResolver();
+        libResolver: ILibraryResolver;
 
         constructor (public defaultUri: string, public xUri: string) {
+            this.libResolver = this.createLibResolver();
+
             this.libResolver.resolve(defaultUri)
                 .add(Array, "Array");
 
@@ -31,6 +33,10 @@ module nullstone {
                 .addPrimitive(RegExp, "RegExp")
                 .addPrimitive(Boolean, "Boolean")
                 .addPrimitive(Uri, "Uri");
+        }
+
+        createLibResolver (): ILibraryResolver {
+            return new LibraryResolver();
         }
 
         resolveLibrary (uri: string): ILibrary {

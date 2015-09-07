@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.3.22';
+    nullstone.version = '0.3.23';
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -899,7 +899,7 @@ var nullstone;
         function TypeManager(defaultUri, xUri) {
             this.defaultUri = defaultUri;
             this.xUri = xUri;
-            this.libResolver = new nullstone.LibraryResolver();
+            this.libResolver = this.createLibResolver();
             this.libResolver.resolve(defaultUri)
                 .add(Array, "Array");
             this.libResolver.resolve(xUri)
@@ -911,6 +911,9 @@ var nullstone;
                 .addPrimitive(Boolean, "Boolean")
                 .addPrimitive(nullstone.Uri, "Uri");
         }
+        TypeManager.prototype.createLibResolver = function () {
+            return new nullstone.LibraryResolver();
+        };
         TypeManager.prototype.resolveLibrary = function (uri) {
             return this.libResolver.resolve(uri || this.defaultUri);
         };
@@ -1215,8 +1218,14 @@ var nullstone;
     (function (markup_1) {
         var Markup = (function () {
             function Markup(uri) {
+                this.$$isLoaded = false;
                 this.uri = new nullstone.Uri(uri);
             }
+            Object.defineProperty(Markup.prototype, "isLoaded", {
+                get: function () { return this.$$isLoaded; },
+                enumerable: true,
+                configurable: true
+            });
             Markup.prototype.createParser = function () {
                 return markup_1.NO_PARSER;
             };
@@ -1226,11 +1235,13 @@ var nullstone;
                 return resolver.resolve();
             };
             Markup.prototype.loadAsync = function () {
+                var _this = this;
                 var reqUri = "text!" + this.uri.toString();
                 var md = this;
                 return nullstone.async.create(function (resolve, reject) {
                     require([reqUri], function (data) {
                         md.setRoot(md.loadRoot(data));
+                        _this.$$isLoaded = true;
                         resolve(md);
                     }, reject);
                 });

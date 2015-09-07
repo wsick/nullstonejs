@@ -3,9 +3,13 @@ module nullstone.markup {
         uri: Uri;
         root: T;
 
+        private $$isLoaded = false;
+
         constructor (uri: string) {
             this.uri = new Uri(uri);
         }
+
+        get isLoaded(): boolean { return this.$$isLoaded; }
 
         createParser (): IMarkupParser<T> {
             return NO_PARSER;
@@ -23,6 +27,7 @@ module nullstone.markup {
             return async.create((resolve, reject) => {
                 (<Function>require)([reqUri], (data: string) => {
                     md.setRoot(md.loadRoot(data));
+                    this.$$isLoaded = true;
                     resolve(md);
                 }, reject);
             });
