@@ -10,7 +10,7 @@ module nullstone {
         defaultUri: string;
         xUri: string;
         resolveLibrary (uri: string): ILibrary;
-        loadTypeAsync (uri: string, name: string): async.IAsyncRequest<any>;
+        loadTypeAsync (uri: string, name: string): Promise<any>;
         resolveType(uri: string, name: string, /* out */oresolve: IOutType): boolean;
         add (uri: string, name: string, type: any): ITypeManager;
         addPrimitive (uri: string, name: string, type: any): ITypeManager;
@@ -43,7 +43,7 @@ module nullstone {
             return this.libResolver.resolve(uri || this.defaultUri);
         }
 
-        loadTypeAsync (uri: string, name: string): async.IAsyncRequest<any> {
+        loadTypeAsync (uri: string, name: string): Promise<any> {
             return this.libResolver.loadTypeAsync(uri || this.defaultUri, name);
         }
 

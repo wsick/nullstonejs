@@ -15,16 +15,16 @@ module nullstone.markup {
             return NO_PARSER;
         }
 
-        resolve (typemgr: ITypeManager, customCollector?: ICustomCollector, customExcluder?: ICustomExcluder): async.IAsyncRequest<any> {
+        resolve (typemgr: ITypeManager, customCollector?: ICustomCollector, customExcluder?: ICustomExcluder): Promise<any> {
             var resolver = new MarkupDependencyResolver<T>(typemgr, this.createParser());
             resolver.collect(this.root, customCollector, customExcluder);
             return resolver.resolve();
         }
 
-        loadAsync (): async.IAsyncRequest<Markup<T>> {
+        loadAsync (): Promise<Markup<T>> {
             var reqUri = "text!" + this.uri.toString();
             var md = this;
-            return async.create((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 (<Function>require)([reqUri], (data: string) => {
                     md.setRoot(md.loadRoot(data));
                     this.$$isLoaded = true;

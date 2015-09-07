@@ -9,7 +9,7 @@ module nullstone {
         deps: string[];
         rootModule: any;
         isLoaded: boolean;
-        loadAsync (): async.IAsyncRequest<Library>;
+        loadAsync (): Promise<Library>;
         resolveType (moduleName: string, name: string, /* out */oresolve: IOutType): boolean;
 
         add (type: any, name?: string): ILibrary;
@@ -71,14 +71,14 @@ module nullstone {
             return this.$$module = this.$$module || require(this.sourcePath);
         }
 
-        loadAsync (): async.IAsyncRequest<Library> {
+        loadAsync (): Promise<Library> {
             //NOTE: If using http library scheme and a custom source path was not set, we assume the library is preloaded
             if (!this.$$sourcePath && this.uri.scheme === "http")
                 this.$$loaded = true;
             if (this.$$loaded)
-                return async.resolve(this);
+                return Promise.resolve(this);
             this.$configModule();
-            return async.create((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 (<Function>require)([this.name], (rootModule) => {
                     this.$$module = rootModule;
                     this.$$loaded = true;
