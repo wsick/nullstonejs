@@ -6,8 +6,5 @@
     "type": "export",
     "exports": "nullstone"
   },
-  "typings": [
-    "typings/promises.d.ts",
-    "dist/nullstone.d.ts"
-  ]
+  "typings": ["dist/nullstone.d.ts"]
 }
