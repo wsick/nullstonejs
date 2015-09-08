@@ -29,11 +29,19 @@ module nullstone {
         tap(onFulfilled?: (value: T) => void, onRejected?: (err: any) => void): Promise<T> {
             return new Promise((resolve, reject) => {
                 this.then(result => {
-                    onFulfilled && onFulfilled(result);
-                    resolve(result);
+                    var prom: any = onFulfilled ? onFulfilled(result) : null;
+                    if (prom && typeof prom.then === "function") {
+                        prom.then(subresult => resolve(result), suberr => reject(suberr));
+                    } else {
+                        resolve(result);
+                    }
                 }, err => {
-                    onRejected && onRejected(err);
-                    reject(err);
+                    var prom: any = onRejected ? onRejected(err) : null;
+                    if (prom && typeof prom.then === "function") {
+                        prom.then(subresult => reject(err), suberr => reject(suberr));
+                    } else {
+                        reject(err);
+                    }
                 });
             });
         }

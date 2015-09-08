@@ -61,11 +61,21 @@ var nullstone;
             var _this = this;
             return new Promise(function (resolve, reject) {
                 _this.then(function (result) {
-                    onFulfilled && onFulfilled(result);
-                    resolve(result);
+                    var prom = onFulfilled ? onFulfilled(result) : null;
+                    if (prom && typeof prom.then === "function") {
+                        prom.then(function (subresult) { return resolve(result); }, function (suberr) { return reject(suberr); });
+                    }
+                    else {
+                        resolve(result);
+                    }
                 }, function (err) {
-                    onRejected && onRejected(err);
-                    reject(err);
+                    var prom = onRejected ? onRejected(err) : null;
+                    if (prom && typeof prom.then === "function") {
+                        prom.then(function (subresult) { return reject(err); }, function (suberr) { return reject(suberr); });
+                    }
+                    else {
+                        reject(err);
+                    }
                 });
             });
         };

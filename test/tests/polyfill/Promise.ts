@@ -146,4 +146,24 @@ module nullstone.polyfill.tests {
                 strictEqual(hiterr, err);
             });
     });
+
+    QUnit.asyncTest("tap resolve (subpromise)", () => {
+        var result = "result";
+        var result2 = "result2";
+        var hitresult = null;
+        var hiterr = null;
+        Promise.resolve(result)
+            .tap(res2 => new Promise((resolve, reject) => setTimeout(() => {
+                resolve(result2);
+                hitresult = result2;
+            }, 50)), err => hiterr = err)
+            .then(res2 => {
+                QUnit.start();
+                strictEqual(res2, result);
+                strictEqual(hitresult, result2);
+            }, err => {
+                QUnit.start();
+                ok(false, "Should not reject");
+            });
+    });
 }
