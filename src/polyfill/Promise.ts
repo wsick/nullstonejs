@@ -1,24 +1,13 @@
-module nullstone {
-    export interface IFulfilledFunc<T, TResult> {
-        (value: T): TResult | Promise<TResult>;
-    }
-    export interface IRejectedFunc<TResult> {
-        (reason: any): TResult | Promise<TResult>;
-    }
-    export interface IResolveFunc<T> {
-        (value?: T | Promise<T>): void;
-    }
-    export interface IRejectFunc {
-        (reason?: any): void;
-    }
+/// <reference path="Promise_def" />
 
+module nullstone {
     // Use polyfill for setImmediate for performance gains
     var asap = (typeof setImmediate === 'function' && setImmediate) ||
         function (fn) {
             setTimeout(fn, 1);
         };
 
-    export class Promise<T> {
+    export class PromiseImpl<T> implements Promise<T> {
         private $$state: boolean = null;
         private $$value: any = null;
         private $$deferreds: Deferred<T, any>[] = [];
@@ -29,21 +18,10 @@ module nullstone {
             doResolve(init, this._resolve, this._reject);
         }
 
-        /**
-         * Attaches callbacks for the resolution and/or rejection of the Promise.
-         * @param onFulfilled The callback to execute when the Promise is resolved.
-         * @param onRejected The callback to execute when the Promise is rejected.
-         * @returns A Promise for the completion of which ever callback is executed.
-         */
         then<TResult>(onFulfilled?: IFulfilledFunc<T, TResult>, onRejected?: IRejectedFunc<TResult>): Promise<TResult> {
             return new Promise((resolve, reject) => this._handle(new Deferred(onFulfilled, onRejected, resolve, reject)));
         }
 
-        /**
-         * Attaches a callback for only the rejection of the Promise.
-         * @param onRejected The callback to execute when the Promise is rejected.
-         * @returns A Promise for the completion of the callback.
-         */
         catch(onRejected?: (reason: any) => T | Promise<T>): Promise<T> {
             return this.then(null, onRejected);
         }
@@ -233,6 +211,6 @@ module nullstone {
 
 (function (global: any) {
     if (typeof global.Promise !== "function") {
-        global.Promise = nullstone.Promise;
+        global.Promise = nullstone.PromiseImpl;
     }
 })(this);

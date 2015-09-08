@@ -7,14 +7,15 @@ if (!Array.isArray) {
         return Object.prototype.toString.call(arg) === '[object Array]';
     };
 }
+/// <reference path="Promise_def" />
 var nullstone;
 (function (nullstone) {
     var asap = (typeof setImmediate === 'function' && setImmediate) ||
         function (fn) {
             setTimeout(fn, 1);
         };
-    var Promise = (function () {
-        function Promise(init) {
+    var PromiseImpl = (function () {
+        function PromiseImpl(init) {
             var _this = this;
             this.$$state = null;
             this.$$value = null;
@@ -49,14 +50,14 @@ var nullstone;
                 throw new TypeError('not a function');
             doResolve(init, this._resolve, this._reject);
         }
-        Promise.prototype.then = function (onFulfilled, onRejected) {
+        PromiseImpl.prototype.then = function (onFulfilled, onRejected) {
             var _this = this;
             return new Promise(function (resolve, reject) { return _this._handle(new Deferred(onFulfilled, onRejected, resolve, reject)); });
         };
-        Promise.prototype.catch = function (onRejected) {
+        PromiseImpl.prototype.catch = function (onRejected) {
             return this.then(null, onRejected);
         };
-        Promise.prototype.tap = function (onFulfilled, onRejected) {
+        PromiseImpl.prototype.tap = function (onFulfilled, onRejected) {
             var _this = this;
             return new Promise(function (resolve, reject) {
                 _this.then(function (result) {
@@ -68,7 +69,7 @@ var nullstone;
                 });
             });
         };
-        Promise.prototype._handle = function (deferred) {
+        PromiseImpl.prototype._handle = function (deferred) {
             var _this = this;
             if (this.$$state === null) {
                 this.$$deferreds.push(deferred);
@@ -91,7 +92,7 @@ var nullstone;
                 deferred.resolve(ret);
             });
         };
-        Promise.all = function () {
+        PromiseImpl.all = function () {
             var args = Array.prototype.slice.call(arguments.length === 1 && Array.isArray(arguments[0]) ? arguments[0] : arguments);
             return new Promise(function (resolve, reject) {
                 if (args.length === 0)
@@ -122,33 +123,33 @@ var nullstone;
                 }
             });
         };
-        Promise.race = function (values) {
+        PromiseImpl.race = function (values) {
             return new Promise(function (resolve, reject) {
                 for (var i = 0, len = values.length; i < len; i++) {
                     values[i].then(resolve, reject);
                 }
             });
         };
-        Promise.reject = function (reason) {
+        PromiseImpl.reject = function (reason) {
             return new Promise(function (resolve, reject) { return reject(reason); });
         };
-        Promise.resolve = function (value) {
+        PromiseImpl.resolve = function (value) {
             if (value instanceof Promise)
                 return value;
             return new Promise(function (resolve, reject) { return resolve(value); });
         };
-        Promise.prototype._finale = function () {
+        PromiseImpl.prototype._finale = function () {
             for (var i = 0, len = this.$$deferreds.length; i < len; i++) {
                 this._handle(this.$$deferreds[i]);
             }
             this.$$deferreds = null;
         };
-        Promise.prototype._setImmediateFn = function (func) {
+        PromiseImpl.prototype._setImmediateFn = function (func) {
             asap = func;
         };
-        return Promise;
+        return PromiseImpl;
     })();
-    nullstone.Promise = Promise;
+    nullstone.PromiseImpl = PromiseImpl;
     var Deferred = (function () {
         function Deferred(onFulfilled, onRejected, resolve, reject) {
             this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null;
@@ -183,7 +184,13 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 (function (global) {
     if (typeof global.Promise !== "function") {
-        global.Promise = nullstone.Promise;
+        global.Promise = nullstone.PromiseImpl;
+    }
+})(this);
+/// <reference path="Promise" />
+(function (global) {
+    if (global.Promise && typeof global.Promise.prototype.tap !== "function") {
+        global.Promise.prototype.tap = nullstone.PromiseImpl.prototype.tap;
     }
 })(this);
 var nullstone;
@@ -193,7 +200,7 @@ var nullstone;
         }
         DirResolver.prototype.loadAsync = function (moduleName, name) {
             var reqUri = moduleName + '/' + name;
-            return new nullstone.Promise(function (resolve, reject) {
+            return new Promise(function (resolve, reject) {
                 require([reqUri], function (rootModule) {
                     resolve(rootModule);
                 }, function (err) { return reject(new nullstone.DirLoadError(reqUri, err)); });
@@ -513,9 +520,9 @@ var nullstone;
             if (!this.$$sourcePath && this.uri.scheme === "http")
                 this.$$loaded = true;
             if (this.$$loaded)
-                return nullstone.Promise.resolve(this);
+                return Promise.resolve(this);
             this.$configModule();
-            return new nullstone.Promise(function (resolve, reject) {
+            return new Promise(function (resolve, reject) {
                 require([_this.name], function (rootModule) {
                     _this.$$module = rootModule;
                     _this.$$loaded = true;
@@ -1350,7 +1357,7 @@ var nullstone;
                 var _this = this;
                 var reqUri = "text!" + this.uri.toString();
                 var md = this;
-                return new nullstone.Promise(function (resolve, reject) {
+                return new Promise(function (resolve, reject) {
                     require([reqUri], function (data) {
                         md.setRoot(md.loadRoot(data));
                         _this.$$isLoaded = true;
@@ -1447,7 +1454,7 @@ var nullstone;
                 for (var i = 0, uris = this.$$uris, names = this.$$names, tm = this.typeManager; i < uris.length; i++) {
                     proms.push(tm.loadTypeAsync(uris[i], names[i]));
                 }
-                return nullstone.Promise.all(proms);
+                return Promise.all(proms);
             };
             return MarkupDependencyResolver;
         })();

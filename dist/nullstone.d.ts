@@ -1,20 +1,39 @@
 declare module nullstone {
     var version: string;
 }
+interface IFulfilledFunc<T, TResult> {
+    (value: T): TResult | Promise<TResult>;
+}
+interface IRejectedFunc<TResult> {
+    (reason: any): TResult | Promise<TResult>;
+}
+interface IResolveFunc<T> {
+    (value?: T | Promise<T>): void;
+}
+interface IRejectFunc {
+    (reason?: any): void;
+}
+interface Promise<T> {
+    then<TResult>(onFulfilled?: IFulfilledFunc<T, TResult>, onRejected?: IRejectedFunc<TResult>): Promise<TResult>;
+    catch(onRejected?: (reason: any) => T | Promise<T>): Promise<T>;
+    tap(onFulfilled?: (value: T) => void, onRejected?: (err: any) => void): Promise<T>;
+}
+interface PromiseConstructor {
+    prototype: Promise<any>;
+    new <T>(init: (resolve: (value?: T | Promise<T>) => void, reject: (reason?: any) => void) => void): Promise<T>;
+    <T>(init: (resolve: (value?: T | Promise<T>) => void, reject: (reason?: any) => void) => void): Promise<T>;
+    all<T>(values: Promise<void>[]): Promise<void>;
+    all<T>(...values: Promise<void>[]): Promise<void>;
+    all<T>(values: (T | Promise<T>)[]): Promise<T[]>;
+    all<T>(...values: (T | Promise<T>)[]): Promise<T[]>;
+    race<T>(values: Promise<T>[]): Promise<T>;
+    reject<T>(reason: any): Promise<void> | Promise<T>;
+    resolve<T>(value: T | Promise<T>): Promise<T>;
+    resolve(): Promise<void>;
+}
+declare var Promise: PromiseConstructor;
 declare module nullstone {
-    interface IFulfilledFunc<T, TResult> {
-        (value: T): TResult | Promise<TResult>;
-    }
-    interface IRejectedFunc<TResult> {
-        (reason: any): TResult | Promise<TResult>;
-    }
-    interface IResolveFunc<T> {
-        (value?: T | Promise<T>): void;
-    }
-    interface IRejectFunc {
-        (reason?: any): void;
-    }
-    class Promise<T> {
+    class PromiseImpl<T> implements Promise<T> {
         private $$state;
         private $$value;
         private $$deferreds;
