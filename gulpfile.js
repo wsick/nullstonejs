@@ -4,6 +4,7 @@ var fs = require('fs'),
         buildfiles: [
             'typings/*.d.ts',
             'src/_version.ts',
+            'src/polyfill/*.ts',
             'src/*.ts',
             'src/**/*.ts'
         ]

@@ -8,7 +8,7 @@ module nullstone.markup {
     export interface IMarkupDependencyResolver<T> {
         add(uri: string, name: string): boolean;
         collect(root: T, customCollector?: ICustomCollector, customExcluder?: ICustomExcluder);
-        resolve(): async.IAsyncRequest<any>;
+        resolve(): Promise<any>;
     }
     export class MarkupDependencyResolver<T> implements IMarkupDependencyResolver<T> {
         private $$uris: string[] = [];
@@ -86,12 +86,12 @@ module nullstone.markup {
             return true;
         }
 
-        resolve(): async.IAsyncRequest<any> {
-            var as: async.IAsyncRequest<any>[] = [];
+        resolve(): Promise<any> {
+            var proms: Promise<any>[] = [];
             for (var i = 0, uris = this.$$uris, names = this.$$names, tm = this.typeManager; i < uris.length; i++) {
-                as.push(tm.loadTypeAsync(uris[i], names[i]));
+                proms.push(tm.loadTypeAsync(uris[i], names[i]));
             }
-            return async.many(as);
+            return Promise.all(proms);
         }
     }
 }

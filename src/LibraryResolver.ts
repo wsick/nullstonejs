@@ -4,7 +4,7 @@ module nullstone {
     }
     export interface ILibraryResolver extends ITypeResolver {
         libraryCreated: Event<IEventArgs>;
-        loadTypeAsync(uri: string, name: string): async.IAsyncRequest<any>;
+        loadTypeAsync(uri: string, name: string): Promise<any>;
         resolve(uri: string): ILibrary;
     }
 
@@ -28,20 +28,17 @@ module nullstone {
             return new Library(uri);
         }
 
-        loadTypeAsync (uri: string, name: string): async.IAsyncRequest<any> {
+        loadTypeAsync (uri: string, name: string): Promise<any> {
             var lib = this.resolve(uri);
             if (!lib)
                 return this.dirResolver.loadAsync(uri, name);
-            return async.create((resolve, reject) => {
-                lib.loadAsync()
-                    .then((lib) => {
-                        var oresolve = {isPrimitive: false, type: undefined};
-                        if (lib.resolveType(null, name, oresolve))
-                            resolve(oresolve.type);
-                        else
-                            resolve(null);
-                    }, reject);
-            });
+            return lib.loadAsync()
+                .then((lib) => {
+                    var oresolve = {isPrimitive: false, type: undefined};
+                    if (lib.resolveType(null, name, oresolve))
+                        return oresolve.type;
+                    return null;
+                });
         }
 
         resolve (uri: string): ILibrary {
