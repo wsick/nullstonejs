@@ -1,8 +1,8 @@
 interface IFulfilledFunc<T, TResult> {
-    (value: T): TResult | Promise<TResult>;
+    (value: T): void | TResult | Promise<TResult>;
 }
 interface IRejectedFunc<TResult> {
-    (reason: any): TResult | Promise<TResult>;
+    (reason: any): void | TResult | Promise<TResult>;
 }
 interface IResolveFunc<T> {
     (value?: T | Promise<T>): void;

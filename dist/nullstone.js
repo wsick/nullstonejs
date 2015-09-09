@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.4.0';
+    nullstone.version = '0.4.1';
 })(nullstone || (nullstone = {}));
 if (!Array.isArray) {
     Array.isArray = function (arg) {
