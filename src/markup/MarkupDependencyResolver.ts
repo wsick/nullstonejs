@@ -34,6 +34,7 @@ module nullstone.markup {
             };
             var parse = {
                 resolveType: (uri, name) => {
+                    uri = uri || this.typeManager.defaultUri;
                     if (!customExcluder || !customExcluder(uri, name))
                         this.add(uri, name);
                     last.uri = uri;

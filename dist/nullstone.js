@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.4.1';
+    nullstone.version = '0.4.2';
 })(nullstone || (nullstone = {}));
 if (!Array.isArray) {
     Array.isArray = function (arg) {
@@ -1413,6 +1413,7 @@ var nullstone;
                 };
                 var parse = {
                     resolveType: function (uri, name) {
+                        uri = uri || _this.typeManager.defaultUri;
                         if (!customExcluder || !customExcluder(uri, name))
                             _this.add(uri, name);
                         last.uri = uri;
