@@ -19,7 +19,7 @@ module nullstone {
     };
 
     IEnumerable_.fromArray = function<T>(arr: T[]): IEnumerable<T> {
-        return {
+        return <IEnumerable<T>>{
             $$arr: arr,
             getEnumerator (isReverse?: boolean): IEnumerator<T> {
                 return IEnumerator_.fromArray(this.$$arr, isReverse);
