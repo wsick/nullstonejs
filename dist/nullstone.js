@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.4.3';
+    nullstone.version = '0.4.4';
 })(nullstone || (nullstone = {}));
 if (!Array.isArray) {
     Array.isArray = function (arg) {
@@ -27,7 +27,7 @@ var nullstone;
                     if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
                         var then = newValue.then;
                         if (typeof then === 'function') {
-                            doResolve(then.apply(newValue), _this._resolve, _this._reject);
+                            doResolve(function () { return then.apply(newValue); }, _this._resolve, _this._reject);
                             return;
                         }
                     }
@@ -99,7 +99,12 @@ var nullstone;
                     deferred.reject(e);
                     return;
                 }
-                deferred.resolve(ret);
+                if (ret && typeof ret.then === "function") {
+                    ret.then.call(ret, deferred.resolve);
+                }
+                else {
+                    deferred.resolve(ret);
+                }
             });
         };
         PromiseImpl.all = function () {

@@ -166,4 +166,17 @@ module nullstone.polyfill.tests {
                 ok(false, "Should not reject");
             });
     });
+
+    QUnit.asyncTest("then(return Promise)", () => {
+        Promise.resolve((resolve, reject) => setTimeout(resolve(), 1))
+            .then(() => 2)
+            .then(() => Promise.resolve(3))
+            .then((result) => {
+                QUnit.start();
+                strictEqual(3, result);
+            }, err => {
+                QUnit.start();
+                ok(false, "Should not reject");
+            });
+    });
 }

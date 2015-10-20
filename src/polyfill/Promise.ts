@@ -64,7 +64,11 @@ module nullstone {
                     deferred.reject(e);
                     return;
                 }
-                deferred.resolve(ret);
+                if (ret && typeof ret.then === "function") {
+                    ret.then.call(ret, deferred.resolve);
+                } else {
+                    deferred.resolve(ret);
+                }
             })
         }
 
@@ -153,7 +157,7 @@ module nullstone {
                 if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
                     var then = newValue.then;
                     if (typeof then === 'function') {
-                        doResolve(then.apply(newValue), this._resolve, this._reject);
+                        doResolve(() => then.apply(newValue), this._resolve, this._reject);
                         return;
                     }
                 }
