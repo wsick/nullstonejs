@@ -96,7 +96,7 @@ module nullstone.tests.typemanager {
         typemgr.loadTypeAsync("mock", "AmdClass")
             .then(cls => {
                 QUnit.start();
-                strictEqual((<any>cls).name, "AmdClass");
+                strictEqual(nullstone.getTypeName(cls), "AmdClass");
                 var o: any = new (<any>cls)();
                 strictEqual(o.x, 1);
             }, err => {

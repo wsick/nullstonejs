@@ -20,7 +20,7 @@ module nullstone.markup.xaml.tests {
                         };
                         ok(typemgr.resolveType("mock", "AmdClass", oresolve));
 
-                        strictEqual((<any>oresolve.type).name, "AmdClass");
+                        strictEqual(nullstone.getTypeName(oresolve.type), "AmdClass");
                         var o: any = new (<any>oresolve.type)();
                         strictEqual(o.x, 1);
                     }, err => {

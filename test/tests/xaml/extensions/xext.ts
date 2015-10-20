@@ -23,7 +23,7 @@ module nullstone.markup.xaml.extensions.tests {
     QUnit.test("x:Type", () => {
         var val = parser.parse("{x:Type Application}", mock.resolver(), []);
         ok(typeof val === "function");
-        strictEqual(val.name, "Application");
+        strictEqual(nullstone.getTypeName(val), "Application");
     });
 
     QUnit.test("x:Null", () => {
