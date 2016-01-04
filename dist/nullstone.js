@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.4.5';
+    nullstone.version = '0.4.6';
 })(nullstone || (nullstone = {}));
 if (!Array.isArray) {
     Array.isArray = function (arg) {
@@ -1477,6 +1477,31 @@ var nullstone;
         markup.MarkupDependencyResolver = MarkupDependencyResolver;
     })(markup = nullstone.markup || (nullstone.markup = {}));
 })(nullstone || (nullstone = {}));
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+var nullstone;
+(function (nullstone) {
+    var markup;
+    (function (markup) {
+        var xaml;
+        (function (xaml) {
+            var SkipBranchError = (function (_super) {
+                __extends(SkipBranchError, _super);
+                function SkipBranchError(root) {
+                    _super.call(this, "Cannot skip branch when element contains more than 1 child element.");
+                    Object.defineProperties(this, {
+                        "root": { value: root, writable: false }
+                    });
+                }
+                return SkipBranchError;
+            })(Error);
+            xaml.SkipBranchError = SkipBranchError;
+        })(xaml = markup.xaml || (markup.xaml = {}));
+    })(markup = nullstone.markup || (nullstone.markup = {}));
+})(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
     var markup;
@@ -1720,11 +1745,6 @@ var nullstone;
         })(xaml = markup.xaml || (markup.xaml = {}));
     })(markup = nullstone.markup || (nullstone.markup = {}));
 })(nullstone || (nullstone = {}));
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 var nullstone;
 (function (nullstone) {
     var markup;
@@ -1864,13 +1884,19 @@ var nullstone;
                         os.push(obj);
                         this.$$onObject(obj, isContent);
                     }
-                    var resEl = findResourcesElement(el, xmlns, name);
-                    if (resEl)
-                        this.$$handleResources(obj, ort.type, resEl);
+                    if (!this.$$skipnext) {
+                        var resEl = findResourcesElement(el, xmlns, name);
+                        if (resEl)
+                            this.$$handleResources(obj, ort.type, resEl);
+                    }
                     this.$$curkey = undefined;
                     this.$$processAttributes(el);
                     var key = this.$$curkey;
                     if (this.$$skipnext) {
+                        if (el.childElementCount > 1) {
+                            if (!this.$$onError(new xaml.SkipBranchError(el)))
+                                return;
+                        }
                         this.$$skipnext = false;
                         os.pop();
                         this.$$onObjectEnd(obj, key, isContent, os[os.length - 1]);
