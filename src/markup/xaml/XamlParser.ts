@@ -156,7 +156,7 @@ module nullstone.markup.xaml {
 
             if (this.$$skipnext) {
                 if (el.childElementCount > 1) {
-                    if (!this.$$onError(new SkipBranchError()))
+                    if (!this.$$onError(new SkipBranchError(el)))
                         return;
                 }
                 this.$$skipnext = false;
