@@ -1,5 +1,5 @@
 module nullstone.tests.enumerable {
-    QUnit.module("IEnumerable");
+    QUnit.module("enumerable");
 
     QUnit.test("Empty", (assert) => {
         var items = [];

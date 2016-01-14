@@ -1,5 +1,5 @@
 module nullstone.markup.xaml.tests.extensions {
-    QUnit.module('Markup:XAML Parser+Extension Tests');
+    QUnit.module('xaml.extensions.withext');
 
     QUnit.asyncTest("With Extension", () => {
         getDoc("docs/withext.xml", (doc) => {

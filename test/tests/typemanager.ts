@@ -1,5 +1,5 @@
 module nullstone.tests.typemanager {
-    QUnit.module("Type Manager");
+    QUnit.module("typemanager");
 
     var DEFAULT_XMLNS = "http://schemas.wsick.com/nullstone";
     var X_XMLNS = "http://schemas.wsick.com/nullstone/x";
@@ -93,10 +93,10 @@ module nullstone.tests.typemanager {
     });
 
     QUnit.asyncTest("Load amd class", () => {
-        typemgr.loadTypeAsync("mock", "amdclass")
+        typemgr.loadTypeAsync("mock", "AmdClass")
             .then(cls => {
                 QUnit.start();
-                strictEqual((<any>cls).name, "AmdClass");
+                strictEqual(nullstone.getTypeName(cls), "AmdClass");
                 var o: any = new (<any>cls)();
                 strictEqual(o.x, 1);
             }, err => {

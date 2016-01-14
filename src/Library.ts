@@ -3,11 +3,13 @@ module nullstone {
         name: string;
         uri: Uri;
         sourcePath: string;
+        basePath: string;
         useMin: boolean;
         exports: string;
         deps: string[];
         rootModule: any;
-        loadAsync (): async.IAsyncRequest<Library>;
+        isLoaded: boolean;
+        loadAsync (): Promise<Library>;
         resolveType (moduleName: string, name: string, /* out */oresolve: IOutType): boolean;
 
         add (type: any, name?: string): ILibrary;
@@ -17,6 +19,7 @@ module nullstone {
     export class Library implements ILibrary {
         private $$module: any = null;
         private $$sourcePath: string = null;
+        private $$basePath: string = null;
 
         private $$primtypes: any = {};
         private $$types: any = {};
@@ -44,6 +47,18 @@ module nullstone {
             this.$$sourcePath = value;
         }
 
+        get basePath (): string {
+            return this.$$basePath || ("lib/" + this.name);
+        }
+
+        set basePath (value: string) {
+            this.$$basePath = value;
+        }
+
+        get isLoaded (): boolean {
+            return !!this.$$loaded;
+        }
+
         constructor (name: string) {
             Object.defineProperty(this, "name", {value: name, writable: false});
             var uri = name;
@@ -56,14 +71,14 @@ module nullstone {
             return this.$$module = this.$$module || require(this.sourcePath);
         }
 
-        loadAsync (): async.IAsyncRequest<Library> {
+        loadAsync (): Promise<Library> {
             //NOTE: If using http library scheme and a custom source path was not set, we assume the library is preloaded
             if (!this.$$sourcePath && this.uri.scheme === "http")
                 this.$$loaded = true;
             if (this.$$loaded)
-                return async.resolve(this);
+                return Promise.resolve(this);
             this.$configModule();
-            return async.create((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 (<Function>require)([this.name], (rootModule) => {
                     this.$$module = rootModule;
                     this.$$loaded = true;

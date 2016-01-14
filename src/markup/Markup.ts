@@ -3,26 +3,31 @@ module nullstone.markup {
         uri: Uri;
         root: T;
 
+        private $$isLoaded = false;
+
         constructor (uri: string) {
             this.uri = new Uri(uri);
         }
+
+        get isLoaded(): boolean { return this.$$isLoaded; }
 
         createParser (): IMarkupParser<T> {
             return NO_PARSER;
         }
 
-        resolve (typemgr: ITypeManager, customCollector?: ICustomCollector): async.IAsyncRequest<any> {
+        resolve (typemgr: ITypeManager, customCollector?: ICustomCollector, customExcluder?: ICustomExcluder): Promise<any> {
             var resolver = new MarkupDependencyResolver<T>(typemgr, this.createParser());
-            resolver.collect(this.root, customCollector);
+            resolver.collect(this.root, customCollector, customExcluder);
             return resolver.resolve();
         }
 
-        loadAsync (): async.IAsyncRequest<Markup<T>> {
+        loadAsync (): Promise<Markup<T>> {
             var reqUri = "text!" + this.uri.toString();
             var md = this;
-            return async.create((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 (<Function>require)([reqUri], (data: string) => {
                     md.setRoot(md.loadRoot(data));
+                    this.$$isLoaded = true;
                     resolve(md);
                 }, reject);
             });

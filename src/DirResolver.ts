@@ -1,8 +1,8 @@
 module nullstone {
     export class DirResolver implements ITypeResolver {
-        loadAsync (moduleName: string, name: string): async.IAsyncRequest<any> {
+        loadAsync (moduleName: string, name: string): Promise<any> {
             var reqUri = moduleName + '/' + name;
-            return async.create((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 (<Function>require)([reqUri], (rootModule) => {
                     resolve(rootModule);
                 }, (err) => reject(new DirLoadError(reqUri, err)));

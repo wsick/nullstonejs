@@ -1,5 +1,5 @@
 module nullstone.markup.xaml.tests {
-    QUnit.module('Markup:Dependency Resolver');
+    QUnit.module('xaml:depresolver');
 
     QUnit.asyncTest("App with ThemeName", () => {
         var tm = new TypeManager("http://schemas.wsick.com/fayde", "http://schemas.wsick.com/fayde/x");

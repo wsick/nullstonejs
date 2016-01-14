@@ -31,13 +31,13 @@ module nullstone.markup.xaml {
         private $$curel: Element = null;
         private $$curkey: string = undefined;
 
-        constructor () {
+        constructor() {
             this.setExtensionParser(new XamlExtensionParser())
                 .setNamespaces(DEFAULT_XMLNS, DEFAULT_XMLNS_X)
                 .on({});
         }
 
-        on (listener: IMarkupSax<Element>): XamlParser {
+        on(listener: IMarkupSax<Element>): XamlParser {
             listener = createMarkupSax(listener);
 
             this.$$onResolveType = listener.resolveType;
@@ -66,7 +66,7 @@ module nullstone.markup.xaml {
             return this;
         }
 
-        setNamespaces (defaultXmlns: string, xXmlns: string): XamlParser {
+        setNamespaces(defaultXmlns: string, xXmlns: string): XamlParser {
             this.$$defaultXmlns = defaultXmlns;
             this.$$xXmlns = xXmlns;
             if (this.$$extension)
@@ -74,7 +74,7 @@ module nullstone.markup.xaml {
             return this;
         }
 
-        setExtensionParser (parser: IMarkupExtensionParser): XamlParser {
+        setExtensionParser(parser: IMarkupExtensionParser): XamlParser {
             this.$$extension = parser;
             if (parser) {
                 parser.setNamespaces(this.$$defaultXmlns, this.$$xXmlns)
@@ -88,7 +88,7 @@ module nullstone.markup.xaml {
             return this;
         }
 
-        parse (el: Element): XamlParser {
+        parse(el: Element): XamlParser {
             if (!this.$$extension)
                 throw new Error("No extension parser exists on parser.");
             this.$$handleElement(el, true);
@@ -96,11 +96,11 @@ module nullstone.markup.xaml {
             return this;
         }
 
-        skipBranch () {
+        skipBranch() {
             this.$$skipnext = true;
         }
 
-        walkUpObjects (): IEnumerator<any> {
+        walkUpObjects(): IEnumerator<any> {
             var os = this.$$objectStack;
             var i = os.length;
             return {
@@ -112,11 +112,11 @@ module nullstone.markup.xaml {
             };
         }
 
-        resolvePrefix (prefix: string): string {
+        resolvePrefix(prefix: string): string {
             return this.$$curel.lookupNamespaceURI(prefix);
         }
 
-        private $$handleElement (el: Element, isContent: boolean) {
+        private $$handleElement(el: Element, isContent: boolean) {
             // NOTE: Handle tag open
             //  <[ns:]Type.Name>
             //  <[ns:]Type>
@@ -143,9 +143,11 @@ module nullstone.markup.xaml {
             }
 
             // NOTE: Handle resources before attributes and child elements
-            var resEl = findResourcesElement(el, xmlns, name);
-            if (resEl)
-                this.$$handleResources(obj, ort.type, resEl);
+            if (!this.$$skipnext) {
+                var resEl = findResourcesElement(el, xmlns, name);
+                if (resEl)
+                    this.$$handleResources(obj, ort.type, resEl);
+            }
 
             this.$$curkey = undefined;
             // NOTE: Walk attributes
@@ -153,6 +155,10 @@ module nullstone.markup.xaml {
             var key = this.$$curkey;
 
             if (this.$$skipnext) {
+                if (el.childElementCount > 1) {
+                    if (!this.$$onError(new SkipBranchError(el)))
+                        return;
+                }
                 this.$$skipnext = false;
                 os.pop();
                 this.$$onObjectEnd(obj, key, isContent, os[os.length - 1]);
@@ -187,7 +193,7 @@ module nullstone.markup.xaml {
             this.$$curel = old;
         }
 
-        private $$handleResources (owner: any, ownerType: any, resEl: Element) {
+        private $$handleResources(owner: any, ownerType: any, resEl: Element) {
             var os = this.$$objectStack;
             var rd = this.$$onResolveResources(owner, ownerType);
             os.push(rd);
@@ -201,14 +207,14 @@ module nullstone.markup.xaml {
             this.$$onObjectEnd(rd, undefined, false, os[os.length - 1]);
         }
 
-        private $$tryHandleError (el: Element, xmlns: string, name: string): boolean {
+        private $$tryHandleError(el: Element, xmlns: string, name: string): boolean {
             if (xmlns !== ERROR_XMLNS || name !== ERROR_NAME)
                 return false;
             this.$$onError(new Error(el.textContent));
             return true;
         }
 
-        private $$tryHandlePropertyTag (el: Element, xmlns: string, name: string): boolean {
+        private $$tryHandlePropertyTag(el: Element, xmlns: string, name: string): boolean {
             var ind = name.indexOf('.');
             if (ind < 0)
                 return false;
@@ -230,7 +236,7 @@ module nullstone.markup.xaml {
             return true;
         }
 
-        private $$tryHandlePrimitive (el: Element, oresolve: IOutType, isContent: boolean): boolean {
+        private $$tryHandlePrimitive(el: Element, oresolve: IOutType, isContent: boolean): boolean {
             if (!oresolve.isPrimitive)
                 return false;
             var text = el.textContent;
@@ -244,13 +250,13 @@ module nullstone.markup.xaml {
             return true;
         }
 
-        private $$processAttributes (el: Element) {
+        private $$processAttributes(el: Element) {
             for (var i = 0, attrs = el.attributes, len = attrs.length; i < len; i++) {
                 this.$$processAttribute(attrs[i]);
             }
         }
 
-        private $$processAttribute (attr: Attr): boolean {
+        private $$processAttribute(attr: Attr): boolean {
             var prefix = attr.prefix;
             var name = attr.localName;
             if (this.$$shouldSkipAttr(prefix, name))
@@ -262,13 +268,13 @@ module nullstone.markup.xaml {
             return this.$$handleAttribute(uri, name, value, attr);
         }
 
-        private $$shouldSkipAttr (prefix: string, name: string): boolean {
+        private $$shouldSkipAttr(prefix: string, name: string): boolean {
             if (prefix === "xmlns")
                 return true;
             return (!prefix && name === "xmlns");
         }
 
-        private $$tryHandleXAttribute (uri: string, name: string, value: string): boolean {
+        private $$tryHandleXAttribute(uri: string, name: string, value: string): boolean {
             //  ... x:Name="..."
             //  ... x:Key="..."
             if (uri !== this.$$xXmlns)
@@ -280,7 +286,7 @@ module nullstone.markup.xaml {
             return true;
         }
 
-        private $$handleAttribute (uri: string, name: string, value: string, attr: Attr): boolean {
+        private $$handleAttribute(uri: string, name: string, value: string, attr: Attr): boolean {
             //  ... [ns:]Type.Name="..."
             //  ... Name="..."
 
@@ -298,18 +304,18 @@ module nullstone.markup.xaml {
             return true;
         }
 
-        private $$getAttrValue (val: string, attr: Attr): any {
+        private $$getAttrValue(val: string, attr: Attr): any {
             if (val[0] !== "{")
                 return val;
             return this.$$extension.parse(val, attr, this.$$objectStack);
         }
 
-        private $$destroy () {
+        private $$destroy() {
             this.$$onEnd && this.$$onEnd();
         }
     }
 
-    function findResourcesElement (ownerEl: Element, uri: string, name: string): Element {
+    function findResourcesElement(ownerEl: Element, uri: string, name: string): Element {
         var expected = name + ".Resources";
         var child = ownerEl.firstElementChild;
         while (child) {

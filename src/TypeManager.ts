@@ -10,16 +10,18 @@ module nullstone {
         defaultUri: string;
         xUri: string;
         resolveLibrary (uri: string): ILibrary;
-        loadTypeAsync (uri: string, name: string): async.IAsyncRequest<any>;
+        loadTypeAsync (uri: string, name: string): Promise<any>;
         resolveType(uri: string, name: string, /* out */oresolve: IOutType): boolean;
         add (uri: string, name: string, type: any): ITypeManager;
         addPrimitive (uri: string, name: string, type: any): ITypeManager;
         addEnum (uri: string, name: string, enu: any): ITypeManager;
     }
     export class TypeManager implements ITypeManager {
-        libResolver: ILibraryResolver = new LibraryResolver();
+        libResolver: ILibraryResolver;
 
         constructor (public defaultUri: string, public xUri: string) {
+            this.libResolver = this.createLibResolver();
+
             this.libResolver.resolve(defaultUri)
                 .add(Array, "Array");
 
@@ -33,11 +35,15 @@ module nullstone {
                 .addPrimitive(Uri, "Uri");
         }
 
+        createLibResolver (): ILibraryResolver {
+            return new LibraryResolver();
+        }
+
         resolveLibrary (uri: string): ILibrary {
             return this.libResolver.resolve(uri || this.defaultUri);
         }
 
-        loadTypeAsync (uri: string, name: string): async.IAsyncRequest<any> {
+        loadTypeAsync (uri: string, name: string): Promise<any> {
             return this.libResolver.loadTypeAsync(uri || this.defaultUri, name);
         }
 
