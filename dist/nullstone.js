@@ -1,6 +1,6 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.4.6';
+    nullstone.version = '0.4.7';
 })(nullstone || (nullstone = {}));
 if (!Array.isArray) {
     Array.isArray = function (arg) {
@@ -859,6 +859,8 @@ var nullstone;
         return new RegExp(val);
     };
     function convertAnyToType(val, type) {
+        if (val && val.constructor === type)
+            return val;
         var converter = converters[type];
         if (converter)
             return converter(val);
