@@ -37,6 +37,8 @@ module nullstone {
     };
 
     export function convertAnyToType (val: any, type: Function): any {
+	if (val && val.constructor === type)
+	    return val;
         var converter: (val: any) => any = (<any>converters)[<any>type];
         if (converter)
             return converter(val);
