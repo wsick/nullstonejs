@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - "0.10"
+  - "4"
 before_install:
   - npm install -g gulp
   - npm install -g bower
@@ -8,4 +8,7 @@ before_install:
 install:
   - npm install
 before_script: gulp reset
-script: gulp test
+script:
+  - gulp version
+  - gulp
+  - gulp test

@@ -5,20 +5,19 @@ var gulp = require('gulp'),
     runSequence = require('run-sequence').use(gulp);
 
 module.exports = function (meta) {
+    var scaffold = meta.getScaffold('test');
+    if (!scaffold)
+        return;
+
     gulp.task('test-build', function () {
-        return gulp.src([
-            'typings/*.d.ts',
-            'test/**/*.ts',
-            '!test/lib/**/*.ts',
-            'dist/' + meta.name + '.d.ts'
-        ])
+        return gulp.src(scaffold.getSrc())
             .pipe(sourcemaps.init())
             .pipe(ts({
                 target: 'ES5',
                 declaration: true,
-                pathFilter: {'test/tests': 'tests'}
+                pathFilter: {'test': ''}
             }))
-            .js.pipe(sourcemaps.write())
+            .pipe(sourcemaps.write('./', {sourceRoot: '/', debug: true}))
             .pipe(gulp.dest('test/.build'));
     });
 
