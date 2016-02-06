@@ -1,213 +1,120 @@
 var nullstone;
 (function (nullstone) {
-    nullstone.version = '0.4.7';
+    nullstone.version = '0.4.8';
 })(nullstone || (nullstone = {}));
-if (!Array.isArray) {
-    Array.isArray = function (arg) {
-        return Object.prototype.toString.call(arg) === '[object Array]';
-    };
-}
-/// <reference path="Promise_def" />
 var nullstone;
 (function (nullstone) {
-    var asap = (typeof setImmediate === 'function' && setImmediate) ||
-        function (fn) {
-            setTimeout(fn, 1);
-        };
-    var PromiseImpl = (function () {
-        function PromiseImpl(init) {
-            var _this = this;
-            this.$$state = null;
-            this.$$value = null;
-            this.$$deferreds = [];
-            this._resolve = function (newValue) {
-                try {
-                    if (newValue === _this)
-                        throw new TypeError('A promise cannot be resolved with itself.');
-                    if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
-                        var then = newValue.then;
-                        if (typeof then === 'function') {
-                            doResolve(function () { return then.apply(newValue); }, _this._resolve, _this._reject);
-                            return;
-                        }
-                    }
-                    _this.$$state = true;
-                    _this.$$value = newValue;
-                    _this._finale();
-                }
-                catch (e) {
-                    _this._reject(e);
-                }
-            };
-            this._reject = function (newValue) {
-                _this.$$state = false;
-                _this.$$value = newValue;
-                _this._finale();
-            };
-            if (typeof this !== 'object')
-                throw new TypeError('Promises must be constructed via new');
-            if (typeof init !== 'function')
-                throw new TypeError('not a function');
-            doResolve(init, this._resolve, this._reject);
-        }
-        PromiseImpl.prototype.then = function (onFulfilled, onRejected) {
-            var _this = this;
-            return new Promise(function (resolve, reject) { return _this._handle(new Deferred(onFulfilled, onRejected, resolve, reject)); });
-        };
-        PromiseImpl.prototype.catch = function (onRejected) {
-            return this.then(null, onRejected);
-        };
-        PromiseImpl.prototype.tap = function (onFulfilled, onRejected) {
-            var _this = this;
-            return new Promise(function (resolve, reject) {
-                _this.then(function (result) {
-                    var prom = onFulfilled ? onFulfilled(result) : null;
-                    if (prom && typeof prom.then === "function") {
-                        prom.then(function (subresult) { return resolve(result); }, function (suberr) { return reject(suberr); });
-                    }
-                    else {
-                        resolve(result);
-                    }
-                }, function (err) {
-                    var prom = onRejected ? onRejected(err) : null;
-                    if (prom && typeof prom.then === "function") {
-                        prom.then(function (subresult) { return reject(err); }, function (suberr) { return reject(suberr); });
-                    }
-                    else {
-                        reject(err);
-                    }
-                });
-            });
-        };
-        PromiseImpl.prototype._handle = function (deferred) {
-            var _this = this;
-            if (this.$$state === null) {
-                this.$$deferreds.push(deferred);
-                return;
-            }
-            asap(function () {
-                var cb = _this.$$state ? deferred.onFulfilled : deferred.onRejected;
-                if (cb === null) {
-                    (_this.$$state ? deferred.resolve : deferred.reject)(_this.$$value);
-                    return;
-                }
-                var ret;
-                try {
-                    ret = cb(_this.$$value);
-                }
-                catch (e) {
-                    deferred.reject(e);
-                    return;
-                }
-                if (ret && typeof ret.then === "function") {
-                    ret.then.call(ret, deferred.resolve);
-                }
-                else {
-                    deferred.resolve(ret);
-                }
-            });
-        };
-        PromiseImpl.all = function () {
-            var args = Array.prototype.slice.call(arguments.length === 1 && Array.isArray(arguments[0]) ? arguments[0] : arguments);
-            return new Promise(function (resolve, reject) {
-                if (args.length === 0)
-                    return resolve([]);
-                var remaining = args.length;
-                function res(i, val) {
-                    try {
-                        if (val && (typeof val === 'object' || typeof val === 'function')) {
-                            var then = val.then;
-                            if (typeof then === 'function') {
-                                then.call(val, function (val) {
-                                    res(i, val);
-                                }, reject);
-                                return;
-                            }
-                        }
-                        args[i] = val;
-                        if (--remaining === 0) {
-                            resolve(args);
-                        }
-                    }
-                    catch (ex) {
-                        reject(ex);
-                    }
-                }
-                for (var i = 0; i < args.length; i++) {
-                    res(i, args[i]);
-                }
-            });
-        };
-        PromiseImpl.race = function (values) {
-            return new Promise(function (resolve, reject) {
-                for (var i = 0, len = values.length; i < len; i++) {
-                    values[i].then(resolve, reject);
-                }
-            });
-        };
-        PromiseImpl.reject = function (reason) {
-            return new Promise(function (resolve, reject) { return reject(reason); });
-        };
-        PromiseImpl.resolve = function (value) {
-            if (value instanceof Promise)
-                return value;
-            return new Promise(function (resolve, reject) { return resolve(value); });
-        };
-        PromiseImpl.prototype._finale = function () {
-            for (var i = 0, len = this.$$deferreds.length; i < len; i++) {
-                this._handle(this.$$deferreds[i]);
-            }
-            this.$$deferreds = null;
-        };
-        PromiseImpl.prototype._setImmediateFn = function (func) {
-            asap = func;
-        };
-        return PromiseImpl;
-    })();
-    nullstone.PromiseImpl = PromiseImpl;
-    var Deferred = (function () {
-        function Deferred(onFulfilled, onRejected, resolve, reject) {
-            this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null;
-            this.onRejected = typeof onRejected === 'function' ? onRejected : null;
-            this.resolve = resolve;
-            this.reject = reject;
-        }
-        return Deferred;
-    })();
-    function doResolve(fn, onFulfilled, onRejected) {
-        var done = false;
-        try {
-            fn(function (value) {
-                if (done)
-                    return;
-                done = true;
-                onFulfilled(value);
-            }, function (reason) {
-                if (done)
-                    return;
-                done = true;
-                onRejected(reason);
-            });
-        }
-        catch (ex) {
-            if (done)
-                return;
-            done = true;
-            onRejected(ex);
-        }
+    function Annotation(type, name, value, forbidMultiple) {
+        var at = type;
+        var anns = at.$$annotations;
+        if (!anns)
+            Object.defineProperty(at, "$$annotations", { value: (anns = []), writable: false });
+        var ann = anns[name];
+        if (!ann)
+            anns[name] = ann = [];
+        if (forbidMultiple && ann.length > 0)
+            throw new Error("Only 1 '" + name + "' annotation allowed per type [" + nullstone.getTypeName(type) + "].");
+        ann.push(value);
     }
+    nullstone.Annotation = Annotation;
+    function GetAnnotations(type, name) {
+        var at = type;
+        var anns = at.$$annotations;
+        if (!anns)
+            return undefined;
+        return (anns[name] || []).slice(0);
+    }
+    nullstone.GetAnnotations = GetAnnotations;
+    function CreateTypedAnnotation(name) {
+        function ta(type) {
+            var values = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                values[_i - 1] = arguments[_i];
+            }
+            for (var i = 0, len = values.length; i < len; i++) {
+                Annotation(type, name, values[i]);
+            }
+        }
+        ta.Get = function (type) {
+            return GetAnnotations(type, name);
+        };
+        return ta;
+    }
+    nullstone.CreateTypedAnnotation = CreateTypedAnnotation;
 })(nullstone || (nullstone = {}));
-(function (global) {
-    if (typeof global.Promise !== "function") {
-        global.Promise = nullstone.PromiseImpl;
+var nullstone;
+(function (nullstone) {
+    var converters = [];
+    converters[Boolean] = function (val) {
+        if (val == null)
+            return null;
+        if (typeof val === "boolean")
+            return val;
+        if (typeof val === "number")
+            return val !== 0;
+        var c = val.toString().toUpperCase();
+        return c === "TRUE" ? true : (c === "FALSE" ? false : null);
+    };
+    converters[String] = function (val) {
+        if (val == null)
+            return "";
+        return val.toString();
+    };
+    converters[Number] = function (val) {
+        if (!val)
+            return 0;
+        if (typeof val === "number")
+            return val;
+        if (typeof val === "boolean")
+            return val ? 1 : 0;
+        return parseFloat(val.toString());
+    };
+    converters[Date] = function (val) {
+        if (val == null)
+            return new Date(0);
+        return new Date(val.toString());
+    };
+    converters[RegExp] = function (val) {
+        if (val instanceof RegExp)
+            return val;
+        if (val = null)
+            throw new Error("Cannot specify an empty RegExp.");
+        val = val.toString();
+        return new RegExp(val);
+    };
+    function convertAnyToType(val, type) {
+        if (val && val.constructor === type)
+            return val;
+        var converter = converters[type];
+        if (converter)
+            return converter(val);
+        if (type instanceof nullstone.Enum) {
+            var enumo = type.Object;
+            if (enumo.Converter)
+                return enumo.Converter(val);
+            val = val || 0;
+            if (typeof val === "string")
+                return enumo[val];
+            return val;
+        }
+        return val;
     }
-})(this);
-/// <reference path="Promise" />
-(function (global) {
-    if (global.Promise && typeof global.Promise.prototype.tap !== "function") {
-        global.Promise.prototype.tap = nullstone.PromiseImpl.prototype.tap;
+    nullstone.convertAnyToType = convertAnyToType;
+    function convertStringToEnum(val, en) {
+        if (!val)
+            return 0;
+        return en[val];
     }
-})(this);
+    nullstone.convertStringToEnum = convertStringToEnum;
+    function registerTypeConverter(type, converter) {
+        converters[type] = converter;
+    }
+    nullstone.registerTypeConverter = registerTypeConverter;
+    function registerEnumConverter(e, converter) {
+        e.Converter = converter;
+    }
+    nullstone.registerEnumConverter = registerEnumConverter;
+})(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
     var DirResolver = (function () {
@@ -247,6 +154,19 @@ var nullstone;
         return Enum;
     })();
     nullstone.Enum = Enum;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    function equals(val1, val2) {
+        if (val1 == null && val2 == null)
+            return true;
+        if (val1 == null || val2 == null)
+            return false;
+        if (val1 === val2)
+            return true;
+        return !!val1.equals && val1.equals(val2);
+    }
+    nullstone.equals = equals;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -409,21 +329,6 @@ var nullstone;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
-    nullstone.IDisposable_ = new nullstone.Interface("IDisposable");
-    nullstone.IObservable_ = new nullstone.Interface("IObservable");
-})(nullstone || (nullstone = {}));
-var nullstone;
-(function (nullstone) {
-    nullstone.IObserver_ = new nullstone.Interface("IObserver");
-    nullstone.IObserver_.is = function (o) {
-        return o
-            && typeof o.onNext === "function"
-            && typeof o.onCompleted === "function"
-            && typeof o.onNext === "function";
-    };
-})(nullstone || (nullstone = {}));
-var nullstone;
-(function (nullstone) {
     var IndexedPropertyInfo = (function () {
         function IndexedPropertyInfo() {
         }
@@ -472,6 +377,21 @@ var nullstone;
         return IndexedPropertyInfo;
     })();
     nullstone.IndexedPropertyInfo = IndexedPropertyInfo;
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    nullstone.IDisposable_ = new nullstone.Interface("IDisposable");
+    nullstone.IObservable_ = new nullstone.Interface("IObservable");
+})(nullstone || (nullstone = {}));
+var nullstone;
+(function (nullstone) {
+    nullstone.IObserver_ = new nullstone.Interface("IObserver");
+    nullstone.IObserver_.is = function (o) {
+        return o
+            && typeof o.onNext === "function"
+            && typeof o.onCompleted === "function"
+            && typeof o.onNext === "function";
+    };
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -818,79 +738,6 @@ var nullstone;
     }
     nullstone.doesInheritFrom = doesInheritFrom;
 })(nullstone || (nullstone = {}));
-var nullstone;
-(function (nullstone) {
-    var converters = [];
-    converters[Boolean] = function (val) {
-        if (val == null)
-            return null;
-        if (typeof val === "boolean")
-            return val;
-        if (typeof val === "number")
-            return val !== 0;
-        var c = val.toString().toUpperCase();
-        return c === "TRUE" ? true : (c === "FALSE" ? false : null);
-    };
-    converters[String] = function (val) {
-        if (val == null)
-            return "";
-        return val.toString();
-    };
-    converters[Number] = function (val) {
-        if (!val)
-            return 0;
-        if (typeof val === "number")
-            return val;
-        if (typeof val === "boolean")
-            return val ? 1 : 0;
-        return parseFloat(val.toString());
-    };
-    converters[Date] = function (val) {
-        if (val == null)
-            return new Date(0);
-        return new Date(val.toString());
-    };
-    converters[RegExp] = function (val) {
-        if (val instanceof RegExp)
-            return val;
-        if (val = null)
-            throw new Error("Cannot specify an empty RegExp.");
-        val = val.toString();
-        return new RegExp(val);
-    };
-    function convertAnyToType(val, type) {
-        if (val && val.constructor === type)
-            return val;
-        var converter = converters[type];
-        if (converter)
-            return converter(val);
-        if (type instanceof nullstone.Enum) {
-            var enumo = type.Object;
-            if (enumo.Converter)
-                return enumo.Converter(val);
-            val = val || 0;
-            if (typeof val === "string")
-                return enumo[val];
-            return val;
-        }
-        return val;
-    }
-    nullstone.convertAnyToType = convertAnyToType;
-    function convertStringToEnum(val, en) {
-        if (!val)
-            return 0;
-        return en[val];
-    }
-    nullstone.convertStringToEnum = convertStringToEnum;
-    function registerTypeConverter(type, converter) {
-        converters[type] = converter;
-    }
-    nullstone.registerTypeConverter = registerTypeConverter;
-    function registerEnumConverter(e, converter) {
-        e.Converter = converter;
-    }
-    nullstone.registerEnumConverter = registerEnumConverter;
-})(nullstone || (nullstone = {}));
 /// <reference path="conversion" />
 var nullstone;
 (function (nullstone) {
@@ -1151,59 +998,6 @@ var nullstone;
         return TypeManager;
     })();
     nullstone.TypeManager = TypeManager;
-})(nullstone || (nullstone = {}));
-var nullstone;
-(function (nullstone) {
-    function Annotation(type, name, value, forbidMultiple) {
-        var at = type;
-        var anns = at.$$annotations;
-        if (!anns)
-            Object.defineProperty(at, "$$annotations", { value: (anns = []), writable: false });
-        var ann = anns[name];
-        if (!ann)
-            anns[name] = ann = [];
-        if (forbidMultiple && ann.length > 0)
-            throw new Error("Only 1 '" + name + "' annotation allowed per type [" + nullstone.getTypeName(type) + "].");
-        ann.push(value);
-    }
-    nullstone.Annotation = Annotation;
-    function GetAnnotations(type, name) {
-        var at = type;
-        var anns = at.$$annotations;
-        if (!anns)
-            return undefined;
-        return (anns[name] || []).slice(0);
-    }
-    nullstone.GetAnnotations = GetAnnotations;
-    function CreateTypedAnnotation(name) {
-        function ta(type) {
-            var values = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                values[_i - 1] = arguments[_i];
-            }
-            for (var i = 0, len = values.length; i < len; i++) {
-                Annotation(type, name, values[i]);
-            }
-        }
-        ta.Get = function (type) {
-            return GetAnnotations(type, name);
-        };
-        return ta;
-    }
-    nullstone.CreateTypedAnnotation = CreateTypedAnnotation;
-})(nullstone || (nullstone = {}));
-var nullstone;
-(function (nullstone) {
-    function equals(val1, val2) {
-        if (val1 == null && val2 == null)
-            return true;
-        if (val1 == null || val2 == null)
-            return false;
-        if (val1 === val2)
-            return true;
-        return !!val1.equals && val1.equals(val2);
-    }
-    nullstone.equals = equals;
 })(nullstone || (nullstone = {}));
 var nullstone;
 (function (nullstone) {
@@ -2042,5 +1836,211 @@ var nullstone;
         })(xaml = markup.xaml || (markup.xaml = {}));
     })(markup = nullstone.markup || (nullstone.markup = {}));
 })(nullstone || (nullstone = {}));
+if (!Array.isArray) {
+    Array.isArray = function (arg) {
+        return Object.prototype.toString.call(arg) === '[object Array]';
+    };
+}
+/// <reference path="Promise_def" />
+var nullstone;
+(function (nullstone) {
+    var asap = (typeof setImmediate === 'function' && setImmediate) ||
+        function (fn) {
+            setTimeout(fn, 1);
+        };
+    var PromiseImpl = (function () {
+        function PromiseImpl(init) {
+            var _this = this;
+            this.$$state = null;
+            this.$$value = null;
+            this.$$deferreds = [];
+            this._resolve = function (newValue) {
+                try {
+                    if (newValue === _this)
+                        throw new TypeError('A promise cannot be resolved with itself.');
+                    if (newValue && (typeof newValue === 'object' || typeof newValue === 'function')) {
+                        var then = newValue.then;
+                        if (typeof then === 'function') {
+                            doResolve(function () { return then.apply(newValue); }, _this._resolve, _this._reject);
+                            return;
+                        }
+                    }
+                    _this.$$state = true;
+                    _this.$$value = newValue;
+                    _this._finale();
+                }
+                catch (e) {
+                    _this._reject(e);
+                }
+            };
+            this._reject = function (newValue) {
+                _this.$$state = false;
+                _this.$$value = newValue;
+                _this._finale();
+            };
+            if (typeof this !== 'object')
+                throw new TypeError('Promises must be constructed via new');
+            if (typeof init !== 'function')
+                throw new TypeError('not a function');
+            doResolve(init, this._resolve, this._reject);
+        }
+        PromiseImpl.prototype.then = function (onFulfilled, onRejected) {
+            var _this = this;
+            return new Promise(function (resolve, reject) { return _this._handle(new Deferred(onFulfilled, onRejected, resolve, reject)); });
+        };
+        PromiseImpl.prototype.catch = function (onRejected) {
+            return this.then(null, onRejected);
+        };
+        PromiseImpl.prototype.tap = function (onFulfilled, onRejected) {
+            var _this = this;
+            return new Promise(function (resolve, reject) {
+                _this.then(function (result) {
+                    var prom = onFulfilled ? onFulfilled(result) : null;
+                    if (prom && typeof prom.then === "function") {
+                        prom.then(function (subresult) { return resolve(result); }, function (suberr) { return reject(suberr); });
+                    }
+                    else {
+                        resolve(result);
+                    }
+                }, function (err) {
+                    var prom = onRejected ? onRejected(err) : null;
+                    if (prom && typeof prom.then === "function") {
+                        prom.then(function (subresult) { return reject(err); }, function (suberr) { return reject(suberr); });
+                    }
+                    else {
+                        reject(err);
+                    }
+                });
+            });
+        };
+        PromiseImpl.prototype._handle = function (deferred) {
+            var _this = this;
+            if (this.$$state === null) {
+                this.$$deferreds.push(deferred);
+                return;
+            }
+            asap(function () {
+                var cb = _this.$$state ? deferred.onFulfilled : deferred.onRejected;
+                if (cb === null) {
+                    (_this.$$state ? deferred.resolve : deferred.reject)(_this.$$value);
+                    return;
+                }
+                var ret;
+                try {
+                    ret = cb(_this.$$value);
+                }
+                catch (e) {
+                    deferred.reject(e);
+                    return;
+                }
+                if (ret && typeof ret.then === "function") {
+                    ret.then.call(ret, deferred.resolve);
+                }
+                else {
+                    deferred.resolve(ret);
+                }
+            });
+        };
+        PromiseImpl.all = function () {
+            var args = Array.prototype.slice.call(arguments.length === 1 && Array.isArray(arguments[0]) ? arguments[0] : arguments);
+            return new Promise(function (resolve, reject) {
+                if (args.length === 0)
+                    return resolve([]);
+                var remaining = args.length;
+                function res(i, val) {
+                    try {
+                        if (val && (typeof val === 'object' || typeof val === 'function')) {
+                            var then = val.then;
+                            if (typeof then === 'function') {
+                                then.call(val, function (val) {
+                                    res(i, val);
+                                }, reject);
+                                return;
+                            }
+                        }
+                        args[i] = val;
+                        if (--remaining === 0) {
+                            resolve(args);
+                        }
+                    }
+                    catch (ex) {
+                        reject(ex);
+                    }
+                }
+                for (var i = 0; i < args.length; i++) {
+                    res(i, args[i]);
+                }
+            });
+        };
+        PromiseImpl.race = function (values) {
+            return new Promise(function (resolve, reject) {
+                for (var i = 0, len = values.length; i < len; i++) {
+                    values[i].then(resolve, reject);
+                }
+            });
+        };
+        PromiseImpl.reject = function (reason) {
+            return new Promise(function (resolve, reject) { return reject(reason); });
+        };
+        PromiseImpl.resolve = function (value) {
+            if (value instanceof Promise)
+                return value;
+            return new Promise(function (resolve, reject) { return resolve(value); });
+        };
+        PromiseImpl.prototype._finale = function () {
+            for (var i = 0, len = this.$$deferreds.length; i < len; i++) {
+                this._handle(this.$$deferreds[i]);
+            }
+            this.$$deferreds = null;
+        };
+        PromiseImpl.prototype._setImmediateFn = function (func) {
+            asap = func;
+        };
+        return PromiseImpl;
+    })();
+    nullstone.PromiseImpl = PromiseImpl;
+    var Deferred = (function () {
+        function Deferred(onFulfilled, onRejected, resolve, reject) {
+            this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null;
+            this.onRejected = typeof onRejected === 'function' ? onRejected : null;
+            this.resolve = resolve;
+            this.reject = reject;
+        }
+        return Deferred;
+    })();
+    function doResolve(fn, onFulfilled, onRejected) {
+        var done = false;
+        try {
+            fn(function (value) {
+                if (done)
+                    return;
+                done = true;
+                onFulfilled(value);
+            }, function (reason) {
+                if (done)
+                    return;
+                done = true;
+                onRejected(reason);
+            });
+        }
+        catch (ex) {
+            if (done)
+                return;
+            done = true;
+            onRejected(ex);
+        }
+    }
+})(nullstone || (nullstone = {}));
+(function (global) {
+    if (typeof global.Promise !== "function") {
+        global.Promise = nullstone.PromiseImpl;
+    }
+})(this);
+/// <reference path="Promise" />
+(function (global) {
+    if (global.Promise && typeof global.Promise.prototype.tap !== "function") {
+        global.Promise.prototype.tap = nullstone.PromiseImpl.prototype.tap;
+    }
+})(this);
 
 //# sourceMappingURL=nullstone.js.map
